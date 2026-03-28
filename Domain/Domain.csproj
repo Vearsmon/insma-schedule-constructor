@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Riok.Mapperly" Version="5.0.0-next.2" />
+    </ItemGroup>
+
+    <PropertyGroup>
+        <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+        <CompilerGeneratedFilesOutputPath>Mapping/Generated</CompilerGeneratedFilesOutputPath>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Remove="$(CompilerGeneratedFilesOutputPath)/**/*.cs" />
+        <None Include="$(CompilerGeneratedFilesOutputPath)/**/*.cs" />
+    </ItemGroup>
+
+</Project>

@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Dal\Dal.csproj" />
+      <ProjectReference Include="..\Domain\Domain.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.13" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.13" />
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.13" />
+    </ItemGroup>
+
+    <PropertyGroup>
+        <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+        <CompilerGeneratedFilesOutputPath>Mapping/Generated</CompilerGeneratedFilesOutputPath>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Remove="$(CompilerGeneratedFilesOutputPath)/**/*.cs" />
+        <None Include="$(CompilerGeneratedFilesOutputPath)/**/*.cs" />
+    </ItemGroup>
+
+</Project>
