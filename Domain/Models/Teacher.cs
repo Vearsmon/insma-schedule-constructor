@@ -27,5 +27,5 @@ public class Teacher : IModelWithId
     /// <summary>
     /// Контактные данные преподавателя
     /// </summary>
-    public string Contacts { get; set; } = null!;
+    public string? Contacts { get; set; }
 }

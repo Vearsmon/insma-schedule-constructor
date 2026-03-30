@@ -2,6 +2,23 @@
 
 public class DayOfWeekTimeInterval
 {
-    public DayOfWeek DayOfWeek { get; set; }
-    public TimeInterval TimeInterval { get; set; } = null!;
+    public DayOfWeekTimeInterval()
+    {
+    }
+
+    public DayOfWeekTimeInterval(DayOfWeek dayOfWeek, TimeInterval timeInterval)
+    {
+        DayOfWeek = dayOfWeek;
+        TimeInterval = timeInterval;
+    }
+
+    public DayOfWeek DayOfWeek { get; }
+    public TimeInterval TimeInterval { get; } = null!;
+
+    public override bool Equals(object? obj)
+        => obj is DayOfWeekTimeInterval dayOfWeekTimeInterval
+           && DayOfWeek == dayOfWeekTimeInterval.DayOfWeek
+           && TimeInterval.Equals(dayOfWeekTimeInterval.TimeInterval);
+
+    public override int GetHashCode() => HashCode.Combine(DayOfWeek, TimeInterval);
 }

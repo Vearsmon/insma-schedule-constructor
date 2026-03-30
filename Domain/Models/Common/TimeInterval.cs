@@ -13,7 +13,6 @@ public class TimeInterval
     }
 
     public TimeOnly TimeFrom { get; }
-
     public TimeOnly TimeTo { get; }
 
     public override bool Equals(object? obj)
@@ -22,4 +21,9 @@ public class TimeInterval
            && TimeTo == timeInterval.TimeTo;
 
     public override int GetHashCode() => HashCode.Combine(TimeFrom, TimeTo);
+
+    public override string ToString()
+    {
+        return $"{TimeFrom:HH:mm}-{TimeTo:HH:mm}";
+    }
 }

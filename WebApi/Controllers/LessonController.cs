@@ -1,8 +1,10 @@
 ﻿using Domain.Dto;
 using Domain.Dto.ErrorDto;
+using Domain.Dto.RegistryDto;
 using Domain.Dto.SaveDto;
 using Domain.Dto.ViewDto;
 using Domain.Models.Common;
+using Domain.Models.RegistrySearchModels;
 using Domain.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,6 +14,26 @@ namespace WebApi.Controllers;
 [Route("api/lesson")]
 public class LessonController(ILessonService lessonService) : ApiController
 {
+    /// <summary>
+    /// Получить реестр данных занятий
+    /// </summary>
+    /// <param name="searchModel">Поисковая модель реестра данных занятий</param>
+    /// <returns>Модель ресстра данных занятий</returns>
+    /// <response code="200">Поиск реестра выполнился успешно</response>
+    /// <response code="400">Поиск реестра завершился с ошибкой валидации входных данных</response>
+    /// <response code="401">Не удалось выполнить авторизацию</response>
+    /// <response code="403">Поиск реестра завершился с ошибкой валидации прав доступа</response>
+    /// <response code="500">Поиск реестра завершился с ошибкой</response>
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(RegistryDto<LessonRegistryItemDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationErrorDto), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorDto), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ErrorDto), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ErrorDto), StatusCodes.Status500InternalServerError)]
+    [HttpPost("search")]
+    public async Task<RegistryDto<LessonRegistryItemDto>> Search([FromBody] LessonRegistrySearchModel searchModel) =>
+        await lessonService.SearchAsync(searchModel);
+
     /// <summary>
     /// Получить данные занятия
     /// </summary>

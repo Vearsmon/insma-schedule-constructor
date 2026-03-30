@@ -1,15 +1,19 @@
-﻿using Dal.Repositories.AcademicDisciplines;
+﻿using Dal.RegistryRepositories.Lesson;
+using Dal.Repositories.AcademicDisciplines;
 using Dal.Repositories.Lessons;
 using Dal.Repositories.StudentGroups;
 using Dal.Repositories.TeacherPreferences;
 using Domain.Constants;
 using Domain.Dto;
+using Domain.Dto.RegistryDto;
 using Domain.Dto.SaveDto;
 using Domain.Dto.ViewDto;
 using Domain.Helpers;
+using Domain.Mapping;
 using Domain.Models;
 using Domain.Models.Common;
 using Domain.Models.Enums;
+using Domain.Models.RegistrySearchModels;
 using Domain.Models.SearchModels;
 using Domain.Services;
 using Services.Mapping;
@@ -18,11 +22,22 @@ namespace Services;
 
 public class LessonService(
     ILessonRepository lessonRepository,
+    ILessonRegistryRepository lessonRegistryRepository,
     ILessonValidationService lessonValidationService,
     IAcademicDisciplineRepository academicDisciplineRepository,
     IStudentGroupRepository studentGroupRepository,
     ITeacherPreferenceRepository teacherPreferenceRepository) : ILessonService
 {
+    public async Task<RegistryDto<LessonRegistryItemDto>> SearchAsync(LessonRegistrySearchModel searchModel)
+    {
+        var registryEntries = await lessonRegistryRepository.SearchAsync(RegistrySearchModelMappingRegister.Map(searchModel));
+        return new RegistryDto<LessonRegistryItemDto>
+        {
+            Items = registryEntries.Items.Select(DtoMappingRegister.Map).ToArray(),
+            ItemsCount = registryEntries.ItemsCount,
+        };
+    }
+
     public async Task<LessonViewDto> GetViewAsync(Guid lessonId)
     {
         var lesson = await lessonRepository.GetAsync(lessonId);
@@ -35,8 +50,10 @@ public class LessonService(
         var validationResult = await lessonValidationService.ValidateAsync(lesson);
         lesson.ValidationMessages = validationResult.Messages.ToArray();
 
-        await lessonRepository.SaveAllAsync(validationResult.LessonsWithConflictById.Select(x => x.Value)
-            .Concat([lesson]).ToArray());
+        await lessonRepository.SaveAllAsync(validationResult.LessonsWithConflictById
+            .Select(x => x.Value)
+            .Concat([lesson])
+            .ToArray());
     }
 
     public async Task RecalculateConflictsForUpdatedAcademicDiscipline(AcademicDiscipline academicDiscipline)
@@ -165,12 +182,10 @@ public class LessonService(
                     StudentGroupId = lessonBatchInfo.StudentGroupId,
                     TeacherId = lessonBatchInfo.TeacherId,
                     RoomId = lessonBatchInfo.RoomId,
-                    DateWithTimeInterval = new DateWithTimeInterval
-                    {
-                        Date = date,
-                        TimeInterval = timeIntervalsByDayOfWeek[date.DayOfWeek].TimeInterval,
-                    },
+                    DateWithTimeInterval = new DateWithTimeInterval(date,
+                        timeIntervalsByDayOfWeek[date.DayOfWeek].TimeInterval),
                     FlexibilityType = LessonFlexibilityType.Fixed,
+                    AllowCombining = lessonBatchInfo.AllowCombining,
                     HoursCost = lessonBatchInfo.HoursCost,
                     CreatedFromDiscipline = true,
                     ValidationMessages = [],
@@ -382,7 +397,7 @@ public class LessonService(
         var lesson = await lessonRepository.GetAsync(lessonId);
         var studentGroupHierarchyIds =
             await studentGroupRepository.GetStudentGroupTreeIdsAsync(lesson.StudentGroupId);
-        var conflictingLessonsByGroup = await lessonRepository.SearchAsync(new LessonSearchModel
+        var conflictingByGroupLessons = await lessonRepository.SearchAsync(new LessonSearchModel
         {
             ScheduleId = lesson.ScheduleId,
             StudentGroupIds = studentGroupHierarchyIds,
@@ -399,10 +414,10 @@ public class LessonService(
                 TeacherPreferenceTypes = [TeacherPreferenceType.Restricted, TeacherPreferenceType.Undesirable]
             });
 
-        var conflictingLessonsByRoom = Array.Empty<Lesson>();
+        var conflictingByRoomLessons = Array.Empty<Lesson>();
         if (lesson.RoomId.HasValue)
         {
-            conflictingLessonsByRoom = await lessonRepository.SearchAsync(new LessonSearchModel
+            conflictingByRoomLessons = await lessonRepository.SearchAsync(new LessonSearchModel
             {
                 ScheduleId = lesson.ScheduleId,
                 RoomIds = lesson.RoomId.HasValue ? [lesson.RoomId!.Value] : [],
@@ -411,8 +426,8 @@ public class LessonService(
             });
         }
 
-        var validationMessages = await lessonValidationService.FillValidationMessages(conflictingLessonsByGroup
-            .Concat(conflictingLessonsByRoom).DistinctBy(x => x.Id).ToArray());
+        var validationMessages = await lessonValidationService.FillValidationMessages(conflictingByGroupLessons
+            .Concat(conflictingByRoomLessons).DistinctBy(x => x.Id).ToArray());
         validationMessages = validationMessages.Concat(conflictingTeacherPreferences
                 .Select(x => new LessonWeekConflictDto
                 {

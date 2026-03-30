@@ -64,6 +64,11 @@ public class DbAcademicDisciplineLessonBatchInfo : IDbEntityWithId
     public DateOnly DateTo { get; set; }
 
     /// <summary>
+    /// Занятие допускает совмещение
+    /// </summary>
+    public bool AllowCombining { get; set; }
+
+    /// <summary>
     /// Вес для всех занятий в часах
     /// </summary>
     public int HoursCost { get; set; }

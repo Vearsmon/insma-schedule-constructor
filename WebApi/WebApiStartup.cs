@@ -1,4 +1,5 @@
 ﻿using Dal.Transactions;
+using WebApi.Middlewares;
 
 namespace WebApi;
 
@@ -29,5 +30,7 @@ public class WebApiStartup
         app.UseSwaggerUI();
 
         app.UseRouting();
+
+        app.UseMiddleware<ErrorHandlingMiddleware>();
     }
 }

@@ -30,11 +30,24 @@ public static partial class MappingRegister
         {
             return model;
         }
-        model!.DateWithTimeInterval ??= new DateWithTimeInterval();
-        model.DateWithTimeInterval.Date = lesson.Date.Value;
-        model.DateWithTimeInterval.TimeInterval = new TimeInterval(lesson.TimeFrom!.Value, lesson.TimeTo!.Value);
+        model!.DateWithTimeInterval ??= new DateWithTimeInterval(lesson.Date.Value,
+            new TimeInterval(lesson.TimeFrom!.Value, lesson.TimeTo!.Value));
 
         return model;
+    }
+
+    [UserMapping(Default = true)]
+    public static LessonRegistryItem? MapRegistryItem(DbLesson? entity)
+    {
+        var item = MapDbToRegistryItem(entity);
+        if (entity is not { Date: not null, TimeFrom: not null, TimeTo: not null })
+        {
+            return item;
+        }
+        item!.DateWithTimeInterval ??= new DateWithTimeInterval(entity.Date.Value,
+            new TimeInterval(entity.TimeFrom!.Value, entity.TimeTo!.Value));
+
+        return item;
     }
 
     [MapProperty($"{nameof(Lesson.DateWithTimeInterval)}.{nameof(Lesson.DateWithTimeInterval.Date)}", nameof(DbLesson.Date))]
@@ -47,11 +60,26 @@ public static partial class MappingRegister
     [MapProperty($"{nameof(Lesson.DateWithTimeInterval)}.{nameof(Lesson.DateWithTimeInterval.TimeInterval)}.{nameof(Lesson.DateWithTimeInterval.TimeInterval.TimeTo)}", nameof(DbLesson.TimeTo))]
     public static partial void Update(Lesson lesson, DbLesson dbLesson);
 
-    [MapProperty(nameof(DbLesson.Date), $"{nameof(Lesson.DateWithTimeInterval)}.{nameof(Lesson.DateWithTimeInterval.Date)}")]
+    [MapperIgnoreSource(nameof(DbLesson.Date))]
     [MapperIgnoreSource(nameof(DbLesson.TimeFrom))]
     [MapperIgnoreSource(nameof(DbLesson.TimeTo))]
+    [MapperIgnoreTarget(nameof(Lesson.DateWithTimeInterval))]
     [MapProperty(nameof(DbLesson.ValidationMessages), nameof(Lesson.ValidationMessages), Use = nameof(MapValidationMessagesCollection))]
     private static partial Lesson? MapDbToModel(DbLesson? lesson);
+
+    [MapperIgnoreSource(nameof(DbLesson.ScheduleId))]
+    [MapperIgnoreSource(nameof(DbLesson.Schedule))]
+    [MapperIgnoreSource(nameof(DbLesson.AcademicDiscipline))]
+    [MapperIgnoreSource(nameof(DbLesson.StudentGroup))]
+    [MapperIgnoreSource(nameof(DbLesson.Teacher))]
+    [MapperIgnoreSource(nameof(DbLesson.Room))]
+    [MapperIgnoreSource(nameof(DbLesson.Date))]
+    [MapperIgnoreSource(nameof(DbLesson.TimeFrom))]
+    [MapperIgnoreSource(nameof(DbLesson.TimeTo))]
+    [MapperIgnoreTarget(nameof(LessonRegistryItem.DateWithTimeInterval))]
+    [MapProperty(nameof(DbLesson.ValidationMessages), nameof(LessonRegistryItem.ValidationMessages), Use = nameof(MapValidationMessagesCollection))]
+    private static partial LessonRegistryItem? MapDbToRegistryItem(DbLesson? entity);
+
     private static LessonValidationMessage[] MapValidationMessagesCollection(ICollection<DbLessonValidationMessage> collection) => collection.Select(x => Map(x)!).ToArray();
 
     #endregion
@@ -361,15 +389,10 @@ public static partial class MappingRegister
     public static TeacherPreference? Map(DbTeacherPreference? teacherPreference)
     {
         var model = MapDbToModel(teacherPreference);
-        if (teacherPreference is { DayOfWeek: not null })
+        if (teacherPreference is { DayOfWeek: not null, TimeFrom: not null, TimeTo: not null })
         {
-            model!.DayOfWeekTimeInterval ??= new DayOfWeekTimeInterval();
-            model.DayOfWeekTimeInterval.DayOfWeek = teacherPreference.DayOfWeek.Value;
-        }
-        if (teacherPreference is { TimeFrom: not null, TimeTo: not null })
-        {
-            model!.DayOfWeekTimeInterval ??= new DayOfWeekTimeInterval();
-            model.DayOfWeekTimeInterval.TimeInterval = new TimeInterval(teacherPreference.TimeFrom!.Value, teacherPreference.TimeTo!.Value);
+            model!.DayOfWeekTimeInterval ??= new DayOfWeekTimeInterval(teacherPreference.DayOfWeek.Value,
+                new TimeInterval(teacherPreference.TimeFrom!.Value, teacherPreference.TimeTo!.Value));
         }
 
         return model;
@@ -398,9 +421,10 @@ public static partial class MappingRegister
     [MapperIgnoreSource(nameof(DbTeacherPreference.Comment))]
     public static partial TeacherPreferenceRegistryItem? MapRegistryItem(DbTeacherPreference? entity);
 
-    [MapProperty(nameof(DbTeacherPreference.DayOfWeek), $"{nameof(TeacherPreference.DayOfWeekTimeInterval)}.{nameof(TeacherPreference.DayOfWeekTimeInterval.DayOfWeek)}")]
+    [MapperIgnoreSource(nameof(DbTeacherPreference.DayOfWeek))]
     [MapperIgnoreSource(nameof(DbTeacherPreference.TimeFrom))]
     [MapperIgnoreSource(nameof(DbTeacherPreference.TimeTo))]
+    [MapperIgnoreTarget(nameof(TeacherPreference.DayOfWeekTimeInterval))]
     private static partial TeacherPreference? MapDbToModel(DbTeacherPreference? teacherPreference);
 
     #endregion

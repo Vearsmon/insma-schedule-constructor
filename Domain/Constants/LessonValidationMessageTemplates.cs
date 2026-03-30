@@ -14,6 +14,12 @@ public static class LessonValidationMessageTemplates
     public const string FlexibleLessonTypeConflictByGroupTemplate =
         "Занятие пересекается по времени с другим занятием {0}со статусом \"Может быть перемещено\" у группы {1}, принадлежащей иерархии выбранной для занятия группы.";
 
+    public const string FixedLessonTypeConflictByTeacherTemplate =
+        "Занятие не может преподаваться в это время у группы, поскольку оно пересекается по времени с другим занятием {0}со статусом \"Закреплено\" с таким же преподавателем {1}.";
+
+    public const string FlexibleLessonTypeConflictByTeacherTemplate =
+        "Занятие пересекается по времени с другим занятием {0}со статусом \"Может быть перемещено\" с таким же преподавателем {1}.";
+
     public const string RestrictedTeacherPreferenceTypeConflictTemplate =
         "Занятие не может быть проведено в это время у группы, поскольку отмеченное время идет вразрез с пожеланием преподавателя {0} \"Нет возможности провести занятие\".";
 

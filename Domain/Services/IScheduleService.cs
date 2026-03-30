@@ -8,5 +8,5 @@ public interface IScheduleService
 {
     Task<RegistryDto<ScheduleRegistryItemDto>> SearchAsync(ScheduleRegistrySearchModel searchModel);
 
-    Task<Guid> SaveAsync(SaveScheduleDto saveScheduleDto);
+    Task SaveAsync(SaveScheduleDto saveScheduleDto);
 }

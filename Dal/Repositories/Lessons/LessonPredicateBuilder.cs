@@ -23,6 +23,7 @@ public class LessonPredicateBuilder : IPredicateBuilder<DbLesson, LessonSearchMo
                 .AndIf(searchModel.TeacherId.HasValue, f => f.TeacherId == searchModel.TeacherId)
                 .AndIf(searchModel.TimeIntervals.Length > 0, BuildTimeIntervalExpression(searchModel))
                 .AndIf(searchModel.DayOfWeekTimeIntervals.Length > 0, BuildDayOfWeekTimeIntervalExpression(searchModel))
+                .AndIf(searchModel.ExcludeAllowCombining, f => f.AllowCombining == false)
             ;
     }
 

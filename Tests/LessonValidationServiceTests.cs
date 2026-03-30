@@ -7,6 +7,7 @@ using Dal.Repositories.Schedules;
 using Dal.Repositories.StudentGroups;
 using Dal.Repositories.TeacherPreferences;
 using Dal.Repositories.Teachers;
+using Domain.Exceptions;
 using Domain.Helpers;
 using Domain.Models;
 using Domain.Models.Common;
@@ -42,7 +43,56 @@ public class LessonValidationServiceTests
     );
 
     [Fact]
-    public async Task SaveLesson_Should_Produce_MismatchedCyphers_Validation_code()
+    public async Task ValidateAsync_Should_Throw_When_Invalid_Data()
+    {
+        // Arrange
+        var lessonToSaveFixture = _fixture.Build<Lesson>()
+            .With(x => x.Id, Guid.NewGuid())
+            .Without(x => x.Schedule)
+            .Without(x => x.AcademicDisciplineId)
+            .Without(x => x.AcademicDiscipline)
+            .Without(x => x.AcademicDisciplineType)
+            .With(x => x.StudentGroupId, Guid.NewGuid())
+            .Without(x => x.StudentGroup)
+            .Without(x => x.TeacherId)
+            .Without(x => x.Teacher)
+            .With(x => x.RoomId, Guid.NewGuid())
+            .Without(x => x.Room)
+            .Without(x => x.DateWithTimeInterval)
+            .Without(x => x.FlexibilityType)
+            .Without(x => x.AllowCombining)
+            .Without(x => x.HoursCost)
+            .Without(x => x.ValidationMessages);
+        var lessonToSave = lessonToSaveFixture
+            .With(x => x.ScheduleId, Guid.NewGuid())
+            .Without(x => x.CreatedFromDiscipline)
+            .Create();
+
+        _studentGroupRepositoryMock.Setup(r => r.GetAsync(lessonToSave.StudentGroupId, CancellationToken.None))
+            .ReturnsAsync(new StudentGroup());
+
+        _lessonRepositoryMock.Setup(r => r.GetAsync(lessonToSave.Id!.Value, CancellationToken.None))
+            .ReturnsAsync(lessonToSaveFixture
+                .With(x => x.ScheduleId, Guid.NewGuid())
+                .With(x => x.CreatedFromDiscipline, true)
+                .Create());
+
+        _scheduleRepositoryMock.Setup(r => r.ExistsAsync(lessonToSave.ScheduleId))
+            .ReturnsAsync(false);
+
+        _roomRepositoryMock.Setup(r => r.ExistsAsync(lessonToSave.RoomId!.Value))
+            .ReturnsAsync(false);
+
+        var service = CreateService();
+        var serviceFunc = () => service.ValidateAsync(lessonToSave);
+
+        // Act & Assert
+        var actualException = await Assert.ThrowsAsync<ServiceException>(serviceFunc);
+        Assert.Equal(4, actualException.ValidationMessages.Length);
+    }
+
+    [Fact]
+    public async Task ValidateAsync_Should_Produce_MismatchedCyphers_Validation_Code()
     {
         // Arrange
         var lessonToSave = _fixture.Build<Lesson>()
@@ -60,12 +110,13 @@ public class LessonValidationServiceTests
             .Without(x => x.Room)
             .Without(x => x.DateWithTimeInterval)
             .With(x => x.FlexibilityType, LessonFlexibilityType.Flexible)
+            .Without(x => x.AllowCombining)
             .Without(x => x.HoursCost)
             .Without(x => x.CreatedFromDiscipline)
             .Without(x => x.ValidationMessages)
             .Create();
 
-        _studentGroupRepositoryMock.Setup(r => r.FindAsync(lessonToSave.StudentGroupId, CancellationToken.None))
+        _studentGroupRepositoryMock.Setup(r => r.GetAsync(lessonToSave.StudentGroupId, CancellationToken.None))
             .ReturnsAsync(new StudentGroup
             {
                 Id = Guid.NewGuid(),
@@ -73,12 +124,13 @@ public class LessonValidationServiceTests
             });
 
         _academicDisciplineRepositoryMock
-            .Setup(r => r.FindAsync(lessonToSave.AcademicDisciplineId!.Value, CancellationToken.None))
+            .Setup(r => r.GetAsync(lessonToSave.AcademicDisciplineId!.Value, CancellationToken.None))
             .ReturnsAsync(new AcademicDiscipline
             {
                 Id = Guid.NewGuid(),
                 Cypher = _fixture.Create<string>(),
-                AllowedLessonTypes = [AcademicDisciplineType.Lecture, AcademicDisciplineType.Practice, AcademicDisciplineType.Lab],
+                AllowedLessonTypes =
+                    [AcademicDisciplineType.Lecture, AcademicDisciplineType.Practice, AcademicDisciplineType.Lab],
             });
 
         _scheduleRepositoryMock.Setup(r => r.ExistsAsync(lessonToSave.ScheduleId))
@@ -95,7 +147,7 @@ public class LessonValidationServiceTests
     }
 
     [Fact]
-    public async Task SaveLesson_Should_Produce_MismatchedSemesterNumber_Validation_code()
+    public async Task ValidateAsync_Should_Produce_MismatchedSemesterNumber_Validation_Code()
     {
         // Arrange
         var lessonToSave = _fixture.Build<Lesson>()
@@ -113,12 +165,13 @@ public class LessonValidationServiceTests
             .Without(x => x.Room)
             .Without(x => x.DateWithTimeInterval)
             .With(x => x.FlexibilityType, LessonFlexibilityType.Flexible)
+            .Without(x => x.AllowCombining)
             .Without(x => x.HoursCost)
             .Without(x => x.CreatedFromDiscipline)
             .Without(x => x.ValidationMessages)
             .Create();
 
-        _studentGroupRepositoryMock.Setup(r => r.FindAsync(lessonToSave.StudentGroupId, CancellationToken.None))
+        _studentGroupRepositoryMock.Setup(r => r.GetAsync(lessonToSave.StudentGroupId, CancellationToken.None))
             .ReturnsAsync(new StudentGroup
             {
                 Id = Guid.NewGuid(),
@@ -126,12 +179,13 @@ public class LessonValidationServiceTests
             });
 
         _academicDisciplineRepositoryMock
-            .Setup(r => r.FindAsync(lessonToSave.AcademicDisciplineId!.Value, CancellationToken.None))
+            .Setup(r => r.GetAsync(lessonToSave.AcademicDisciplineId!.Value, CancellationToken.None))
             .ReturnsAsync(new AcademicDiscipline
             {
                 Id = Guid.NewGuid(),
                 SemesterNumber = _fixture.Create<int>(),
-                AllowedLessonTypes = [AcademicDisciplineType.Lecture, AcademicDisciplineType.Practice, AcademicDisciplineType.Lab],
+                AllowedLessonTypes =
+                    [AcademicDisciplineType.Lecture, AcademicDisciplineType.Practice, AcademicDisciplineType.Lab],
             });
 
         _scheduleRepositoryMock.Setup(r => r.ExistsAsync(lessonToSave.ScheduleId))
@@ -152,7 +206,7 @@ public class LessonValidationServiceTests
     }
 
     [Fact]
-    public async Task SaveLesson_Should_Produce_MismatchedAcademicDisciplineType_Validation_code()
+    public async Task ValidateAsync_Should_Produce_MismatchedAcademicDisciplineType_Validation_Code()
     {
         // Arrange
         var lessonToSave = _fixture.Build<Lesson>()
@@ -170,6 +224,7 @@ public class LessonValidationServiceTests
             .Without(x => x.Room)
             .Without(x => x.DateWithTimeInterval)
             .With(x => x.FlexibilityType, LessonFlexibilityType.Flexible)
+            .Without(x => x.AllowCombining)
             .Without(x => x.HoursCost)
             .Without(x => x.CreatedFromDiscipline)
             .Without(x => x.ValidationMessages)
@@ -178,7 +233,7 @@ public class LessonValidationServiceTests
         var cypher = _fixture.Create<string>();
         var semesterNumber = _fixture.Create<int>();
 
-        _studentGroupRepositoryMock.Setup(r => r.FindAsync(lessonToSave.StudentGroupId, CancellationToken.None))
+        _studentGroupRepositoryMock.Setup(r => r.GetAsync(lessonToSave.StudentGroupId, CancellationToken.None))
             .ReturnsAsync(new StudentGroup
             {
                 Id = Guid.NewGuid(),
@@ -187,7 +242,7 @@ public class LessonValidationServiceTests
             });
 
         _academicDisciplineRepositoryMock
-            .Setup(r => r.FindAsync(lessonToSave.AcademicDisciplineId!.Value, CancellationToken.None))
+            .Setup(r => r.GetAsync(lessonToSave.AcademicDisciplineId!.Value, CancellationToken.None))
             .ReturnsAsync(new AcademicDiscipline
             {
                 Id = Guid.NewGuid(),
@@ -213,7 +268,7 @@ public class LessonValidationServiceTests
     }
 
     [Fact]
-    public async Task SaveLesson_Should_Produce_FixedLessonTypeConflictByGroup_Validation_code()
+    public async Task ValidateAsync_Should_Produce_FixedLessonTypeConflictByGroup_Validation_Code()
     {
         // Arrange
         var lessonToSave = _fixture.Build<Lesson>()
@@ -229,12 +284,10 @@ public class LessonValidationServiceTests
             .Without(x => x.Teacher)
             .Without(x => x.RoomId)
             .Without(x => x.Room)
-            .With(x => x.DateWithTimeInterval, new DateWithTimeInterval
-            {
-                Date = DateTime.Today.ToDateOnly(),
-                TimeInterval = new TimeInterval(new TimeOnly(9, 0), new TimeOnly(12, 0)),
-            })
+            .With(x => x.DateWithTimeInterval, new DateWithTimeInterval(DateTime.Today.ToDateOnly(),
+                new TimeInterval(new TimeOnly(9, 0), new TimeOnly(12, 0))))
             .With(x => x.FlexibilityType, LessonFlexibilityType.Flexible)
+            .Without(x => x.AllowCombining)
             .Without(x => x.HoursCost)
             .Without(x => x.CreatedFromDiscipline)
             .Without(x => x.ValidationMessages)
@@ -243,7 +296,7 @@ public class LessonValidationServiceTests
         var cypher = _fixture.Create<string>();
         var semesterNumber = _fixture.Create<int>();
 
-        _studentGroupRepositoryMock.Setup(r => r.FindAsync(lessonToSave.StudentGroupId, CancellationToken.None))
+        _studentGroupRepositoryMock.Setup(r => r.GetAsync(lessonToSave.StudentGroupId, CancellationToken.None))
             .ReturnsAsync(new StudentGroup
             {
                 Id = Guid.NewGuid(),
@@ -255,13 +308,14 @@ public class LessonValidationServiceTests
             .ReturnsAsync([lessonToSave.StudentGroupId]);
 
         _academicDisciplineRepositoryMock
-            .Setup(r => r.FindAsync(lessonToSave.AcademicDisciplineId!.Value, CancellationToken.None))
+            .Setup(r => r.GetAsync(lessonToSave.AcademicDisciplineId!.Value, CancellationToken.None))
             .ReturnsAsync(new AcademicDiscipline
             {
                 Id = Guid.NewGuid(),
                 Cypher = cypher,
                 SemesterNumber = semesterNumber,
-                AllowedLessonTypes = [AcademicDisciplineType.Lecture, AcademicDisciplineType.Practice, AcademicDisciplineType.Lab],
+                AllowedLessonTypes =
+                    [AcademicDisciplineType.Lecture, AcademicDisciplineType.Practice, AcademicDisciplineType.Lab],
             });
 
         _scheduleRepositoryMock.Setup(r => r.ExistsAsync(lessonToSave.ScheduleId))
@@ -295,11 +349,12 @@ public class LessonValidationServiceTests
         Assert.Equal(LessonValidationCode.FixedLessonTypeConflictByGroup, validationResult.Messages.First().Code);
         Assert.Single(validationResult.LessonsWithConflictById.Keys.ToArray());
         Assert.Single(validationResult.LessonsWithConflictById.First().Value.ValidationMessages);
-        Assert.Equal(LessonValidationCode.FlexibleLessonTypeConflictByGroup, validationResult.LessonsWithConflictById.First().Value.ValidationMessages.First().Code);
+        Assert.Equal(LessonValidationCode.FlexibleLessonTypeConflictByGroup,
+            validationResult.LessonsWithConflictById.First().Value.ValidationMessages.First().Code);
     }
 
     [Fact]
-    public async Task SaveLesson_Should_Produce_FlexibleLessonTypeConflictByGroup_Validation_code()
+    public async Task ValidateAsync_Should_Produce_FlexibleLessonTypeConflictByGroup_Validation_Code()
     {
         // Arrange
         var lessonToSave = _fixture.Build<Lesson>()
@@ -315,12 +370,10 @@ public class LessonValidationServiceTests
             .Without(x => x.Teacher)
             .Without(x => x.RoomId)
             .Without(x => x.Room)
-            .With(x => x.DateWithTimeInterval, new DateWithTimeInterval
-            {
-                Date = DateTime.Today.ToDateOnly(),
-                TimeInterval = new TimeInterval(new TimeOnly(9, 0), new TimeOnly(12, 0)),
-            })
+            .With(x => x.DateWithTimeInterval, new DateWithTimeInterval(DateTime.Today.ToDateOnly(),
+                new TimeInterval(new TimeOnly(9, 0), new TimeOnly(12, 0))))
             .With(x => x.FlexibilityType, LessonFlexibilityType.Fixed)
+            .Without(x => x.AllowCombining)
             .Without(x => x.HoursCost)
             .Without(x => x.CreatedFromDiscipline)
             .Without(x => x.ValidationMessages)
@@ -329,7 +382,7 @@ public class LessonValidationServiceTests
         var cypher = _fixture.Create<string>();
         var semesterNumber = _fixture.Create<int>();
 
-        _studentGroupRepositoryMock.Setup(r => r.FindAsync(lessonToSave.StudentGroupId, CancellationToken.None))
+        _studentGroupRepositoryMock.Setup(r => r.GetAsync(lessonToSave.StudentGroupId, CancellationToken.None))
             .ReturnsAsync(new StudentGroup
             {
                 Id = Guid.NewGuid(),
@@ -341,13 +394,14 @@ public class LessonValidationServiceTests
             .ReturnsAsync([lessonToSave.StudentGroupId]);
 
         _academicDisciplineRepositoryMock
-            .Setup(r => r.FindAsync(lessonToSave.AcademicDisciplineId!.Value, CancellationToken.None))
+            .Setup(r => r.GetAsync(lessonToSave.AcademicDisciplineId!.Value, CancellationToken.None))
             .ReturnsAsync(new AcademicDiscipline
             {
                 Id = Guid.NewGuid(),
                 Cypher = cypher,
                 SemesterNumber = semesterNumber,
-                AllowedLessonTypes = [AcademicDisciplineType.Lecture, AcademicDisciplineType.Practice, AcademicDisciplineType.Lab],
+                AllowedLessonTypes =
+                    [AcademicDisciplineType.Lecture, AcademicDisciplineType.Practice, AcademicDisciplineType.Lab],
             });
 
         _scheduleRepositoryMock.Setup(r => r.ExistsAsync(lessonToSave.ScheduleId))
@@ -381,11 +435,12 @@ public class LessonValidationServiceTests
         Assert.Equal(LessonValidationCode.FlexibleLessonTypeConflictByGroup, validationResult.Messages.First().Code);
         Assert.Single(validationResult.LessonsWithConflictById.Keys.ToArray());
         Assert.Single(validationResult.LessonsWithConflictById.First().Value.ValidationMessages);
-        Assert.Equal(LessonValidationCode.FixedLessonTypeConflictByGroup, validationResult.LessonsWithConflictById.First().Value.ValidationMessages.First().Code);
+        Assert.Equal(LessonValidationCode.FixedLessonTypeConflictByGroup,
+            validationResult.LessonsWithConflictById.First().Value.ValidationMessages.First().Code);
     }
 
     [Fact]
-    public async Task SaveLesson_Should_Produce_RestrictedTeacherPreferenceTypeConflict_Validation_code()
+    public async Task ValidateAsync_Should_Produce_RestrictedTeacherPreferenceTypeConflict_Validation_Code()
     {
         // Arrange
         var lessonToSave = _fixture.Build<Lesson>()
@@ -401,12 +456,10 @@ public class LessonValidationServiceTests
             .Without(x => x.Teacher)
             .Without(x => x.RoomId)
             .Without(x => x.Room)
-            .With(x => x.DateWithTimeInterval, new DateWithTimeInterval
-            {
-                Date = DateTime.Today.ToDateOnly(),
-                TimeInterval = new TimeInterval(new TimeOnly(9, 0), new TimeOnly(12, 0)),
-            })
+            .With(x => x.DateWithTimeInterval, new DateWithTimeInterval(DateTime.Today.ToDateOnly(),
+                new TimeInterval(new TimeOnly(9, 0), new TimeOnly(12, 0))))
             .With(x => x.FlexibilityType, LessonFlexibilityType.Fixed)
+            .Without(x => x.AllowCombining)
             .Without(x => x.HoursCost)
             .Without(x => x.CreatedFromDiscipline)
             .Without(x => x.ValidationMessages)
@@ -415,7 +468,7 @@ public class LessonValidationServiceTests
         var cypher = _fixture.Create<string>();
         var semesterNumber = _fixture.Create<int>();
 
-        _studentGroupRepositoryMock.Setup(r => r.FindAsync(lessonToSave.StudentGroupId, CancellationToken.None))
+        _studentGroupRepositoryMock.Setup(r => r.GetAsync(lessonToSave.StudentGroupId, CancellationToken.None))
             .ReturnsAsync(new StudentGroup
             {
                 Id = Guid.NewGuid(),
@@ -426,17 +479,18 @@ public class LessonValidationServiceTests
         _studentGroupRepositoryMock.Setup(r => r.GetStudentGroupTreeIdsAsync(lessonToSave.StudentGroupId))
             .ReturnsAsync([lessonToSave.StudentGroupId]);
 
-        _teacherRepositoryMock.Setup(r => r.FindAsync(lessonToSave.TeacherId!.Value, CancellationToken.None))
+        _teacherRepositoryMock.Setup(r => r.GetAsync(lessonToSave.TeacherId!.Value, CancellationToken.None))
             .ReturnsAsync(new Teacher { Id = Guid.NewGuid() });
 
         _academicDisciplineRepositoryMock
-            .Setup(r => r.FindAsync(lessonToSave.AcademicDisciplineId!.Value, CancellationToken.None))
+            .Setup(r => r.GetAsync(lessonToSave.AcademicDisciplineId!.Value, CancellationToken.None))
             .ReturnsAsync(new AcademicDiscipline
             {
                 Id = Guid.NewGuid(),
                 Cypher = cypher,
                 SemesterNumber = semesterNumber,
-                AllowedLessonTypes = [AcademicDisciplineType.Lecture, AcademicDisciplineType.Practice, AcademicDisciplineType.Lab],
+                AllowedLessonTypes =
+                    [AcademicDisciplineType.Lecture, AcademicDisciplineType.Practice, AcademicDisciplineType.Lab],
             });
 
         _scheduleRepositoryMock.Setup(r => r.ExistsAsync(lessonToSave.ScheduleId))
@@ -467,11 +521,12 @@ public class LessonValidationServiceTests
 
         // Assert
         Assert.Single(validationResult.Messages);
-        Assert.Equal(LessonValidationCode.RestrictedTeacherPreferenceTypeConflict, validationResult.Messages.First().Code);
+        Assert.Equal(LessonValidationCode.RestrictedTeacherPreferenceTypeConflict,
+            validationResult.Messages.First().Code);
     }
 
     [Fact]
-    public async Task SaveLesson_Should_Produce_UndesirableTeacherPreferenceTypeConflict_Validation_code()
+    public async Task ValidateAsync_Should_Produce_UndesirableTeacherPreferenceTypeConflict_Validation_Code()
     {
         // Arrange
         var lessonToSave = _fixture.Build<Lesson>()
@@ -487,12 +542,10 @@ public class LessonValidationServiceTests
             .Without(x => x.Teacher)
             .Without(x => x.RoomId)
             .Without(x => x.Room)
-            .With(x => x.DateWithTimeInterval, new DateWithTimeInterval
-            {
-                Date = DateTime.Today.ToDateOnly(),
-                TimeInterval = new TimeInterval(new TimeOnly(9, 0), new TimeOnly(12, 0)),
-            })
+            .With(x => x.DateWithTimeInterval, new DateWithTimeInterval(DateTime.Today.ToDateOnly(),
+                new TimeInterval(new TimeOnly(9, 0), new TimeOnly(12, 0))))
             .With(x => x.FlexibilityType, LessonFlexibilityType.Fixed)
+            .Without(x => x.AllowCombining)
             .Without(x => x.HoursCost)
             .Without(x => x.CreatedFromDiscipline)
             .Without(x => x.ValidationMessages)
@@ -501,7 +554,7 @@ public class LessonValidationServiceTests
         var cypher = _fixture.Create<string>();
         var semesterNumber = _fixture.Create<int>();
 
-        _studentGroupRepositoryMock.Setup(r => r.FindAsync(lessonToSave.StudentGroupId, CancellationToken.None))
+        _studentGroupRepositoryMock.Setup(r => r.GetAsync(lessonToSave.StudentGroupId, CancellationToken.None))
             .ReturnsAsync(new StudentGroup
             {
                 Id = Guid.NewGuid(),
@@ -513,13 +566,14 @@ public class LessonValidationServiceTests
             .ReturnsAsync([lessonToSave.StudentGroupId]);
 
         _academicDisciplineRepositoryMock
-            .Setup(r => r.FindAsync(lessonToSave.AcademicDisciplineId!.Value, CancellationToken.None))
+            .Setup(r => r.GetAsync(lessonToSave.AcademicDisciplineId!.Value, CancellationToken.None))
             .ReturnsAsync(new AcademicDiscipline
             {
                 Id = Guid.NewGuid(),
                 Cypher = cypher,
                 SemesterNumber = semesterNumber,
-                AllowedLessonTypes = [AcademicDisciplineType.Lecture, AcademicDisciplineType.Practice, AcademicDisciplineType.Lab],
+                AllowedLessonTypes =
+                    [AcademicDisciplineType.Lecture, AcademicDisciplineType.Practice, AcademicDisciplineType.Lab],
             });
 
         _scheduleRepositoryMock.Setup(r => r.ExistsAsync(lessonToSave.ScheduleId))
@@ -529,7 +583,7 @@ public class LessonValidationServiceTests
             m.Date != null
         ))).ReturnsAsync([]);
 
-        _teacherRepositoryMock.Setup(r => r.FindAsync(lessonToSave.TeacherId!.Value, CancellationToken.None))
+        _teacherRepositoryMock.Setup(r => r.GetAsync(lessonToSave.TeacherId!.Value, CancellationToken.None))
             .ReturnsAsync(new Teacher { Id = Guid.NewGuid() });
 
         _teacherPreferenceRepositoryMock.Setup(r =>
@@ -553,11 +607,12 @@ public class LessonValidationServiceTests
 
         // Assert
         Assert.Single(validationResult.Messages);
-        Assert.Equal(LessonValidationCode.UndesirableTeacherPreferenceTypeConflict, validationResult.Messages.First().Code);
+        Assert.Equal(LessonValidationCode.UndesirableTeacherPreferenceTypeConflict,
+            validationResult.Messages.First().Code);
     }
 
     [Fact]
-    public async Task SaveLesson_Should_Produce_FixedLessonTypeConflictByRoom_Validation_code()
+    public async Task ValidateAsync_Should_Produce_FixedLessonTypeConflictByRoom_Validation_Code()
     {
         // Arrange
         var lessonToSave = _fixture.Build<Lesson>()
@@ -573,12 +628,10 @@ public class LessonValidationServiceTests
             .Without(x => x.Teacher)
             .With(x => x.RoomId, Guid.NewGuid())
             .Without(x => x.Room)
-            .With(x => x.DateWithTimeInterval, new DateWithTimeInterval
-            {
-                Date = DateTime.Today.ToDateOnly(),
-                TimeInterval = new TimeInterval(new TimeOnly(9, 0), new TimeOnly(12, 0)),
-            })
+            .With(x => x.DateWithTimeInterval, new DateWithTimeInterval(DateTime.Today.ToDateOnly(),
+                new TimeInterval(new TimeOnly(9, 0), new TimeOnly(12, 0))))
             .With(x => x.FlexibilityType, LessonFlexibilityType.Fixed)
+            .Without(x => x.AllowCombining)
             .Without(x => x.HoursCost)
             .Without(x => x.CreatedFromDiscipline)
             .Without(x => x.ValidationMessages)
@@ -587,7 +640,7 @@ public class LessonValidationServiceTests
         var cypher = _fixture.Create<string>();
         var semesterNumber = _fixture.Create<int>();
 
-        _studentGroupRepositoryMock.Setup(r => r.FindAsync(lessonToSave.StudentGroupId, CancellationToken.None))
+        _studentGroupRepositoryMock.Setup(r => r.GetAsync(lessonToSave.StudentGroupId, CancellationToken.None))
             .ReturnsAsync(new StudentGroup
             {
                 Id = Guid.NewGuid(),
@@ -598,17 +651,18 @@ public class LessonValidationServiceTests
         _studentGroupRepositoryMock.Setup(r => r.GetStudentGroupTreeIdsAsync(lessonToSave.StudentGroupId))
             .ReturnsAsync([lessonToSave.StudentGroupId]);
 
-        _roomRepositoryMock.Setup(r => r.FindAsync(lessonToSave.RoomId!.Value, CancellationToken.None))
-            .ReturnsAsync(new Room());
+        _roomRepositoryMock.Setup(r => r.ExistsAsync(lessonToSave.RoomId!.Value))
+            .ReturnsAsync(true);
 
         _academicDisciplineRepositoryMock
-            .Setup(r => r.FindAsync(lessonToSave.AcademicDisciplineId!.Value, CancellationToken.None))
+            .Setup(r => r.GetAsync(lessonToSave.AcademicDisciplineId!.Value, CancellationToken.None))
             .ReturnsAsync(new AcademicDiscipline
             {
                 Id = Guid.NewGuid(),
                 Cypher = cypher,
                 SemesterNumber = semesterNumber,
-                AllowedLessonTypes = [AcademicDisciplineType.Lecture, AcademicDisciplineType.Practice, AcademicDisciplineType.Lab],
+                AllowedLessonTypes =
+                    [AcademicDisciplineType.Lecture, AcademicDisciplineType.Practice, AcademicDisciplineType.Lab],
             });
 
         _scheduleRepositoryMock.Setup(r => r.ExistsAsync(lessonToSave.ScheduleId))
@@ -643,11 +697,12 @@ public class LessonValidationServiceTests
         Assert.Equal(LessonValidationCode.FlexibleLessonTypeConflictByRoom, validationResult.Messages.First().Code);
         Assert.Single(validationResult.LessonsWithConflictById.Keys.ToArray());
         Assert.Single(validationResult.LessonsWithConflictById.First().Value.ValidationMessages);
-        Assert.Equal(LessonValidationCode.FixedLessonTypeConflictByRoom, validationResult.LessonsWithConflictById.First().Value.ValidationMessages.First().Code);
+        Assert.Equal(LessonValidationCode.FixedLessonTypeConflictByRoom,
+            validationResult.LessonsWithConflictById.First().Value.ValidationMessages.First().Code);
     }
 
     [Fact]
-    public async Task SaveLesson_Should_Produce_FlexibleLessonTypeConflictByRoom_Validation_code()
+    public async Task ValidateAsync_Should_Produce_FlexibleLessonTypeConflictByRoom_Validation_Code()
     {
         // Arrange
         var lessonToSave = _fixture.Build<Lesson>()
@@ -663,12 +718,10 @@ public class LessonValidationServiceTests
             .Without(x => x.Teacher)
             .With(x => x.RoomId, Guid.NewGuid())
             .Without(x => x.Room)
-            .With(x => x.DateWithTimeInterval, new DateWithTimeInterval
-            {
-                Date = DateTime.Today.ToDateOnly(),
-                TimeInterval = new TimeInterval(new TimeOnly(9, 0), new TimeOnly(12, 0)),
-            })
+            .With(x => x.DateWithTimeInterval, new DateWithTimeInterval(DateTime.Today.ToDateOnly(),
+                new TimeInterval(new TimeOnly(9, 0), new TimeOnly(12, 0))))
             .With(x => x.FlexibilityType, LessonFlexibilityType.Flexible)
+            .Without(x => x.AllowCombining)
             .Without(x => x.HoursCost)
             .Without(x => x.CreatedFromDiscipline)
             .Without(x => x.ValidationMessages)
@@ -677,7 +730,7 @@ public class LessonValidationServiceTests
         var cypher = _fixture.Create<string>();
         var semesterNumber = _fixture.Create<int>();
 
-        _studentGroupRepositoryMock.Setup(r => r.FindAsync(lessonToSave.StudentGroupId, CancellationToken.None))
+        _studentGroupRepositoryMock.Setup(r => r.GetAsync(lessonToSave.StudentGroupId, CancellationToken.None))
             .ReturnsAsync(new StudentGroup
             {
                 Id = Guid.NewGuid(),
@@ -688,17 +741,18 @@ public class LessonValidationServiceTests
         _studentGroupRepositoryMock.Setup(r => r.GetStudentGroupTreeIdsAsync(lessonToSave.StudentGroupId))
             .ReturnsAsync([lessonToSave.StudentGroupId]);
 
-        _roomRepositoryMock.Setup(r => r.FindAsync(lessonToSave.RoomId!.Value, CancellationToken.None))
-            .ReturnsAsync(new Room());
+        _roomRepositoryMock.Setup(r => r.ExistsAsync(lessonToSave.RoomId!.Value))
+            .ReturnsAsync(true);
 
         _academicDisciplineRepositoryMock
-            .Setup(r => r.FindAsync(lessonToSave.AcademicDisciplineId!.Value, CancellationToken.None))
+            .Setup(r => r.GetAsync(lessonToSave.AcademicDisciplineId!.Value, CancellationToken.None))
             .ReturnsAsync(new AcademicDiscipline
             {
                 Id = Guid.NewGuid(),
                 Cypher = cypher,
                 SemesterNumber = semesterNumber,
-                AllowedLessonTypes = [AcademicDisciplineType.Lecture, AcademicDisciplineType.Practice, AcademicDisciplineType.Lab],
+                AllowedLessonTypes =
+                    [AcademicDisciplineType.Lecture, AcademicDisciplineType.Practice, AcademicDisciplineType.Lab],
             });
 
         _scheduleRepositoryMock.Setup(r => r.ExistsAsync(lessonToSave.ScheduleId))
@@ -733,6 +787,7 @@ public class LessonValidationServiceTests
         Assert.Equal(LessonValidationCode.FixedLessonTypeConflictByRoom, validationResult.Messages.First().Code);
         Assert.Single(validationResult.LessonsWithConflictById.Keys.ToArray());
         Assert.Single(validationResult.LessonsWithConflictById.First().Value.ValidationMessages);
-        Assert.Equal(LessonValidationCode.FlexibleLessonTypeConflictByRoom, validationResult.LessonsWithConflictById.First().Value.ValidationMessages.First().Code);
+        Assert.Equal(LessonValidationCode.FlexibleLessonTypeConflictByRoom,
+            validationResult.LessonsWithConflictById.First().Value.ValidationMessages.First().Code);
     }
 }

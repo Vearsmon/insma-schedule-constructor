@@ -63,6 +63,8 @@ public static partial class DtoMappingRegister
     [MapValue(nameof(Lesson.CreatedFromDiscipline), false)]
     public static partial Lesson? Map(SaveLessonDto? dto);
 
+    public static partial LessonRegistryItemDto Map(LessonRegistryItem item);
+
     #endregion
 
     #region Room

@@ -3,7 +3,9 @@ using Dal.Repositories.Rooms;
 using Domain.Dto;
 using Domain.Dto.SaveDto;
 using Domain.Dto.ViewDto;
+using Domain.Exceptions;
 using Domain.Models.SearchModels;
+using Domain.Models.ValidationMessages;
 using Domain.Services;
 using Services.Mapping;
 
@@ -36,14 +38,28 @@ public class RoomService(
             }).ToArray();
     }
 
-    public async Task<Guid> SaveAsync(SaveRoomDto saveRoomDto)
+    public async Task SaveAsync(SaveRoomDto saveRoomDto)
     {
+        var validationMessages = new List<ValidationMessage>();
+        if (saveRoomDto.Name == null!)
+        {
+            validationMessages.Add(new ValidationMessage("Не допускается отсутствие названия"));
+        }
+        if (saveRoomDto.Id.HasValue && !(await roomRepository.ExistsAsync(saveRoomDto.Id!.Value)))
+        {
+            validationMessages.Add(new ValidationMessage("Не найдена аудитория для обновления"));
+        }
         if (!(await campusRepository.ExistsAsync(saveRoomDto.CampusId)))
         {
-            throw new NotImplementedException();
+            validationMessages.Add(new ValidationMessage("Не найден учебный корпус для сохранения аудитории"));
+        }
+
+        if (validationMessages.Count > 0)
+        {
+            throw new ServiceException(validationMessages.ToArray());
         }
 
         var room = DtoMappingRegister.Map(saveRoomDto)!;
-        return await roomRepository.SaveAsync(room);
+        await roomRepository.SaveAsync(room);
     }
 }

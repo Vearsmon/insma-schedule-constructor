@@ -7,14 +7,6 @@ public class ValidationMessage(
     string? errorCode = null,
     int? sortOrder = null)
 {
-    [System.Text.Json.Serialization.JsonConstructor]
-    public ValidationMessage(
-        string message,
-        ValidationLevel validationLevel = ValidationLevel.Error,
-        string? field = null) : this(message, validationLevel, field, null)
-    {
-    }
-
     public ValidationLevel ValidationLevel { get; set; } = validationLevel;
 
     public string Message { get; set; } = message;

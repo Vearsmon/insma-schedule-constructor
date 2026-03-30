@@ -18,6 +18,12 @@ public static partial class RegistrySearchModelMappingRegister
 
     #endregion
 
+    #region Lesson
+
+    public static partial LessonRegistryInternalSearchModel Map(LessonRegistrySearchModel searchModel);
+
+    #endregion
+
     #region Schedule
 
     public static partial ScheduleRegistryInternalSearchModel Map(ScheduleRegistrySearchModel searchModel);

@@ -94,6 +94,11 @@ public class DbLesson : IDbEntityWithId
     public int HoursCost { get; set; }
 
     /// <summary>
+    /// Занятие допускает совмещение
+    /// </summary>
+    public bool AllowCombining { get; set; }
+
+    /// <summary>
     /// Занятие создано через определение дисциплины
     /// </summary>
     public bool CreatedFromDiscipline { get; set; }

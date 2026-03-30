@@ -14,5 +14,6 @@ public class SaveLessonDto
     public Guid? RoomId { get; set; }
     public DateWithTimeInterval? DateWithTimeInterval { get; set; }
     public LessonFlexibilityType FlexibilityType { get; set; }
+    public bool AllowCombining { get; set; }
     public int HoursCost { get; set; }
 }

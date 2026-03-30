@@ -53,6 +53,11 @@ public class AcademicDisciplineLessonBatchInfo : IModelWithId
     public DateInterval DateInterval { get; set; } = null!;
 
     /// <summary>
+    /// Занятие допускает совмещение
+    /// </summary>
+    public bool AllowCombining { get; set; }
+
+    /// <summary>
     /// Вес для всех занятий в часах
     /// </summary>
     public int HoursCost { get; set; }

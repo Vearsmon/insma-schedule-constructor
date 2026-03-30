@@ -3,8 +3,10 @@ using Dal.Repositories.Teachers;
 using Domain.Dto.RegistryDto;
 using Domain.Dto.SaveDto;
 using Domain.Dto.ViewDto;
+using Domain.Exceptions;
 using Domain.Mapping;
 using Domain.Models.RegistrySearchModels;
+using Domain.Models.ValidationMessages;
 using Domain.Services;
 using Services.Mapping;
 
@@ -30,9 +32,24 @@ public class TeacherService(
         return DtoMappingRegister.Map(teacher)!;
     }
 
-    public async Task<Guid> SaveAsync(SaveTeacherDto saveTeacherDto)
+    public async Task SaveAsync(SaveTeacherDto saveTeacherDto)
     {
+        var validationMessages = new List<ValidationMessage>();
+        if (saveTeacherDto.Fullname == null!)
+        {
+            validationMessages.Add(new ValidationMessage("Не допускается отсутствие имени"));
+        }
+        if (saveTeacherDto.Id.HasValue && !(await teacherRepository.ExistsAsync(saveTeacherDto.Id!.Value)))
+        {
+            validationMessages.Add(new ValidationMessage("Не найден преподаватель для обновления"));
+        }
+
+        if (validationMessages.Count != 0)
+        {
+            throw new ServiceException(validationMessages.ToArray());
+        }
+
         var teacher = DtoMappingRegister.Map(saveTeacherDto)!;
-        return await teacherRepository.SaveAsync(teacher);
+        await teacherRepository.SaveAsync(teacher);
     }
 }

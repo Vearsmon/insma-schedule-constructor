@@ -2,6 +2,7 @@
 using Dal.RegistryRepositories;
 using Dal.RegistryRepositories.AcademicDiscipline;
 using Dal.RegistryRepositories.Campus;
+using Dal.RegistryRepositories.Lesson;
 using Dal.RegistryRepositories.Schedule;
 using Dal.RegistryRepositories.StudentGroup;
 using Dal.RegistryRepositories.Teacher;
@@ -55,6 +56,10 @@ public static class ServiceCollectionExtension
             .AddScoped<ILessonRepository, LessonRepository>()
             .AddScoped<IRepositoryMapper<DbLesson, Lesson>, LessonMapper>()
             .AddScoped<IPredicateBuilder<DbLesson, LessonSearchModel>, LessonPredicateBuilder>()
+            .AddScoped<ILessonRegistryRepository, LessonRegistryRepository>()
+            .AddScoped<IReadonlyRepositoryMapper<DbLesson, LessonRegistryItem>, LessonRegistryMapper>()
+            .AddScoped<IRegistryRepositoryOrderer<DbLesson, LessonRegistryInternalSearchModel>, LessonRegistryOrderer>()
+            .AddScoped<IPredicateBuilder<DbLesson, LessonRegistryInternalSearchModel>, LessonRegistryPredicateBuilder>()
 
             .AddScoped<ILessonValidationMessageRepository, LessonValidationMessageRepository>()
             .AddScoped<IRepositoryMapper<DbLessonValidationMessage, LessonValidationMessage>, LessonValidationMessageMapper>()

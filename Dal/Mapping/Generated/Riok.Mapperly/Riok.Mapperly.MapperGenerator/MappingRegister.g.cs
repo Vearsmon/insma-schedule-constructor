@@ -80,6 +80,7 @@ namespace Dal.Mapping
             target.TimeTo = lesson.DateWithTimeInterval?.TimeInterval.TimeTo;
             target.FlexibilityType = lesson.FlexibilityType;
             target.HoursCost = lesson.HoursCost;
+            target.AllowCombining = lesson.AllowCombining;
             target.CreatedFromDiscipline = lesson.CreatedFromDiscipline;
             target.ValidationMessages = MapToListOfDbLessonValidationMessage(lesson.ValidationMessages);
             return target;
@@ -108,6 +109,7 @@ namespace Dal.Mapping
             dbLesson.TimeTo = lesson.DateWithTimeInterval?.TimeInterval.TimeTo;
             dbLesson.FlexibilityType = lesson.FlexibilityType;
             dbLesson.HoursCost = lesson.HoursCost;
+            dbLesson.AllowCombining = lesson.AllowCombining;
             dbLesson.CreatedFromDiscipline = lesson.CreatedFromDiscipline;
             dbLesson.ValidationMessages = MapToListOfDbLessonValidationMessage(lesson.ValidationMessages);
         }
@@ -131,15 +133,32 @@ namespace Dal.Mapping
             target.Teacher = Map(lesson.Teacher);
             target.RoomId = lesson.RoomId;
             target.Room = Map(lesson.Room);
-            if (lesson.Date != null)
-            {
-                target.DateWithTimeInterval ??= new global::Domain.Models.Common.DateWithTimeInterval();
-                target.DateWithTimeInterval.Date = lesson.Date.Value;
-            }
             target.FlexibilityType = lesson.FlexibilityType;
+            target.AllowCombining = lesson.AllowCombining;
             target.HoursCost = lesson.HoursCost;
             target.CreatedFromDiscipline = lesson.CreatedFromDiscipline;
             target.ValidationMessages = MapValidationMessagesCollection(lesson.ValidationMessages);
+            return target;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(entity))]
+        private static partial global::Domain.Models.RegistryItemModels.LessonRegistryItem? MapDbToRegistryItem(global::Dal.Entities.DbLesson? entity)
+        {
+            if (entity == null)
+                return default;
+            var target = new global::Domain.Models.RegistryItemModels.LessonRegistryItem();
+            target.Id = entity.Id;
+            target.AcademicDisciplineId = entity.AcademicDisciplineId;
+            target.AcademicDisciplineType = entity.AcademicDisciplineType;
+            target.StudentGroupId = entity.StudentGroupId;
+            target.TeacherId = entity.TeacherId;
+            target.RoomId = entity.RoomId;
+            target.FlexibilityType = entity.FlexibilityType;
+            target.AllowCombining = entity.AllowCombining;
+            target.HoursCost = entity.HoursCost;
+            target.CreatedFromDiscipline = entity.CreatedFromDiscipline;
+            target.ValidationMessages = MapValidationMessagesCollection(entity.ValidationMessages);
             return target;
         }
 
@@ -745,6 +764,7 @@ namespace Dal.Mapping
             target.RepeatType = academicDisciplineLessonBatchInfo.RepeatType;
             target.DateFrom = academicDisciplineLessonBatchInfo.DateInterval.DateFrom;
             target.DateTo = academicDisciplineLessonBatchInfo.DateInterval.DateTo;
+            target.AllowCombining = academicDisciplineLessonBatchInfo.AllowCombining;
             target.HoursCost = academicDisciplineLessonBatchInfo.HoursCost;
             return target;
         }
@@ -766,6 +786,7 @@ namespace Dal.Mapping
             dbAcademicDisciplineLessonBatchInfo.RepeatType = academicDisciplineLessonBatchInfo.RepeatType;
             dbAcademicDisciplineLessonBatchInfo.DateFrom = academicDisciplineLessonBatchInfo.DateInterval.DateFrom;
             dbAcademicDisciplineLessonBatchInfo.DateTo = academicDisciplineLessonBatchInfo.DateInterval.DateTo;
+            dbAcademicDisciplineLessonBatchInfo.AllowCombining = academicDisciplineLessonBatchInfo.AllowCombining;
             dbAcademicDisciplineLessonBatchInfo.HoursCost = academicDisciplineLessonBatchInfo.HoursCost;
         }
 
@@ -785,6 +806,7 @@ namespace Dal.Mapping
             target.Room = Map(academicDisciplineLessonBatchInfo.Room);
             target.DayOfWeekTimeIntervals = academicDisciplineLessonBatchInfo.DayOfWeekTimeIntervals;
             target.RepeatType = academicDisciplineLessonBatchInfo.RepeatType;
+            target.AllowCombining = academicDisciplineLessonBatchInfo.AllowCombining;
             target.HoursCost = academicDisciplineLessonBatchInfo.HoursCost;
             return target;
         }
@@ -918,11 +940,6 @@ namespace Dal.Mapping
             target.Teacher = Map(teacherPreference.Teacher);
             target.RoomId = teacherPreference.RoomId;
             target.Room = Map(teacherPreference.Room);
-            if (teacherPreference.DayOfWeek != null)
-            {
-                target.DayOfWeekTimeInterval ??= new global::Domain.Models.Common.DayOfWeekTimeInterval();
-                target.DayOfWeekTimeInterval.DayOfWeek = teacherPreference.DayOfWeek.Value;
-            }
             target.TeacherPreferenceType = teacherPreference.TeacherPreferenceType;
             target.Comment = teacherPreference.Comment;
             return target;

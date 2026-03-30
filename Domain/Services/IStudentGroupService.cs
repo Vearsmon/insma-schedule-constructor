@@ -9,5 +9,5 @@ public interface IStudentGroupService
 {
     Task<RegistryDto<StudentGroupRegistryItemDto>> SearchAsync(StudentGroupRegistrySearchModel searchModel);
     Task<StudentGroupViewDto> GetViewAsync(Guid studentGroupId);
-    Task<Guid> SaveAsync(SaveStudentGroupDto saveStudentGroupDto);
+    Task SaveAsync(SaveStudentGroupDto saveStudentGroupDto);
 }

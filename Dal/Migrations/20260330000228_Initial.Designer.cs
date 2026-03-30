@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Dal.Migrations
 {
     [DbContext(typeof(InsmaScheduleContext))]
-    [Migration("20260328214532_Initial")]
+    [Migration("20260330000228_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -158,6 +158,10 @@ namespace Dal.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<bool>("AllowCombining")
+                        .HasColumnType("boolean")
+                        .HasColumnName("allow_combining");
+
                     b.Property<DateOnly>("DateFrom")
                         .HasColumnType("Date")
                         .HasColumnName("date_from");
@@ -240,6 +244,10 @@ namespace Dal.Migrations
                     b.Property<string>("AcademicDisciplineType")
                         .HasColumnType("text")
                         .HasColumnName("academic_discipline_type");
+
+                    b.Property<bool>("AllowCombining")
+                        .HasColumnType("boolean")
+                        .HasColumnName("allow_combining");
 
                     b.Property<bool>("CreatedFromDiscipline")
                         .HasColumnType("boolean")
@@ -571,7 +579,6 @@ namespace Dal.Migrations
                         .HasColumnName("id");
 
                     b.Property<string>("Contacts")
-                        .IsRequired()
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)")
                         .HasColumnName("contacts");

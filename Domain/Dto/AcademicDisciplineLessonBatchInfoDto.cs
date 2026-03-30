@@ -12,5 +12,6 @@ public class AcademicDisciplineLessonBatchInfoDto
     public DayOfWeekTimeInterval[] DayOfWeekTimeIntervals { get; set; } = [];
     public DisciplineLessonRepeatType RepeatType { get; set; }
     public DateInterval DateInterval { get; set; } = null!;
+    public bool AllowCombining { get; set; }
     public int HoursCost { get; set; }
 }

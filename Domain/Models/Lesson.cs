@@ -76,6 +76,11 @@ public class Lesson : IModelWithId
     public LessonFlexibilityType FlexibilityType { get; set; }
 
     /// <summary>
+    /// Занятие допускает совмещение
+    /// </summary>
+    public bool AllowCombining { get; set; }
+
+    /// <summary>
     /// Вес занятия в часах
     /// </summary>
     public int HoursCost { get; set; }

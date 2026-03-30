@@ -29,5 +29,5 @@ public class DbTeacher : IDbEntityWithId
     /// Контактные данные преподавателя
     /// </summary>
     [MaxLength(64)]
-    public string Contacts { get; set; } = null!;
+    public string? Contacts { get; set; }
 }

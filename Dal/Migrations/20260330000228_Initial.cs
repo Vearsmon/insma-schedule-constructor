@@ -132,7 +132,7 @@ namespace Dal.Migrations
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     user_id = table.Column<Guid>(type: "uuid", nullable: false),
                     fullname = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    contacts = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false)
+                    contacts = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -183,6 +183,7 @@ namespace Dal.Migrations
                     repeat_type = table.Column<string>(type: "text", nullable: false),
                     date_from = table.Column<DateOnly>(type: "Date", nullable: false),
                     date_to = table.Column<DateOnly>(type: "Date", nullable: false),
+                    allow_combining = table.Column<bool>(type: "boolean", nullable: false),
                     hours_cost = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -319,6 +320,7 @@ namespace Dal.Migrations
                     time_to = table.Column<TimeOnly>(type: "time without time zone", nullable: true),
                     flexibility_type = table.Column<string>(type: "text", nullable: false),
                     hours_cost = table.Column<int>(type: "integer", nullable: false),
+                    allow_combining = table.Column<bool>(type: "boolean", nullable: false),
                     created_from_discipline = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>

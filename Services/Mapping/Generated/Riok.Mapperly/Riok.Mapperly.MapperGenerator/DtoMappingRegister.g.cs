@@ -116,6 +116,7 @@ namespace Services.Mapping
             target.DayOfWeekTimeIntervals = dto.DayOfWeekTimeIntervals;
             target.RepeatType = dto.RepeatType;
             target.DateInterval = dto.DateInterval;
+            target.AllowCombining = dto.AllowCombining;
             target.HoursCost = dto.HoursCost;
             return target;
         }
@@ -132,6 +133,7 @@ namespace Services.Mapping
             target.DayOfWeekTimeIntervals = dto.DayOfWeekTimeIntervals;
             target.RepeatType = dto.RepeatType;
             target.DateInterval = dto.DateInterval;
+            target.AllowCombining = dto.AllowCombining;
             target.HoursCost = dto.HoursCost;
             return target;
         }
@@ -210,6 +212,7 @@ namespace Services.Mapping
             target.RoomId = model.RoomId;
             target.DateWithTimeInterval = model.DateWithTimeInterval;
             target.FlexibilityType = model.FlexibilityType;
+            target.AllowCombining = model.AllowCombining;
             target.HoursCost = model.HoursCost;
             target.CreatedFromDiscipline = model.CreatedFromDiscipline;
             target.ValidationMessages = model.ValidationMessages;
@@ -232,8 +235,28 @@ namespace Services.Mapping
             target.RoomId = dto.RoomId;
             target.DateWithTimeInterval = dto.DateWithTimeInterval;
             target.FlexibilityType = dto.FlexibilityType;
+            target.AllowCombining = dto.AllowCombining;
             target.HoursCost = dto.HoursCost;
             target.CreatedFromDiscipline = false;
+            return target;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        public static partial global::Domain.Dto.RegistryDto.LessonRegistryItemDto Map(global::Domain.Models.RegistryItemModels.LessonRegistryItem item)
+        {
+            var target = new global::Domain.Dto.RegistryDto.LessonRegistryItemDto();
+            target.Id = item.Id;
+            target.AcademicDisciplineId = item.AcademicDisciplineId;
+            target.AcademicDisciplineType = item.AcademicDisciplineType;
+            target.StudentGroupId = item.StudentGroupId;
+            target.TeacherId = item.TeacherId;
+            target.RoomId = item.RoomId;
+            target.DateWithTimeInterval = item.DateWithTimeInterval;
+            target.FlexibilityType = item.FlexibilityType;
+            target.AllowCombining = item.AllowCombining;
+            target.HoursCost = item.HoursCost;
+            target.CreatedFromDiscipline = item.CreatedFromDiscipline;
+            target.ValidationMessages = item.ValidationMessages;
             return target;
         }
 

@@ -2,9 +2,9 @@
 using Domain.Models.Common;
 using Domain.Models.Enums;
 
-namespace Domain.Dto.ViewDto;
+namespace Domain.Dto.RegistryDto;
 
-public class LessonViewDto
+public class LessonRegistryItemDto : IModelWithId
 {
     public Guid? Id { get; set; }
     public Guid? AcademicDisciplineId { get; set; }

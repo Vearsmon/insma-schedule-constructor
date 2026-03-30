@@ -9,5 +9,5 @@ public interface ITeacherService
 {
     Task<RegistryDto<TeacherRegistryItemDto>> SearchAsync(TeacherRegistrySearchModel searchModel);
     Task<TeacherViewDto> GetViewAsync(Guid teacherId);
-    Task<Guid> SaveAsync(SaveTeacherDto saveTeacherDto);
+    Task SaveAsync(SaveTeacherDto saveTeacherDto);
 }
