@@ -56,7 +56,10 @@ namespace Dal.Migrations
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     campus_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    room_type = table.Column<string>(type: "text", nullable: false)
+                    room_type = table.Column<string>(type: "text", nullable: false),
+                    capacity = table.Column<int>(type: "integer", nullable: false),
+                    room_board_type = table.Column<string>(type: "text", nullable: false),
+                    has_projector = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -367,6 +370,7 @@ namespace Dal.Migrations
                     error_type = table.Column<string>(type: "text", nullable: false),
                     code = table.Column<string>(type: "text", nullable: false),
                     affected_by_academic_discipline_id = table.Column<Guid>(type: "uuid", nullable: true),
+                    affected_by_academic_discipline_type = table.Column<string>(type: "text", nullable: true),
                     affected_by_lesson_id = table.Column<Guid>(type: "uuid", nullable: true),
                     affected_by_student_group_id = table.Column<Guid>(type: "uuid", nullable: true),
                     affected_by_teacher_id = table.Column<Guid>(type: "uuid", nullable: true),

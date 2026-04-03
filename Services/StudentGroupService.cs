@@ -98,6 +98,7 @@ public class StudentGroupService(
         var studentGroup = DtoMappingRegister.Map(saveStudentGroupDto)!;
         studentGroup.Children = children;
         await studentGroupRepository.SaveAsync(studentGroup);
+
         if (saveStudentGroupDto.Id.HasValue)
         {
             await lessonService.RecalculateConflictsForNewStudentGroup(studentGroup);

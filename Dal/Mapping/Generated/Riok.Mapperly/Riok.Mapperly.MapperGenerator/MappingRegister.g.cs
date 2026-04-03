@@ -176,6 +176,7 @@ namespace Dal.Mapping
             target.Code = lessonValidationMessage.Code;
             target.Payload.AffectedByAcademicDisciplineId = lessonValidationMessage.AffectedByAcademicDisciplineId;
             target.Payload.AffectedByAcademicDiscipline = Map(lessonValidationMessage.AffectedByAcademicDiscipline);
+            target.Payload.AffectedByAcademicDisciplineType = lessonValidationMessage.AffectedByAcademicDisciplineType;
             target.Payload.AffectedByStudentGroupId = lessonValidationMessage.AffectedByStudentGroupId;
             target.Payload.AffectedByStudentGroup = Map(lessonValidationMessage.AffectedByStudentGroup);
             target.Payload.AffectedByLessonId = lessonValidationMessage.AffectedByLessonId;
@@ -205,6 +206,7 @@ namespace Dal.Mapping
             target.Code = lessonValidationMessage.Code;
             target.AffectedByAcademicDisciplineId = lessonValidationMessage.Payload.AffectedByAcademicDisciplineId;
             target.AffectedByAcademicDiscipline = Map(lessonValidationMessage.Payload.AffectedByAcademicDiscipline);
+            target.AffectedByAcademicDisciplineType = lessonValidationMessage.Payload.AffectedByAcademicDisciplineType;
             target.AffectedByLessonId = lessonValidationMessage.Payload.AffectedByLessonId;
             target.AffectedByLesson = Map(lessonValidationMessage.Payload.AffectedByLesson);
             target.AffectedByStudentGroupId = lessonValidationMessage.Payload.AffectedByStudentGroupId;
@@ -230,6 +232,7 @@ namespace Dal.Mapping
             dbLessonValidationMessage.Code = lessonValidationMessage.Code;
             dbLessonValidationMessage.AffectedByAcademicDisciplineId = lessonValidationMessage.Payload.AffectedByAcademicDisciplineId;
             dbLessonValidationMessage.AffectedByAcademicDiscipline = Map(lessonValidationMessage.Payload.AffectedByAcademicDiscipline);
+            dbLessonValidationMessage.AffectedByAcademicDisciplineType = lessonValidationMessage.Payload.AffectedByAcademicDisciplineType;
             dbLessonValidationMessage.AffectedByLessonId = lessonValidationMessage.Payload.AffectedByLessonId;
             dbLessonValidationMessage.AffectedByLesson = Map(lessonValidationMessage.Payload.AffectedByLesson);
             dbLessonValidationMessage.AffectedByStudentGroupId = lessonValidationMessage.Payload.AffectedByStudentGroupId;
@@ -253,6 +256,9 @@ namespace Dal.Mapping
             target.CampusId = room.CampusId;
             target.Campus = Map(room.Campus);
             target.RoomType = room.RoomType;
+            target.Capacity = room.Capacity;
+            target.RoomBoardType = room.RoomBoardType;
+            target.HasProjector = room.HasProjector;
             return target;
         }
 
@@ -271,6 +277,9 @@ namespace Dal.Mapping
             target.CampusId = room.CampusId;
             target.Campus = Map(room.Campus);
             target.RoomType = room.RoomType;
+            target.Capacity = room.Capacity;
+            target.RoomBoardType = room.RoomBoardType;
+            target.HasProjector = room.HasProjector;
             return target;
         }
 
@@ -285,6 +294,9 @@ namespace Dal.Mapping
             dbRoom.CampusId = room.CampusId;
             dbRoom.Campus = Map(room.Campus);
             dbRoom.RoomType = room.RoomType;
+            dbRoom.Capacity = room.Capacity;
+            dbRoom.RoomBoardType = room.RoomBoardType;
+            dbRoom.HasProjector = room.HasProjector;
         }
 
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]

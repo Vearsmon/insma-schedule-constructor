@@ -1,4 +1,6 @@
-﻿namespace Domain.Models;
+﻿using Domain.Models.Enums;
+
+namespace Domain.Models;
 
 public class LessonValidationPayload
 {
@@ -11,6 +13,11 @@ public class LessonValidationPayload
     /// Оказавшая влияние академическая дисциплина
     /// </summary>
     public AcademicDiscipline? AffectedByAcademicDiscipline { get; set; }
+
+    /// <summary>
+    /// Оказавший влияние вид занятий академической дисциплины
+    /// </summary>
+    public AcademicDisciplineType? AffectedByAcademicDisciplineType { get; set; }
 
     /// <summary>
     /// Оказавшее влияние занятие

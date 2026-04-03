@@ -30,6 +30,9 @@ public class RoomServiceTests
             .Without(x => x.Name)
             .With(x => x.CampusId, Guid.NewGuid())
             .With(x => x.RoomType, RoomType.Amphitheater)
+            .Without(x => x.Capacity)
+            .Without(x => x.RoomBoardType)
+            .Without(x => x.HasProjector)
             .Create();
 
         _roomRepositoryMock.Setup(r => r.ExistsAsync(roomToSave.Id!.Value)).ReturnsAsync(false);

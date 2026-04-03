@@ -61,7 +61,8 @@ public class LessonValidationService(
         if (previousLesson is { CreatedFromDiscipline: true }
             && !CreatedFromDisciplineLessonVersionsAreEqual(previousLesson, lesson))
         {
-            validationMessages.Add(new ValidationMessage("Для созданного через дисциплину занятия позволяется изменять только возможность совмещения"));
+            validationMessages.Add(new ValidationMessage(
+                "Для созданного через дисциплину занятия позволяется изменять только возможность совмещения"));
         }
 
         if (validationMessages.Count > 0)
@@ -162,9 +163,22 @@ public class LessonValidationService(
     public async Task<LessonWeekConflictDto[]> FillValidationMessages(Lesson[] lessons)
     {
         var lessonConflicts = new List<LessonWeekConflictDto>();
+        var studentGroupAcademicDisciplineLessonsCache = new Dictionary<(Guid, Guid, Guid), Lesson[]>();
         foreach (var lesson in lessons)
         {
-            foreach (var validationMessage in lessons.SelectMany(x => x.ValidationMessages))
+            if (lesson.AcademicDisciplineId != null
+                && !studentGroupAcademicDisciplineLessonsCache.ContainsKey((lesson.ScheduleId,
+                    lesson.AcademicDisciplineId!.Value, lesson.StudentGroupId)))
+            {
+                studentGroupAcademicDisciplineLessonsCache[(lesson.ScheduleId, lesson.AcademicDisciplineId!.Value, lesson.StudentGroupId)] =
+                    await lessonRepository.SearchAsync(new LessonSearchModel
+                    {
+                        ScheduleId = lesson.ScheduleId,
+                        AcademicDisciplineId = lesson.AcademicDisciplineId!.Value,
+                        StudentGroupIds = [lesson.StudentGroupId],
+                    });
+            }
+            foreach (var validationMessage in lesson.ValidationMessages)
             {
                 var discipline = validationMessage.Payload.AffectedByAcademicDisciplineId.HasValue
                     ? await academicDisciplineRepository.GetAsync(
@@ -193,6 +207,10 @@ public class LessonValidationService(
                         studentGroup!.Name,
                         studentGroup.SemesterNumber,
                         discipline.SemesterNumber),
+                    LessonValidationCode.MismatchedAcademicDisciplineType => string.Format(
+                        LessonValidationMessageTemplates.MismatchedAcademicDisciplineTypeTemplate,
+                        discipline!.Name,
+                        lesson.AcademicDisciplineType!.GetDescription()),
                     LessonValidationCode.FixedLessonTypeConflictByGroup => string.Format(
                         LessonValidationMessageTemplates.FixedLessonTypeConflictByGroupTemplate,
                         affectedByLesson!.AcademicDiscipline == null
@@ -217,11 +235,17 @@ public class LessonValidationService(
                             ? string.Empty
                             : affectedByLesson.AcademicDiscipline.Name,
                         affectedByLesson.Teacher!.Fullname),
-                    LessonValidationCode.RestrictedTeacherPreferenceTypeConflict => string.Format(
-                        LessonValidationMessageTemplates.RestrictedTeacherPreferenceTypeConflictTemplate,
+                    LessonValidationCode.RestrictedTimeTeacherPreferenceTypeConflict => string.Format(
+                        LessonValidationMessageTemplates.RestrictedTimeTeacherPreferenceTypeConflictTemplate,
                         teacher!.Fullname),
-                    LessonValidationCode.UndesirableTeacherPreferenceTypeConflict => string.Format(
-                        LessonValidationMessageTemplates.UndesirableTeacherPreferenceTypeConflictTemplate,
+                    LessonValidationCode.UndesirableTimeTeacherPreferenceTypeConflict => string.Format(
+                        LessonValidationMessageTemplates.UndesirableTimeTeacherPreferenceTypeConflictTemplate,
+                        teacher!.Fullname),
+                    LessonValidationCode.RestrictedRoomTeacherPreferenceTypeConflict => string.Format(
+                        LessonValidationMessageTemplates.RestrictedRoomTeacherPreferenceTypeConflictTemplate,
+                        teacher!.Fullname),
+                    LessonValidationCode.UndesirableRoomTeacherPreferenceTypeConflict => string.Format(
+                        LessonValidationMessageTemplates.UndesirableRoomTeacherPreferenceTypeConflictTemplate,
                         teacher!.Fullname),
                     LessonValidationCode.FixedLessonTypeConflictByRoom => string.Format(
                         LessonValidationMessageTemplates.FixedLessonTypeConflictByRoomTemplate,
@@ -235,6 +259,34 @@ public class LessonValidationService(
                             ? string.Empty
                             : affectedByLesson.AcademicDiscipline.Name,
                         affectedByLesson.Room!.Name),
+                    LessonValidationCode.MismatchedAcademicDisciplineTypeTotalHoursCount => string.Format(
+                        LessonValidationMessageTemplates.MismatchedAcademicDisciplineTypeTotalHoursCountTemplate,
+                        validationMessage.Payload.AffectedByAcademicDisciplineType!.Value.GetDescription(),
+                        discipline!.Name,
+                        studentGroupAcademicDisciplineLessonsCache[(lesson.ScheduleId, lesson.AcademicDisciplineId!.Value, lesson.StudentGroupId)]
+                            .Where(x => x.AcademicDisciplineType == validationMessage.Payload.AffectedByAcademicDisciplineType)
+                            .Sum(x => x.HoursCost),
+                        discipline.GetPayloadByType(validationMessage.Payload.AffectedByAcademicDisciplineType!.Value)!.TotalHoursCount,
+                        lesson.StudentGroup.Name),
+                    LessonValidationCode.MismatchedAcademicDisciplineTypeLessonPerWeekCount => string.Format(
+                        LessonValidationMessageTemplates.MismatchedAcademicDisciplineTypeLessonPerWeekCountTemplate,
+                        validationMessage.Payload.AffectedByAcademicDisciplineType!.Value.GetDescription(),
+                        discipline!.Name,
+                        studentGroupAcademicDisciplineLessonsCache[(lesson.ScheduleId, lesson.AcademicDisciplineId!.Value, lesson.StudentGroupId)]
+                            .Count(x => x.AcademicDisciplineType == validationMessage.Payload.AffectedByAcademicDisciplineType
+                                        && x.DateWithTimeInterval!.Date.GetWeekDatesRangeByDate().HasIntersection(lesson.DateWithTimeInterval!.Date)),
+                        discipline.GetPayloadByType(validationMessage.Payload.AffectedByAcademicDisciplineType!.Value)!.LessonsPerWeekCount,
+                        lesson.StudentGroup.Name),
+                    LessonValidationCode.MismatchedAcademicDisciplineTypeStudyWeeksCount => string.Format(
+                        LessonValidationMessageTemplates.MismatchedAcademicDisciplineTypeStudyWeeksCountTemplate,
+                        validationMessage.Payload.AffectedByAcademicDisciplineType!.Value.GetDescription(),
+                        discipline!.Name,
+                        studentGroupAcademicDisciplineLessonsCache[(lesson.ScheduleId, lesson.AcademicDisciplineId!.Value, lesson.StudentGroupId)]
+                            .Where(x => x.AcademicDisciplineType == validationMessage.Payload.AffectedByAcademicDisciplineType)
+                            .GroupBy(x => x.DateWithTimeInterval!.Date.GetWeekDatesRangeByDate())
+                            .Count(),
+                        discipline.GetPayloadByType(validationMessage.Payload.AffectedByAcademicDisciplineType!.Value)!.StudyWeeksCount,
+                        lesson.StudentGroup.Name),
                     _ => throw new NotImplementedException(),
                 };
                 lessonConflicts.Add(new LessonWeekConflictDto
@@ -247,6 +299,26 @@ public class LessonValidationService(
         }
 
         return lessonConflicts.ToArray();
+    }
+
+    public async Task RemoveValidationMessages(Guid[] lessonIds, LessonValidationCode[] validationCodes)
+    {
+        var selfValidationMessages = await lessonValidationMessageRepository.SearchAsync(
+            new LessonValidationMessageSearchModel
+            {
+                LessonIds = lessonIds,
+                ValidationCodes = validationCodes,
+            });
+        var affectedValidationMessages = await lessonValidationMessageRepository.SearchAsync(
+            new LessonValidationMessageSearchModel
+            {
+                AffectedByLessonIds = lessonIds,
+                ValidationCodes = validationCodes,
+            });
+        await lessonValidationMessageRepository.DeleteAsync(selfValidationMessages
+            .Concat(affectedValidationMessages)
+            .Select(x => x.Id!.Value)
+            .ToArray());
     }
 
     private static bool CreatedFromDisciplineLessonVersionsAreEqual(Lesson previousLesson, Lesson nextLesson)
@@ -362,16 +434,26 @@ public class LessonValidationService(
         List<LessonValidationMessage> validationMessages,
         Teacher saveDtoTeacher)
     {
-        var conflictingTeacherPreferences = await teacherPreferenceRepository.SearchAsync(
+        var conflictingTimeTeacherPreferences = await teacherPreferenceRepository.SearchAsync(
             new TeacherPreferenceSearchModel
             {
                 ScheduleId = lesson.ScheduleId,
                 TeacherId = lesson.TeacherId,
                 DaysOfWeek = [lesson.DateWithTimeInterval!.Date.DayOfWeek],
                 TimeInterval = lesson.DateWithTimeInterval!.TimeInterval,
-                TeacherPreferenceTypes = [TeacherPreferenceType.Restricted, TeacherPreferenceType.Undesirable]
+                TeacherPreferenceTypes = [TeacherPreferenceType.Restricted, TeacherPreferenceType.Undesirable],
             });
-        foreach (var conflictingTeacherPreference in conflictingTeacherPreferences)
+        var conflictingRoomTeacherPreferences = lesson.RoomId!.HasValue
+            ? await teacherPreferenceRepository.SearchAsync(
+                new TeacherPreferenceSearchModel
+                {
+                    ScheduleId = lesson.ScheduleId,
+                    TeacherId = lesson.TeacherId,
+                    RoomIds = [lesson.RoomId!.Value],
+                    TeacherPreferenceTypes = [TeacherPreferenceType.Restricted, TeacherPreferenceType.Undesirable],
+                })
+            : [];
+        foreach (var conflictingTeacherPreference in conflictingTimeTeacherPreferences.Concat(conflictingRoomTeacherPreferences))
         {
             var payload = new LessonValidationPayload
             {
@@ -379,13 +461,25 @@ public class LessonValidationService(
                 AffectedByTeacherId = saveDtoTeacher.Id,
             };
             validationMessages
-                .AddWarningIf(conflictingTeacherPreference.TeacherPreferenceType == TeacherPreferenceType.Undesirable,
+                .AddWarningIf(
+                    conflictingTeacherPreference is { DayOfWeekTimeInterval: not null, TeacherPreferenceType: TeacherPreferenceType.Undesirable },
                     payload,
-                    LessonValidationCode.UndesirableTeacherPreferenceTypeConflict);
+                    LessonValidationCode.UndesirableTimeTeacherPreferenceTypeConflict);
             validationMessages
-                .AddErrorIf(conflictingTeacherPreference.TeacherPreferenceType == TeacherPreferenceType.Restricted,
+                .AddErrorIf(
+                    conflictingTeacherPreference is { DayOfWeekTimeInterval: not null, TeacherPreferenceType: TeacherPreferenceType.Restricted },
                     payload,
-                    LessonValidationCode.RestrictedTeacherPreferenceTypeConflict);
+                    LessonValidationCode.RestrictedTimeTeacherPreferenceTypeConflict);
+            validationMessages
+                .AddWarningIf(
+                    conflictingTeacherPreference is { RoomId: not null, TeacherPreferenceType: TeacherPreferenceType.Undesirable },
+                    payload,
+                    LessonValidationCode.UndesirableRoomTeacherPreferenceTypeConflict);
+            validationMessages
+                .AddErrorIf(
+                    conflictingTeacherPreference is { RoomId: not null, TeacherPreferenceType: TeacherPreferenceType.Restricted },
+                    payload,
+                    LessonValidationCode.RestrictedRoomTeacherPreferenceTypeConflict);
         }
     }
 

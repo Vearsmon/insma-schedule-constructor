@@ -141,6 +141,9 @@ public class InsmaScheduleContext(DbContextOptions options) : DbContextBase(opti
             .HasForeignKey(x => x.AffectedByAcademicDisciplineId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        builder.Property(x => x.AffectedByAcademicDisciplineType)
+            .HasConversion(new EnumToStringConverter<AcademicDisciplineType>());
+
         builder.HasOne(x => x.AffectedByLesson)
             .WithMany()
             .HasForeignKey(x => x.AffectedByLessonId)
@@ -171,6 +174,9 @@ public class InsmaScheduleContext(DbContextOptions options) : DbContextBase(opti
 
         builder.Property(x => x.RoomType)
             .HasConversion(new EnumToStringConverter<RoomType>());
+
+        builder.Property(x => x.RoomBoardType)
+            .HasConversion(new EnumToStringConverter<RoomBoardType>());
     }
 
     private void ScheduleConfigure(EntityTypeBuilder<DbSchedule> builder)

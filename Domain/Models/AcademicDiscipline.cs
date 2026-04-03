@@ -64,4 +64,21 @@ public class AcademicDiscipline : IModelWithId
     /// Комментарий
     /// </summary>
     public string? Comment { get; set; }
+
+    public AcademicDisciplinePayload? GetPayloadByType(AcademicDisciplineType type)
+    {
+        switch (type)
+        {
+            case AcademicDisciplineType.Lecture:
+                return LecturePayload;
+            case AcademicDisciplineType.Practice:
+                return PracticePayload;
+            case AcademicDisciplineType.Lab:
+                return LabPayload;
+            case AcademicDisciplineType.Exam:
+            case AcademicDisciplineType.Test:
+            default:
+                throw new ArgumentOutOfRangeException(nameof(type), type, null);
+        }
+    }
 }

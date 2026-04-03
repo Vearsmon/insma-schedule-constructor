@@ -1,4 +1,5 @@
 using Domain.Models.Common;
+using Domain.Models.Enums;
 
 namespace Domain.Helpers;
 
@@ -17,11 +18,45 @@ public static class DateOnlyHelper
         }
     }
 
-    public static DateOnly[] GetDatesInIntervalByDaysOfWeek(DateInterval dateInterval, DayOfWeek[] daysOfWeek)
+    public static bool HasIntersection(this DateInterval interval, DateOnly date)
     {
-        return Enumerable.Range(0, (dateInterval.DateTo.Day - dateInterval.DateFrom.Day) + 1)
-            .Select(offset => dateInterval.DateFrom.AddDays(offset))
-            .Where(d => daysOfWeek.Contains(d.DayOfWeek))
-            .ToArray();
+        return date >= interval.DateFrom && date <= interval.DateTo;
+    }
+
+    public static DateOnly[] GetDatesInIntervalByDaysOfWeek(DateInterval dateInterval,
+        DayOfWeek[] daysOfWeek,
+        DisciplineLessonRepeatType repeatType)
+    {
+        var result = new List<DateOnly>();
+        var skipUntilDate = (DateOnly?)null;
+
+        var dates = Enumerable.Range(0, (dateInterval.DateTo.Day - dateInterval.DateFrom.Day) + 1)
+            .Select(offset => dateInterval.DateFrom.AddDays(offset));
+        foreach (var date in dates)
+        {
+            if (date < skipUntilDate)
+            {
+                continue;
+            }
+
+            if (daysOfWeek.Contains(date.DayOfWeek))
+            {
+                result.Add(date);
+            }
+
+            if (date.DayOfWeek == DayOfWeek.Sunday && repeatType == DisciplineLessonRepeatType.EveryTwoWeeks)
+            {
+                skipUntilDate = date.AddDays(8);
+            }
+        }
+
+        return result.ToArray();
+    }
+
+    public static DateInterval GetWeekDatesRangeByDate(this DateOnly date)
+    {
+        var startOfWeek = date.AddDays(-(int)date.DayOfWeek);
+        var endOfWeek = startOfWeek.AddDays(6);
+        return new DateInterval(startOfWeek, endOfWeek);
     }
 }

@@ -88,6 +88,7 @@ public static partial class MappingRegister
 
     [MapProperty(nameof(DbLessonValidationMessage.AffectedByAcademicDisciplineId), $"{nameof(LessonValidationMessage.Payload)}.{nameof(LessonValidationMessage.Payload.AffectedByAcademicDisciplineId)}")]
     [MapProperty(nameof(DbLessonValidationMessage.AffectedByAcademicDiscipline), $"{nameof(LessonValidationMessage.Payload)}.{nameof(LessonValidationMessage.Payload.AffectedByAcademicDiscipline)}")]
+    [MapProperty(nameof(DbLessonValidationMessage.AffectedByAcademicDisciplineType), $"{nameof(LessonValidationMessage.Payload)}.{nameof(LessonValidationMessage.Payload.AffectedByAcademicDisciplineType)}")]
     [MapProperty(nameof(DbLessonValidationMessage.AffectedByStudentGroupId), $"{nameof(LessonValidationMessage.Payload)}.{nameof(LessonValidationMessage.Payload.AffectedByStudentGroupId)}")]
     [MapProperty(nameof(DbLessonValidationMessage.AffectedByStudentGroup), $"{nameof(LessonValidationMessage.Payload)}.{nameof(LessonValidationMessage.Payload.AffectedByStudentGroup)}")]
     [MapProperty(nameof(DbLessonValidationMessage.AffectedByLessonId), $"{nameof(LessonValidationMessage.Payload)}.{nameof(LessonValidationMessage.Payload.AffectedByLessonId)}")]
@@ -100,6 +101,7 @@ public static partial class MappingRegister
 
     [MapProperty($"{nameof(LessonValidationMessage.Payload)}.{nameof(LessonValidationMessage.Payload.AffectedByAcademicDisciplineId)}", nameof(DbLessonValidationMessage.AffectedByAcademicDisciplineId))]
     [MapProperty($"{nameof(LessonValidationMessage.Payload)}.{nameof(LessonValidationMessage.Payload.AffectedByAcademicDiscipline)}", nameof(DbLessonValidationMessage.AffectedByAcademicDiscipline))]
+    [MapProperty($"{nameof(LessonValidationMessage.Payload)}.{nameof(LessonValidationMessage.Payload.AffectedByAcademicDisciplineType)}", nameof(DbLessonValidationMessage.AffectedByAcademicDisciplineType))]
     [MapProperty($"{nameof(LessonValidationMessage.Payload)}.{nameof(LessonValidationMessage.Payload.AffectedByStudentGroupId)}", nameof(DbLessonValidationMessage.AffectedByStudentGroupId))]
     [MapProperty($"{nameof(LessonValidationMessage.Payload)}.{nameof(LessonValidationMessage.Payload.AffectedByStudentGroup)}", nameof(DbLessonValidationMessage.AffectedByStudentGroup))]
     [MapProperty($"{nameof(LessonValidationMessage.Payload)}.{nameof(LessonValidationMessage.Payload.AffectedByLessonId)}", nameof(DbLessonValidationMessage.AffectedByLessonId))]
@@ -112,6 +114,7 @@ public static partial class MappingRegister
 
     [MapProperty($"{nameof(LessonValidationMessage.Payload)}.{nameof(LessonValidationMessage.Payload.AffectedByAcademicDisciplineId)}", nameof(DbLessonValidationMessage.AffectedByAcademicDisciplineId))]
     [MapProperty($"{nameof(LessonValidationMessage.Payload)}.{nameof(LessonValidationMessage.Payload.AffectedByAcademicDiscipline)}", nameof(DbLessonValidationMessage.AffectedByAcademicDiscipline))]
+    [MapProperty($"{nameof(LessonValidationMessage.Payload)}.{nameof(LessonValidationMessage.Payload.AffectedByAcademicDisciplineType)}", nameof(DbLessonValidationMessage.AffectedByAcademicDisciplineType))]
     [MapProperty($"{nameof(LessonValidationMessage.Payload)}.{nameof(LessonValidationMessage.Payload.AffectedByStudentGroupId)}", nameof(DbLessonValidationMessage.AffectedByStudentGroupId))]
     [MapProperty($"{nameof(LessonValidationMessage.Payload)}.{nameof(LessonValidationMessage.Payload.AffectedByStudentGroup)}", nameof(DbLessonValidationMessage.AffectedByStudentGroup))]
     [MapProperty($"{nameof(LessonValidationMessage.Payload)}.{nameof(LessonValidationMessage.Payload.AffectedByLessonId)}", nameof(DbLessonValidationMessage.AffectedByLessonId))]

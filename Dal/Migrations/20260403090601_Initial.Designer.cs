@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Dal.Migrations
 {
     [DbContext(typeof(InsmaScheduleContext))]
-    [Migration("20260330000228_Initial")]
+    [Migration("20260403090601_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -322,6 +322,10 @@ namespace Dal.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("affected_by_academic_discipline_id");
 
+                    b.Property<string>("AffectedByAcademicDisciplineType")
+                        .HasColumnType("text")
+                        .HasColumnName("affected_by_academic_discipline_type");
+
                     b.Property<Guid?>("AffectedByLessonId")
                         .HasColumnType("uuid")
                         .HasColumnName("affected_by_lesson_id");
@@ -393,11 +397,24 @@ namespace Dal.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("campus_id");
 
+                    b.Property<int>("Capacity")
+                        .HasColumnType("integer")
+                        .HasColumnName("capacity");
+
+                    b.Property<bool>("HasProjector")
+                        .HasColumnType("boolean")
+                        .HasColumnName("has_projector");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)")
                         .HasColumnName("name");
+
+                    b.Property<string>("RoomBoardType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("room_board_type");
 
                     b.Property<string>("RoomType")
                         .IsRequired()

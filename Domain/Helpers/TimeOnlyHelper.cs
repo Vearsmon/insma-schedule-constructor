@@ -9,6 +9,21 @@ public static class TimeOnlyHelper
         return first.TimeFrom <= second.TimeTo && first.TimeTo >= second.TimeFrom;
     }
 
+    public static bool HasIntersection(this DayOfWeekTimeInterval first, DayOfWeekTimeInterval second)
+    {
+        return first.DayOfWeek == second.DayOfWeek && first.TimeInterval.HasIntersection(second.TimeInterval);
+    }
+
+    public static bool HasIntersection(this DayOfWeekTimeInterval first, DateWithTimeInterval? second)
+    {
+        return second != null && first.DayOfWeek == second.Date.DayOfWeek && first.TimeInterval.HasIntersection(second.TimeInterval);
+    }
+
+    public static bool HasIntersection(this DateWithTimeInterval first, DateWithTimeInterval second)
+    {
+        return first.Date == second.Date && first.TimeInterval.HasIntersection(second.TimeInterval);
+    }
+
     public static TimeInterval[] MergeIntersections(this TimeInterval[] timeIntervals)
     {
         var sortedIntervals = timeIntervals.OrderBy(x => x.TimeFrom).ToArray();

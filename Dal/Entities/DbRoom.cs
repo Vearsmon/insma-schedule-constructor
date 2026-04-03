@@ -30,4 +30,19 @@ public class DbRoom : IDbEntityWithId
     /// Тип аудитории
     /// </summary>
     public RoomType RoomType { get; set; }
+
+    /// <summary>
+    /// Вместимость
+    /// </summary>
+    public int Capacity { get; set; }
+
+    /// <summary>
+    /// Тип доски
+    /// </summary>
+    public RoomBoardType RoomBoardType { get; set; }
+
+    /// <summary>
+    /// Имеет в наличии проектор
+    /// </summary>
+    public bool HasProjector { get; set; }
 }

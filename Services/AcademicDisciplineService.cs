@@ -72,7 +72,7 @@ public class AcademicDisciplineService(
 
         saveAcademicDisciplineDto.AllowedLessonTypes =
             saveAcademicDisciplineDto.AllowedLessonTypes.Distinct().ToArray();
-        var unspecifiedLessonTypes = new[]
+        var notAllowedLessonTypes = new[]
             {
                 AcademicDisciplineType.Lecture,
                 AcademicDisciplineType.Practice,
@@ -80,25 +80,24 @@ public class AcademicDisciplineService(
             }
             .Except(saveAcademicDisciplineDto.AllowedLessonTypes)
             .ToArray();
-        var specifiedPayloadsPairs = new[]
+        var specifiedPayloads = new[]
         {
-            (saveAcademicDisciplineDto.LecturePayload != null,
-                unspecifiedLessonTypes.Contains(AcademicDisciplineType.Lecture),
-                AcademicDisciplineType.Lecture),
-            (saveAcademicDisciplineDto.PracticePayload != null,
-                unspecifiedLessonTypes.Contains(AcademicDisciplineType.Practice),
-                AcademicDisciplineType.Practice),
-            (saveAcademicDisciplineDto.LabPayload != null,
-                unspecifiedLessonTypes.Contains(AcademicDisciplineType.Lab),
-                AcademicDisciplineType.Lab),
+            (IsSpecified: saveAcademicDisciplineDto.LecturePayload != null,
+                IsNotAllowed: notAllowedLessonTypes.Contains(AcademicDisciplineType.Lecture),
+                Type: AcademicDisciplineType.Lecture),
+            (IsSpecified: saveAcademicDisciplineDto.PracticePayload != null,
+                IsNotAllowed: notAllowedLessonTypes.Contains(AcademicDisciplineType.Practice),
+                Type: AcademicDisciplineType.Practice),
+            (IsSpecified: saveAcademicDisciplineDto.LabPayload != null,
+                IsNotAllowed: notAllowedLessonTypes.Contains(AcademicDisciplineType.Lab),
+                Type: AcademicDisciplineType.Lab),
         };
 
-        foreach (var unspecifiedLessonType in specifiedPayloadsPairs.Where(x => x is { Item1: true, Item2: true }))
-        {
-            validationMessages.Add(
+        validationMessages.AddRange(specifiedPayloads
+            .Where(x => x is { IsSpecified: true, IsNotAllowed: true })
+            .Select(specifiedPayload =>
                 new ValidationMessage($"Дисциплина не может содержать дополнительную информацию по занятиям вида " +
-                                      $"\"{unspecifiedLessonType.Item3.GetDescription()}\", если она не подразумевает их проведение"));
-        }
+                                      $"\"{specifiedPayload.Type.GetDescription()}\", если она не подразумевает их проведение")));
 
         if (validationMessages.Count != 0)
         {
@@ -106,10 +105,7 @@ public class AcademicDisciplineService(
         }
 
         var academicDiscipline = DtoMappingRegister.Map(saveAcademicDisciplineDto)!;
-        if (saveAcademicDisciplineDto.Id.HasValue)
-        {
-            await lessonService.UpdateAcademicDisciplineLessons(academicDiscipline);
-        }
+        await lessonService.UpdateAcademicDisciplineLessons(academicDiscipline);
 
         await academicDisciplineRepository.SaveAsync(academicDiscipline);
         if (saveAcademicDisciplineDto.Id.HasValue)

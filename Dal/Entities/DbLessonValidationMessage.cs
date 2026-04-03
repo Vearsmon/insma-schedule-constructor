@@ -41,6 +41,11 @@ public class DbLessonValidationMessage : IDbEntityWithId
     public DbAcademicDiscipline? AffectedByAcademicDiscipline { get; set; }
 
     /// <summary>
+    /// Оказавший влияние вид занятий академической дисциплины
+    /// </summary>
+    public AcademicDisciplineType? AffectedByAcademicDisciplineType { get; set; }
+
+    /// <summary>
     /// Оказавшее влияние занятие
     /// </summary>
     public Guid? AffectedByLessonId { get; set; }

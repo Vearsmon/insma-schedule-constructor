@@ -8,6 +8,9 @@ public static class LessonValidationMessageTemplates
     public const string MismatchedSemesterNumberTemplate =
         "Занятие по дисциплине \"{0}\" не может преподаваться у группы \"{1}\" (номер семетра группы \"{2}\" отличается от номера семестра дисциплины \"{3}\" в учебном плане).";
 
+    public const string MismatchedAcademicDisciplineTypeTemplate =
+        "Занятие по дисциплине \"{0}\" имеет вид занятия \"{1}\", не поддерживаемый дисциплиной.";
+
     public const string FixedLessonTypeConflictByGroupTemplate =
         "Занятие не может преподаваться в это время у группы, поскольку есть пересечение по времени с другим занятием {0}со статусом \"Закреплено\" у группы {1}, принадлежащей иерархии выбранной для занятия группы.";
 
@@ -20,11 +23,17 @@ public static class LessonValidationMessageTemplates
     public const string FlexibleLessonTypeConflictByTeacherTemplate =
         "Занятие пересекается по времени с другим занятием {0}со статусом \"Может быть перемещено\" с таким же преподавателем {1}.";
 
-    public const string RestrictedTeacherPreferenceTypeConflictTemplate =
+    public const string RestrictedTimeTeacherPreferenceTypeConflictTemplate =
         "Занятие не может быть проведено в это время у группы, поскольку отмеченное время идет вразрез с пожеланием преподавателя {0} \"Нет возможности провести занятие\".";
 
-    public const string UndesirableTeacherPreferenceTypeConflictTemplate =
+    public const string UndesirableTimeTeacherPreferenceTypeConflictTemplate =
         "Временной отрезок занятия пересекается с временным отрезком в пожелании, отмеченым преподавателем {0} как \"Нежелательный\".";
+
+    public const string RestrictedRoomTeacherPreferenceTypeConflictTemplate =
+        "Занятие не может быть проведено у группы, поскольку преподаватель {0} отметил указанную аудиторию как запрещенную.";
+
+    public const string UndesirableRoomTeacherPreferenceTypeConflictTemplate =
+        "Аудитория занятия отмечена преподавателем {0} как нежелательная.";
 
     public const string FixedLessonTypeConflictByRoomTemplate =
         "Занятие не может преподаваться в это время у группы, поскольку оно пересекается по времени с другим занятием {0}со статусом \"Закреплено\" в этой же аудитории \"{1}\".";
