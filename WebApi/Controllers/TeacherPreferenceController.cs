@@ -73,4 +73,26 @@ public class TeacherPreferenceController(ITeacherPreferenceService teacherPrefer
     {
         await teacherPreferenceService.SaveAsync(saveTeacherPreferenceDto);
     }
+
+    /// <summary>
+    /// Удалить данные пожеланий преподавателя
+    /// </summary>
+    /// <param name="scheduleId">Идентификатор проекта расписания</param>
+    /// <param name="teacherId">Идентификатор преподавателя</param>
+    /// <response code="200">Удаление данных выполнилось успешно</response>
+    /// <response code="400">Удаление данных завершилось с ошибкой валидации входных данных</response>
+    /// <response code="401">Не удалось выполнить авторизацию</response>
+    /// <response code="403">Удаление данных завершилось с ошибкой валидации прав доступа</response>
+    /// <response code="500">Удаление данных завершилось с ошибкой</response>
+    [AllowAnonymous]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationErrorDto), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorDto), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ErrorDto), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ErrorDto), StatusCodes.Status500InternalServerError)]
+    [HttpDelete("delete")]
+    public async Task Delete(Guid scheduleId, Guid teacherId)
+    {
+        await teacherPreferenceService.DeleteAsync(scheduleId, teacherId);
+    }
 }

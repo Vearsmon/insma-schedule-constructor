@@ -7,5 +7,7 @@ public interface IAcademicDisciplineRepository : IRepository<AcademicDiscipline>
 {
     Task<AcademicDiscipline[]> SearchAsync(AcademicDisciplineSearchModel searchModel);
 
+    Task<string[]> SearchCyphersAsync(Guid scheduleId);
+
     Task<bool> ExistsAsync(Guid id);
 }

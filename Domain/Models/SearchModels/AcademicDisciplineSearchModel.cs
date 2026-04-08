@@ -2,4 +2,5 @@
 
 public class AcademicDisciplineSearchModel
 {
+    public Guid? ScheduleId { get; set; }
 }

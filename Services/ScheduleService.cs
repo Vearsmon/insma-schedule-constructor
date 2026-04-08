@@ -2,6 +2,7 @@
 using Dal.Repositories.Schedules;
 using Domain.Dto.RegistryDto;
 using Domain.Dto.SaveDto;
+using Domain.Dto.ShortDto;
 using Domain.Exceptions;
 using Domain.Mapping;
 using Domain.Models.RegistrySearchModels;
@@ -15,12 +16,18 @@ public class ScheduleService(
     IScheduleRepository scheduleRepository,
     IScheduleRegistryRepository scheduleRegistryRepository) : IScheduleService
 {
+    public async Task<ScheduleShortDto[]> SearchShortAsync()
+    {
+        var items = await scheduleRepository.SelectAllAsync();
+        return items.Select(DtoMappingRegister.MapShort).ToArray()!;
+    }
+
     public async Task<RegistryDto<ScheduleRegistryItemDto>> SearchAsync(ScheduleRegistrySearchModel searchModel)
     {
         var registryEntries = await scheduleRegistryRepository.SearchAsync(RegistrySearchModelMappingRegister.Map(searchModel));
         return new RegistryDto<ScheduleRegistryItemDto>
         {
-            Items = registryEntries.Items.Select(DtoMappingRegister.Map).ToArray(),
+            Items = registryEntries.Items.Select(DtoMappingRegister.Map).ToArray()!,
             ItemsCount = registryEntries.ItemsCount,
         };
     }
@@ -44,5 +51,10 @@ public class ScheduleService(
 
         var schedule = DtoMappingRegister.Map(saveScheduleDto)!;
         await scheduleRepository.SaveAsync(schedule);
+    }
+
+    public async Task DeleteAsync(Guid scheduleId)
+    {
+        await scheduleRepository.DeleteAsync(scheduleId);
     }
 }

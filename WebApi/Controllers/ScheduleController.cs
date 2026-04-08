@@ -1,6 +1,7 @@
 ﻿using Domain.Dto.ErrorDto;
 using Domain.Dto.RegistryDto;
 using Domain.Dto.SaveDto;
+using Domain.Dto.ShortDto;
 using Domain.Models.RegistrySearchModels;
 using Domain.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -11,6 +12,24 @@ namespace WebApi.Controllers;
 [Route("api/schedule")]
 public class ScheduleController(IScheduleService scheduleService) : ApiController
 {
+    /// <summary>
+    /// Получить список проектов расписаний
+    /// </summary>
+    /// <returns>Список кратких моделей проектов расписаний</returns>
+    /// <response code="200">Поиск реестра выполнился успешно</response>
+    /// <response code="400">Поиск реестра завершился с ошибкой валидации входных данных</response>
+    /// <response code="401">Не удалось выполнить авторизацию</response>
+    /// <response code="403">Поиск реестра завершился с ошибкой валидации прав доступа</response>
+    /// <response code="500">Поиск реестра завершился с ошибкой</response>
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(ScheduleShortDto[]), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationErrorDto), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorDto), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ErrorDto), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ErrorDto), StatusCodes.Status500InternalServerError)]
+    [HttpGet("search-short")]
+    public async Task<ScheduleShortDto[]> SearchShort() => await scheduleService.SearchShortAsync();
+
     /// <summary>
     /// Получить реестр данных проектов расписаний
     /// </summary>
@@ -50,5 +69,26 @@ public class ScheduleController(IScheduleService scheduleService) : ApiControlle
     public async Task Save([FromBody] SaveScheduleDto saveScheduleDto)
     {
         await scheduleService.SaveAsync(saveScheduleDto);
+    }
+
+    /// <summary>
+    /// Удалить данные проекта расписания
+    /// </summary>
+    /// <param name="scheduleId">Идентификатор проекта расписания</param>
+    /// <response code="200">Удаление данных выполнилось успешно</response>
+    /// <response code="400">Удаление данных завершилось с ошибкой валидации входных данных</response>
+    /// <response code="401">Не удалось выполнить авторизацию</response>
+    /// <response code="403">Удаление данных завершилось с ошибкой валидации прав доступа</response>
+    /// <response code="500">Удаление данных завершилось с ошибкой</response>
+    [AllowAnonymous]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationErrorDto), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorDto), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ErrorDto), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ErrorDto), StatusCodes.Status500InternalServerError)]
+    [HttpDelete("delete")]
+    public async Task Delete(Guid scheduleId)
+    {
+        await scheduleService.DeleteAsync(scheduleId);
     }
 }

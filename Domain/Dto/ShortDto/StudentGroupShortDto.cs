@@ -1,6 +1,6 @@
-﻿namespace Domain.Dto.ViewDto;
+﻿namespace Domain.Dto.ShortDto;
 
-public class StudentGroupShortViewDto
+public class StudentGroupShortDto
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = null!;

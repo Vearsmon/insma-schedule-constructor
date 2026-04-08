@@ -12,14 +12,9 @@ public class DbAcademicDisciplineLessonBatchInfo : IDbEntityWithId
     public Guid Id { get; set; }
 
     /// <summary>
-    /// Академическая группа
+    /// Академические группы
     /// </summary>
-    public Guid StudentGroupId { get; set; }
-
-    /// <summary>
-    /// Академическая группа
-    /// </summary>
-    public DbStudentGroup StudentGroup { get; set; } = null!;
+    public ICollection<DbStudentGroup> StudentGroups { get; set; } = [];
 
     /// <summary>
     /// Преподаватель

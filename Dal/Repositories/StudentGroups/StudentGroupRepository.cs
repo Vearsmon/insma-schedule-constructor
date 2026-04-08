@@ -23,17 +23,41 @@ public class StudentGroupRepository(
         return (await base.SelectAsync([id])).Length == 1;
     }
 
-    public async Task<Guid[]> GetStudentGroupTreeIdsAsync(Guid studentGroupId)
+    public async Task<Dictionary<Guid, List<Guid>>> GetStudentGroupTreeIdsAsync(Guid[] studentGroupIds)
     {
-        var studentGroupTreeFlat = await Query()
+        var studentGroupTrees = await Query()
             .AsNoTracking()
             .Include(x => x.Parent)
             .ThenInclude(x => x!.Parent)
             .Include(x => x.Children)
             .ThenInclude(x => x!.Children)
-            .Where(x => x.Id == studentGroupId)
+            .Where(x => studentGroupIds.Contains(x.Id))
             .ToArrayAsync();
 
-        return studentGroupTreeFlat.Select(x => x.Id).ToArray();
+        var result = new Dictionary<Guid, List<Guid>>();
+        foreach (var studentGroup in studentGroupTrees)
+        {
+            result[studentGroup.Id] = [studentGroup.Id];
+            if (studentGroup.Parent != null)
+            {
+                result[studentGroup.Id].Add(studentGroup.Parent.Id);
+            }
+
+            if (studentGroup.Children.Count > 0)
+            {
+                result[studentGroup.Id].AddRange(studentGroup.Children.Select(x => x.Id));
+            }
+        }
+        return result;
+    }
+
+    public async Task<string[]> SearchCyphersAsync(Guid scheduleId)
+    {
+        return await Query()
+            .AsNoTracking()
+            .Where(x => x.ScheduleId == scheduleId)
+            .Select(x => x.Cypher)
+            .Distinct()
+            .ToArrayAsync();
     }
 }

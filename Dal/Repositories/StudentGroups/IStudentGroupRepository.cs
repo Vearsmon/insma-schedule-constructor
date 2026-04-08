@@ -9,5 +9,7 @@ public interface IStudentGroupRepository : IRepository<StudentGroup>
 
     Task<bool> ExistsAsync(Guid id);
 
-    Task<Guid[]> GetStudentGroupTreeIdsAsync(Guid studentGroupId);
+    Task<Dictionary<Guid, List<Guid>>> GetStudentGroupTreeIdsAsync(Guid[] studentGroupIds);
+
+    Task<string[]> SearchCyphersAsync(Guid scheduleId);
 }

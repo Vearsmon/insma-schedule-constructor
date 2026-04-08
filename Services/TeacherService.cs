@@ -2,6 +2,7 @@
 using Dal.Repositories.Teachers;
 using Domain.Dto.RegistryDto;
 using Domain.Dto.SaveDto;
+using Domain.Dto.ShortDto;
 using Domain.Dto.ViewDto;
 using Domain.Exceptions;
 using Domain.Mapping;
@@ -16,12 +17,18 @@ public class TeacherService(
     ITeacherRepository teacherRepository,
     ITeacherRegistryRepository teacherRegistryRepository) : ITeacherService
 {
+    public async Task<TeacherShortDto[]> SearchShortAsync()
+    {
+        var items = await teacherRepository.SelectAllAsync();
+        return items.Select(DtoMappingRegister.MapShort).ToArray()!;
+    }
+
     public async Task<RegistryDto<TeacherRegistryItemDto>> SearchAsync(TeacherRegistrySearchModel searchModel)
     {
         var registryEntries = await teacherRegistryRepository.SearchAsync(RegistrySearchModelMappingRegister.Map(searchModel));
         return new RegistryDto<TeacherRegistryItemDto>
         {
-            Items = registryEntries.Items.Select(DtoMappingRegister.Map).ToArray(),
+            Items = registryEntries.Items.Select(DtoMappingRegister.Map).ToArray()!,
             ItemsCount = registryEntries.ItemsCount,
         };
     }
@@ -51,5 +58,10 @@ public class TeacherService(
 
         var teacher = DtoMappingRegister.Map(saveTeacherDto)!;
         await teacherRepository.SaveAsync(teacher);
+    }
+
+    public async Task DeleteAsync(Guid teacherId)
+    {
+        await teacherRepository.DeleteAsync([teacherId]);
     }
 }

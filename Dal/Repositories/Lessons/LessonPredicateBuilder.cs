@@ -15,7 +15,7 @@ public class LessonPredicateBuilder : IPredicateBuilder<DbLesson, LessonSearchMo
                 .AndIf(searchModel.ScheduleId.HasValue, f => f.ScheduleId == searchModel.ScheduleId)
                 .AndIf(searchModel.AcademicDisciplineId.HasValue, f => f.AcademicDisciplineId == searchModel.AcademicDisciplineId)
                 .AndIf(searchModel.Types.Length > 0, f => f.AcademicDisciplineType != null && searchModel.Types.Contains(f.AcademicDisciplineType!.Value))
-                .AndIf(searchModel.StudentGroupIds.Length > 0, f => searchModel.StudentGroupIds.Contains(f.StudentGroupId))
+                .AndIf(searchModel.StudentGroupIds.Length > 0, f => f.StudentGroups.Any(x => searchModel.StudentGroupIds.Contains(x.Id)))
                 .AndIf(searchModel.RoomIds.Length > 0, f => f.RoomId != null && searchModel.RoomIds.Contains(f.RoomId!.Value))
                 .AndIf(searchModel.Date.HasValue, f => f.Date == searchModel.Date)
                 .AndIf(searchModel.DateFrom.HasValue, f => f.Date >= searchModel.DateFrom)
@@ -23,7 +23,6 @@ public class LessonPredicateBuilder : IPredicateBuilder<DbLesson, LessonSearchMo
                 .AndIf(searchModel.TeacherId.HasValue, f => f.TeacherId == searchModel.TeacherId)
                 .AndIf(searchModel.TimeIntervals.Length > 0, BuildTimeIntervalExpression(searchModel))
                 .AndIf(searchModel.DayOfWeekTimeIntervals.Length > 0, BuildDayOfWeekTimeIntervalExpression(searchModel))
-                .AndIf(searchModel.CreatedFromDiscipline, f => f.CreatedFromDiscipline == true)
                 .AndIf(searchModel.ExcludeAllowCombining, f => f.AllowCombining == false)
             ;
     }

@@ -29,6 +29,14 @@ namespace Domain.Mapping
         }
 
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        public static partial global::Domain.Models.RegistrySearchModels.RoomRegistryInternalSearchModel Map(global::Domain.Models.RegistrySearchModels.RoomRegistrySearchModel searchModel)
+        {
+            var target = new global::Domain.Models.RegistrySearchModels.RoomRegistryInternalSearchModel();
+            target.SearchParameters = searchModel.SearchParameters;
+            return target;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
         public static partial global::Domain.Models.RegistrySearchModels.ScheduleRegistryInternalSearchModel Map(global::Domain.Models.RegistrySearchModels.ScheduleRegistrySearchModel searchModel)
         {
             var target = new global::Domain.Models.RegistrySearchModels.ScheduleRegistryInternalSearchModel();

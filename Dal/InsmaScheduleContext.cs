@@ -15,7 +15,6 @@ public class InsmaScheduleContext(DbContextOptions options) : DbContextBase(opti
         builder.Entity<DbUser>(UserConfigure);
         builder.Entity<DbCampus>(CampusConfigure);
         builder.Entity<DbSchedule>(ScheduleConfigure);
-        builder.Entity<DbScheduleSettings>(ScheduleSettingsConfigure);
         builder.Entity<DbRoom>(RoomConfigure);
         builder.Entity<DbTeacher>(TeacherConfigure);
         builder.Entity<DbTeacherPreference>(TeacherPreferenceConfigure);
@@ -60,10 +59,8 @@ public class InsmaScheduleContext(DbContextOptions options) : DbContextBase(opti
 
     private void AcademicDisciplineLessonBatchInfoConfigure(EntityTypeBuilder<DbAcademicDisciplineLessonBatchInfo> builder)
     {
-        builder.HasOne(x => x.StudentGroup)
-            .WithMany()
-            .HasForeignKey(x => x.StudentGroupId)
-            .OnDelete(DeleteBehavior.Restrict);
+        builder.HasMany(x => x.StudentGroups)
+            .WithMany();
 
         builder.HasOne(x => x.Teacher)
             .WithMany()
@@ -104,10 +101,8 @@ public class InsmaScheduleContext(DbContextOptions options) : DbContextBase(opti
         builder.Property(x => x.AcademicDisciplineType)
             .HasConversion(new EnumToStringConverter<AcademicDisciplineType>());
 
-        builder.HasOne(x => x.StudentGroup)
-            .WithMany()
-            .HasForeignKey(x => x.StudentGroupId)
-            .OnDelete(DeleteBehavior.Restrict);
+        builder.HasMany(x => x.StudentGroups)
+            .WithMany();
 
         builder.HasOne(x => x.Teacher)
             .WithMany()
@@ -181,14 +176,6 @@ public class InsmaScheduleContext(DbContextOptions options) : DbContextBase(opti
 
     private void ScheduleConfigure(EntityTypeBuilder<DbSchedule> builder)
     {
-    }
-
-    private void ScheduleSettingsConfigure(EntityTypeBuilder<DbScheduleSettings> builder)
-    {
-        builder.HasOne(x => x.Schedule)
-            .WithOne()
-            .HasForeignKey<DbScheduleSettings>(x => x.ScheduleId)
-            .OnDelete(DeleteBehavior.Restrict);
     }
 
     private void StudentConfigure(EntityTypeBuilder<DbStudent> builder)

@@ -2,6 +2,7 @@
 using Dal.Repositories.Campuses;
 using Domain.Dto.RegistryDto;
 using Domain.Dto.SaveDto;
+using Domain.Dto.ShortDto;
 using Domain.Exceptions;
 using Domain.Mapping;
 using Domain.Models.RegistrySearchModels;
@@ -15,12 +16,18 @@ public class CampusService(
     ICampusRepository campusRepository,
     ICampusRegistryRepository campusRegistryRepository) : ICampusService
 {
+    public async Task<CampusShortDto[]> SearchShortAsync()
+    {
+        var items = await campusRepository.SelectAllAsync();
+        return items.Select(DtoMappingRegister.MapShort).ToArray()!;
+    }
+
     public async Task<RegistryDto<CampusRegistryItemDto>> SearchAsync(CampusRegistrySearchModel searchModel)
     {
         var registryEntries = await campusRegistryRepository.SearchAsync(RegistrySearchModelMappingRegister.Map(searchModel));
         return new RegistryDto<CampusRegistryItemDto>
         {
-            Items = registryEntries.Items.Select(DtoMappingRegister.Map).ToArray(),
+            Items = registryEntries.Items.Select(DtoMappingRegister.Map).ToArray()!,
             ItemsCount = registryEntries.ItemsCount,
         };
     }

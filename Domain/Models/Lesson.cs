@@ -36,14 +36,9 @@ public class Lesson : IModelWithId
     public AcademicDisciplineType? AcademicDisciplineType { get; set; }
 
     /// <summary>
-    /// Академическая группа
+    /// Академические группы
     /// </summary>
-    public Guid StudentGroupId { get; set; }
-
-    /// <summary>
-    /// Академическая группа
-    /// </summary>
-    public StudentGroup StudentGroup { get; set; } = null!;
+    public StudentGroup[] StudentGroups { get; set; } = [];
 
     /// <summary>
     /// Преподаватель
@@ -84,11 +79,6 @@ public class Lesson : IModelWithId
     /// Вес занятия в часах
     /// </summary>
     public int HoursCost { get; set; }
-
-    /// <summary>
-    /// Занятие создано через определение дисциплины
-    /// </summary>
-    public bool CreatedFromDiscipline { get; set; }
 
     /// <summary>
     /// Сообщения валидации

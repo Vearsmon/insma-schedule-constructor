@@ -1,4 +1,5 @@
-﻿using Domain.Models.Enums;
+﻿using Domain.Dto.ShortDto;
+using Domain.Models.Enums;
 
 namespace Domain.Dto.ViewDto;
 
@@ -9,5 +10,5 @@ public class StudentGroupViewDto
     public int SemesterNumber { get; set; }
     public StudentGroupType StudentGroupType { get; set; }
     public string Cypher { get; set; } = null!;
-    public StudentGroupShortViewDto[] Children { get; set; } = [];
+    public StudentGroupShortDto[] Children { get; set; } = [];
 }

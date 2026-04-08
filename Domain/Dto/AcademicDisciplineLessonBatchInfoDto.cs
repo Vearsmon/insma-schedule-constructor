@@ -6,7 +6,7 @@ namespace Domain.Dto;
 public class AcademicDisciplineLessonBatchInfoDto
 {
     public Guid? Id { get; set; }
-    public Guid StudentGroupId { get; set; }
+    public Guid[] StudentGroupIds { get; set; } = [];
     public Guid? TeacherId { get; set; }
     public Guid? RoomId { get; set; }
     public DayOfWeekTimeInterval[] DayOfWeekTimeIntervals { get; set; } = [];

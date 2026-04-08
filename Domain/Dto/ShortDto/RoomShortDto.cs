@@ -1,4 +1,4 @@
-﻿namespace Domain.Dto;
+﻿namespace Domain.Dto.ShortDto;
 
 public class RoomShortDto
 {

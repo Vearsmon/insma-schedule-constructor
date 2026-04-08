@@ -15,20 +15,14 @@ public class LessonRepository(
 {
     public async Task<Lesson[]> SearchAsync(LessonSearchModel searchModel)
     {
-        // return await base.SearchAsync(predicateBuilder, searchModel);
-        var entities = await Query()
-            .AsNoTracking()
-            .Where(predicateBuilder.Build(searchModel))
-            .ToArrayAsync();
-
-        return entities.Select(x => MapperReadonly.Map(x)).ToArray();
+        return await base.SearchAsync(predicateBuilder, searchModel);
     }
 
     protected override IQueryable<DbLesson> Query()
     {
         return Context.Set<DbLesson>()
             .Include(x => x.Room)
-            .Include(x => x.StudentGroup)
+            .Include(x => x.StudentGroups)
             .Include(x => x.AcademicDiscipline)
             .Include(x => x.Teacher)
             .Include(x => x.ValidationMessages);

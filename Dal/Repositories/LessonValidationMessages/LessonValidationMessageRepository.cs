@@ -2,7 +2,6 @@
 using Dal.Transactions;
 using Domain.Models;
 using Domain.Models.SearchModels;
-using Microsoft.EntityFrameworkCore;
 
 namespace Dal.Repositories.LessonValidationMessages;
 
@@ -15,12 +14,6 @@ public class LessonValidationMessageRepository(
 {
     public async Task<LessonValidationMessage[]> SearchAsync(LessonValidationMessageSearchModel searchModel)
     {
-        // return await base.SearchAsync(predicateBuilder, searchModel);
-        var entities = await Query()
-            .AsNoTracking()
-            .Where(predicateBuilder.Build(searchModel))
-            .ToArrayAsync();
-
-        return entities.Select(x => MapperReadonly.Map(x)).ToArray();
+        return await base.SearchAsync(predicateBuilder, searchModel);
     }
 }

@@ -24,6 +24,12 @@ public static partial class RegistrySearchModelMappingRegister
 
     #endregion
 
+    #region Room
+
+    public static partial RoomRegistryInternalSearchModel Map(RoomRegistrySearchModel searchModel);
+
+    #endregion
+
     #region Schedule
 
     public static partial ScheduleRegistryInternalSearchModel Map(ScheduleRegistrySearchModel searchModel);

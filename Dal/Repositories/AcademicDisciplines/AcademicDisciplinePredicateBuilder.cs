@@ -11,6 +11,8 @@ public class AcademicDisciplinePredicateBuilder : IPredicateBuilder<DbAcademicDi
 
     public Expression<Func<DbAcademicDiscipline, bool>> Build(AcademicDisciplineSearchModel searchModel)
     {
-        return Predicate;
+        return Predicate
+                .AndIf(searchModel.ScheduleId.HasValue, f => f.ScheduleId == searchModel.ScheduleId)
+            ;
     }
 }

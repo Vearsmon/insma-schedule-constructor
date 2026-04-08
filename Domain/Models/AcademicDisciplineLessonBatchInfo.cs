@@ -8,14 +8,9 @@ public class AcademicDisciplineLessonBatchInfo : IModelWithId
     public Guid? Id { get; set; }
 
     /// <summary>
-    /// Академическая группа
+    /// Академические группы
     /// </summary>
-    public Guid StudentGroupId { get; set; }
-
-    /// <summary>
-    /// Академическая группа
-    /// </summary>
-    public StudentGroup StudentGroup { get; set; } = null!;
+    public StudentGroup[] StudentGroups { get; set; } = [];
 
     /// <summary>
     /// Преподаватель

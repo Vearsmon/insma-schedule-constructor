@@ -18,23 +18,23 @@ public enum DisciplineLessonRepeatType
     Weekly = 1,
 
     /// <summary>
-    /// Каждые две недели
+    /// Четные недели
     /// </summary>
-    [Description("Каждые две недели")]
+    [Description("Четные недели")]
     [SortEnumOrder(2)]
-    EveryTwoWeeks = 2,
+    EvenWeeks = 2,
+
+    /// <summary>
+    /// Нечетные недели
+    /// </summary>
+    [Description("Нечетные недели")]
+    [SortEnumOrder(3)]
+    OddWeeks = 3,
 
     /// <summary>
     /// Единожды
     /// </summary>
     [Description("Единожды")]
-    [SortEnumOrder(3)]
-    Once = 3,
-
-    /// <summary>
-    /// Произвольный выбор
-    /// </summary>
-    [Description("Произвольный выбор")]
     [SortEnumOrder(4)]
-    Custom = 4,
+    Once = 4,
 }

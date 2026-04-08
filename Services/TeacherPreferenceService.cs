@@ -36,7 +36,7 @@ public class TeacherPreferenceService(
             await teacherPreferenceRegistryRepository.SearchAsync(RegistrySearchModelMappingRegister.Map(searchModel));
         return new RegistryDto<TeacherPreferenceRegistryItemDto>
         {
-            Items = registryEntries.Items.Select(DtoMappingRegister.Map).ToArray(),
+            Items = registryEntries.Items.Select(DtoMappingRegister.Map).ToArray()!,
             ItemsCount = registryEntries.ItemsCount,
         };
     }
@@ -224,5 +224,16 @@ public class TeacherPreferenceService(
             await lessonService.RecalculateConflictsForNewTeacherPreferences(teacherPreferencesArray);
             await teacherPreferenceRepository.SaveAllAsync(teacherPreferencesArray);
         }
+    }
+
+    public async Task DeleteAsync(Guid scheduleId, Guid teacherId)
+    {
+        var teacherPreferences = await teacherPreferenceRepository.SearchAsync(
+            new TeacherPreferenceSearchModel
+            {
+                ScheduleId = scheduleId,
+                TeacherId = teacherId,
+            });
+        await teacherRepository.DeleteAsync(teacherPreferences.Select(x => x.Id!.Value).ToArray());
     }
 }

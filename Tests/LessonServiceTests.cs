@@ -2,6 +2,7 @@
 using Dal.RegistryRepositories.Lesson;
 using Dal.Repositories.AcademicDisciplines;
 using Dal.Repositories.Lessons;
+using Dal.Repositories.Schedules;
 using Dal.Repositories.StudentGroups;
 using Dal.Repositories.TeacherPreferences;
 using Domain.Models;
@@ -23,6 +24,7 @@ public class LessonServiceTests
     private readonly Mock<ILessonValidationService> _lessonValidationServiceMock = new();
     private readonly Mock<IAcademicDisciplineRepository> _academicDisciplineRepositoryMock = new();
     private readonly Mock<IStudentGroupRepository> _studentGroupRepositoryMock = new();
+    private readonly Mock<IScheduleRepository> _scheduleRepositoryMock = new();
     private readonly Mock<ITeacherPreferenceRepository> _teacherPreferenceRepositoryMock = new();
 
     private LessonService CreateService() => new(
@@ -31,6 +33,7 @@ public class LessonServiceTests
         _lessonValidationServiceMock.Object,
         _academicDisciplineRepositoryMock.Object,
         _studentGroupRepositoryMock.Object,
+        _scheduleRepositoryMock.Object,
         _teacherPreferenceRepositoryMock.Object
     );
 
@@ -61,19 +64,27 @@ public class LessonServiceTests
                 new Lesson
                 {
                     Id = Guid.NewGuid(),
-                    StudentGroupId = Guid.NewGuid(),
-                    StudentGroup = new StudentGroup { Cypher = _fixture.Create<string>(), SemesterNumber = 6 },
+                    StudentGroups =
+                    [
+                        new StudentGroup
+                        {
+                            Id = Guid.NewGuid(), Cypher = _fixture.Create<string>(), SemesterNumber = 6,
+                        },
+                    ],
                     AcademicDisciplineType = AcademicDisciplineType.Lecture,
                 },
                 new Lesson
                 {
                     Id = Guid.NewGuid(),
-                    StudentGroupId = Guid.NewGuid(),
-                    StudentGroup = new StudentGroup
-                    {
-                        Cypher = academicDiscipline.Cypher,
-                        SemesterNumber = academicDiscipline.SemesterNumber
-                    },
+                    StudentGroups =
+                    [
+                        new StudentGroup
+                        {
+                            Id = Guid.NewGuid(),
+                            Cypher = academicDiscipline.Cypher,
+                            SemesterNumber = academicDiscipline.SemesterNumber,
+                        },
+                    ],
                     AcademicDisciplineType = AcademicDisciplineType.Practice,
                 },
             ]);
@@ -90,10 +101,13 @@ public class LessonServiceTests
         // Assert
         Assert.Equal(2, actualLessons.Count);
         Assert.Equal(2, actualLessons.First().ValidationMessages.Length);
-        Assert.Contains(actualLessons.First().ValidationMessages, x => x.Code == LessonValidationCode.MismatchedCyphers);
-        Assert.Contains(actualLessons.First().ValidationMessages, x => x.Code == LessonValidationCode.MismatchedSemesterNumber);
+        Assert.Contains(actualLessons.First().ValidationMessages,
+            x => x.Code == LessonValidationCode.MismatchedCyphers);
+        Assert.Contains(actualLessons.First().ValidationMessages,
+            x => x.Code == LessonValidationCode.MismatchedSemesterNumber);
         Assert.Single(actualLessons.Last().ValidationMessages);
-        Assert.Contains(actualLessons.Last().ValidationMessages, x => x.Code == LessonValidationCode.MismatchedAcademicDisciplineType);
+        Assert.Contains(actualLessons.Last().ValidationMessages,
+            x => x.Code == LessonValidationCode.MismatchedAcademicDisciplineType);
     }
 
     [Fact]
@@ -114,13 +128,10 @@ public class LessonServiceTests
             .With(x => x.LecturePayload, _fixture
                 .Build<AcademicDisciplinePayload>()
                 .With(x => x.TotalHoursCount, _fixture.Create<int>())
-                .With(x => x.StudyWeeksCount, _fixture.Create<int>())
-                .With(x => x.LessonsPerWeekCount, _fixture.Create<int>())
                 .With(x => x.LessonBatchInfo, _fixture
                     .Build<AcademicDisciplineLessonBatchInfo>()
                     .Without(x => x.Id)
-                    .With(x => x.StudentGroupId, Guid.NewGuid())
-                    .Without(x => x.StudentGroup)
+                    .With(x => x.StudentGroups, [new StudentGroup { Id = Guid.NewGuid() }])
                     .Without(x => x.TeacherId)
                     .Without(x => x.Teacher)
                     .Without(x => x.RoomId)
@@ -153,6 +164,9 @@ public class LessonServiceTests
             new DateOnly(2026, 9, 22),
             new DateOnly(2026, 9, 24),
         };
+
+        _scheduleRepositoryMock.Setup(r => r.GetAsync(academicDiscipline.ScheduleId, CancellationToken.None))
+            .ReturnsAsync(new Schedule { StartsWithEvenWeek = true, StartDate = new DateOnly(2026, 9, 7), EndDate = new DateOnly(2026, 9, 28) });
 
         _lessonValidationServiceMock.Setup(x => x.ValidateAsync(It.IsAny<Lesson>()))
             .ReturnsAsync(new LessonValidationResult
@@ -189,13 +203,10 @@ public class LessonServiceTests
         var payloadFixture = _fixture
             .Build<AcademicDisciplinePayload>()
             .With(x => x.TotalHoursCount, _fixture.Create<int>())
-            .With(x => x.StudyWeeksCount, _fixture.Create<int>())
-            .With(x => x.LessonsPerWeekCount, _fixture.Create<int>())
             .With(x => x.LessonBatchInfo, _fixture
                 .Build<AcademicDisciplineLessonBatchInfo>()
                 .Without(x => x.Id)
-                .With(x => x.StudentGroupId, Guid.NewGuid())
-                .Without(x => x.StudentGroup)
+                .With(x => x.StudentGroups, [new StudentGroup { Id = Guid.NewGuid() }])
                 .Without(x => x.TeacherId)
                 .Without(x => x.Teacher)
                 .Without(x => x.RoomId)
@@ -244,6 +255,9 @@ public class LessonServiceTests
         _lessonRepositoryMock.Setup(x =>
             x.DeleteAsync(It.Is<Guid[]>(y => y == existingLessonIds), CancellationToken.None));
 
+        _scheduleRepositoryMock.Setup(r => r.GetAsync(academicDiscipline.ScheduleId, CancellationToken.None))
+            .ReturnsAsync(new Schedule { StartsWithEvenWeek = true, StartDate = new DateOnly(2026, 9, 7), EndDate = new DateOnly(2026, 9, 28) });
+
         _lessonValidationServiceMock.Setup(x => x.ValidateAsync(It.IsAny<Lesson>()))
             .ReturnsAsync(new LessonValidationResult
             {
@@ -274,49 +288,53 @@ public class LessonServiceTests
     {
         // Arrange
         var teacherPreferences = new[]
-            {
-                _fixture.Build<TeacherPreference>()
-                    .Without(x => x.Id)
-                    .With(x => x.ScheduleId, Guid.NewGuid())
-                    .Without(x => x.Schedule)
-                    .With(x => x.TeacherId, Guid.NewGuid())
-                    .Without(x => x.Teacher)
-                    .Without(x => x.RoomId)
-                    .Without(x => x.Room)
-                    .With(x => x.DayOfWeekTimeInterval,
-                        new DayOfWeekTimeInterval(DayOfWeek.Monday,
-                            new TimeInterval(new TimeOnly(9, 0), new TimeOnly(10, 30))))
-                    .With(x => x.TeacherPreferenceType, TeacherPreferenceType.Restricted)
-                    .Without(x => x.Comment)
-                    .Create(),
-                _fixture.Build<TeacherPreference>()
-                    .Without(x => x.Id)
-                    .With(x => x.ScheduleId, Guid.NewGuid())
-                    .Without(x => x.Schedule)
-                    .With(x => x.TeacherId, Guid.NewGuid())
-                    .Without(x => x.Teacher)
-                    .With(x => x.RoomId, Guid.NewGuid())
-                    .Without(x => x.Room)
-                    .Without(x => x.DayOfWeekTimeInterval)
-                    .With(x => x.TeacherPreferenceType, TeacherPreferenceType.Restricted)
-                    .Without(x => x.Comment)
-                    .Create(),
-            };
+        {
+            _fixture.Build<TeacherPreference>()
+                .Without(x => x.Id)
+                .With(x => x.ScheduleId, Guid.NewGuid())
+                .Without(x => x.Schedule)
+                .With(x => x.TeacherId, Guid.NewGuid())
+                .Without(x => x.Teacher)
+                .Without(x => x.RoomId)
+                .Without(x => x.Room)
+                .With(x => x.DayOfWeekTimeInterval,
+                    new DayOfWeekTimeInterval(DayOfWeek.Monday,
+                        new TimeInterval(new TimeOnly(9, 0), new TimeOnly(10, 30))))
+                .With(x => x.TeacherPreferenceType, TeacherPreferenceType.Restricted)
+                .Without(x => x.Comment)
+                .Create(),
+            _fixture.Build<TeacherPreference>()
+                .Without(x => x.Id)
+                .With(x => x.ScheduleId, Guid.NewGuid())
+                .Without(x => x.Schedule)
+                .With(x => x.TeacherId, Guid.NewGuid())
+                .Without(x => x.Teacher)
+                .With(x => x.RoomId, Guid.NewGuid())
+                .Without(x => x.Room)
+                .Without(x => x.DayOfWeekTimeInterval)
+                .With(x => x.TeacherPreferenceType, TeacherPreferenceType.Restricted)
+                .Without(x => x.Comment)
+                .Create(),
+        };
 
         _lessonRepositoryMock
             .SetupSequence(r => r.SearchAsync(It.IsAny<LessonSearchModel>()))
-            .ReturnsAsync([new Lesson
-            {
-                Id = Guid.NewGuid(),
-                DateWithTimeInterval = new DateWithTimeInterval(
-                    new DateOnly(2026, 9, 7),
-                    teacherPreferences.First().DayOfWeekTimeInterval!.TimeInterval),
-            }])
-            .ReturnsAsync([new Lesson
-            {
-                Id = Guid.NewGuid(),
-                RoomId = teacherPreferences.Last().RoomId,
-            }]);
+            .ReturnsAsync([
+                new Lesson
+                {
+                    Id = Guid.NewGuid(),
+                    DateWithTimeInterval = new DateWithTimeInterval(
+                        new DateOnly(2026, 9, 7),
+                        teacherPreferences.First().DayOfWeekTimeInterval!.TimeInterval),
+                }
+            ])
+            .ReturnsAsync([
+                new Lesson
+                {
+                    Id = Guid.NewGuid(),
+                    RoomId = teacherPreferences.Last().RoomId,
+                }
+            ]);
 
         var service = CreateService();
 
@@ -330,9 +348,11 @@ public class LessonServiceTests
         // Assert
         Assert.Equal(2, actualLessons.Count);
         Assert.Single(actualLessons.First().ValidationMessages);
-        Assert.Contains(actualLessons.First().ValidationMessages, x => x.Code == LessonValidationCode.RestrictedTimeTeacherPreferenceTypeConflict);
+        Assert.Contains(actualLessons.First().ValidationMessages,
+            x => x.Code == LessonValidationCode.RestrictedTimeTeacherPreferenceTypeConflict);
         Assert.Single(actualLessons.Last().ValidationMessages);
-        Assert.Contains(actualLessons.Last().ValidationMessages, x => x.Code == LessonValidationCode.RestrictedRoomTeacherPreferenceTypeConflict);
+        Assert.Contains(actualLessons.Last().ValidationMessages,
+            x => x.Code == LessonValidationCode.RestrictedRoomTeacherPreferenceTypeConflict);
     }
 
     [Fact]
@@ -359,8 +379,11 @@ public class LessonServiceTests
             .Without(x => x.Children)
             .Create();
 
-        _studentGroupRepositoryMock.Setup(r => r.GetStudentGroupTreeIdsAsync(studentGroup.Id!.Value))
-            .ReturnsAsync([studentGroup.Id!.Value, firstStudentGroupId, secondStudentGroupId]);
+        _studentGroupRepositoryMock.Setup(r => r.GetStudentGroupTreeIdsAsync(new[] { studentGroup.Id!.Value }))
+            .ReturnsAsync(new Dictionary<Guid, List<Guid>>()
+            {
+                { studentGroup.Id!.Value, [studentGroup.Id!.Value, firstStudentGroupId, secondStudentGroupId] }
+            });
 
         _lessonRepositoryMock.SetupSequence(r => r.SearchAsync(It.IsAny<LessonSearchModel>()))
             .ReturnsAsync([])
@@ -378,7 +401,7 @@ public class LessonServiceTests
                 new Lesson
                 {
                     Id = firstExpectedLessonId,
-                    StudentGroupId = firstStudentGroupId,
+                    StudentGroups = [new StudentGroup { Id = firstStudentGroupId }],
                     DateWithTimeInterval = new DateWithTimeInterval(new DateOnly(2026, 9, 7),
                         new TimeInterval(new TimeOnly(9, 0), new TimeOnly(10, 30))),
                     FlexibilityType = LessonFlexibilityType.Fixed,
@@ -392,7 +415,7 @@ public class LessonServiceTests
                 new Lesson
                 {
                     Id = secondExpectedLessonId,
-                    StudentGroupId = studentGroup.Id!.Value,
+                    StudentGroups = [new StudentGroup { Id = studentGroup.Id!.Value }],
                     DateWithTimeInterval = new DateWithTimeInterval(new DateOnly(2026, 9, 7),
                         new TimeInterval(new TimeOnly(10, 0), new TimeOnly(11, 30))),
                     FlexibilityType = LessonFlexibilityType.Fixed,
@@ -406,7 +429,7 @@ public class LessonServiceTests
                 new Lesson
                 {
                     Id = thirdExpectedLessonId,
-                    StudentGroupId = secondStudentGroupId,
+                    StudentGroups = [new StudentGroup { Id = secondStudentGroupId }],
                     DateWithTimeInterval = new DateWithTimeInterval(new DateOnly(2026, 9, 7),
                         new TimeInterval(new TimeOnly(11, 0), new TimeOnly(12, 30))),
                     FlexibilityType = LessonFlexibilityType.Fixed,
@@ -432,21 +455,27 @@ public class LessonServiceTests
         Assert.Equal(4, actualLessons.Count);
 
         Assert.Equal(2, actualLessons.First().ValidationMessages.Length);
-        Assert.Contains(actualLessons.First().ValidationMessages, x => x.Code == LessonValidationCode.MismatchedCyphers);
-        Assert.Contains(actualLessons.First().ValidationMessages, x => x.Code == LessonValidationCode.MismatchedSemesterNumber);
+        Assert.Contains(actualLessons.First().ValidationMessages,
+            x => x.Code == LessonValidationCode.MismatchedCyphers);
+        Assert.Contains(actualLessons.First().ValidationMessages,
+            x => x.Code == LessonValidationCode.MismatchedSemesterNumber);
 
         Assert.Single(actualLessons[1].ValidationMessages);
         Assert.Contains(actualLessons[1].ValidationMessages, x =>
-            x.Code == LessonValidationCode.FixedLessonTypeConflictByGroup && x.Payload.AffectedByLessonId == secondExpectedLessonId);
+            x.Code == LessonValidationCode.FixedLessonTypeConflictByGroup &&
+            x.Payload.AffectedByLessonId == secondExpectedLessonId);
 
         Assert.Equal(2, actualLessons[2].ValidationMessages.Length);
         Assert.Contains(actualLessons[2].ValidationMessages, x =>
-            x.Code == LessonValidationCode.FixedLessonTypeConflictByGroup && x.Payload.AffectedByLessonId == firstExpectedLessonId);
+            x.Code == LessonValidationCode.FixedLessonTypeConflictByGroup &&
+            x.Payload.AffectedByLessonId == firstExpectedLessonId);
         Assert.Contains(actualLessons[2].ValidationMessages, x =>
-            x.Code == LessonValidationCode.FixedLessonTypeConflictByGroup && x.Payload.AffectedByLessonId == thirdExpectedLessonId);
+            x.Code == LessonValidationCode.FixedLessonTypeConflictByGroup &&
+            x.Payload.AffectedByLessonId == thirdExpectedLessonId);
 
         Assert.Single(actualLessons[3].ValidationMessages);
         Assert.Contains(actualLessons[3].ValidationMessages, x =>
-            x.Code == LessonValidationCode.FixedLessonTypeConflictByGroup && x.Payload.AffectedByLessonId == secondExpectedLessonId);
+            x.Code == LessonValidationCode.FixedLessonTypeConflictByGroup &&
+            x.Payload.AffectedByLessonId == secondExpectedLessonId);
     }
 }

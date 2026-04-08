@@ -8,7 +8,7 @@ public interface ILessonValidationService
 {
     Task<LessonValidationResult> ValidateAsync(Lesson lesson);
 
-    Task<LessonWeekConflictDto[]> FillValidationMessages(Lesson[] lessons);
+    Task<LessonSeriesConflictDto[]> FillValidationMessages(Lesson[] lessons);
 
     Task RemoveValidationMessages(Guid[] lessonIds, LessonValidationCode[] validationCodes);
 }

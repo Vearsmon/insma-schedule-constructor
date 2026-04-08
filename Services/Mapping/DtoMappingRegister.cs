@@ -1,6 +1,7 @@
 ﻿using Domain.Dto;
 using Domain.Dto.RegistryDto;
 using Domain.Dto.SaveDto;
+using Domain.Dto.ShortDto;
 using Domain.Dto.ViewDto;
 using Domain.Models;
 using Domain.Models.RegistryItemModels;
@@ -13,26 +14,62 @@ public static partial class DtoMappingRegister
 {
     #region AcademicDiscipline
 
+    [UserMapping(Default = true)]
+    public static AcademicDisciplineLessonBatchInfoDto? Map(AcademicDisciplineLessonBatchInfo? model)
+    {
+        var dto = MapModelToDto(model);
+        if (dto != null && model != null)
+        {
+            dto.StudentGroupIds = model.StudentGroups.Select(x => x.Id!.Value).ToArray();
+        }
+        return dto;
+    }
+
+    [UserMapping(Default = true)]
+    public static AcademicDisciplineLessonBatchInfo? Map(AcademicDisciplineLessonBatchInfoDto? dto)
+    {
+        var model = MapDtoToModel(dto);
+        if (model != null && dto != null)
+        {
+            model.StudentGroups = dto.StudentGroupIds.Select(x => new StudentGroup { Id = x }).ToArray();
+        }
+        return model;
+    }
+
     [MapperIgnoreSource(nameof(AcademicDiscipline.ScheduleId))]
     [MapperIgnoreSource(nameof(AcademicDiscipline.Schedule))]
     public static partial AcademicDisciplineViewDto? Map(AcademicDiscipline? model);
 
     [MapperIgnoreTarget(nameof(AcademicDiscipline.Schedule))]
-    public static partial AcademicDiscipline? Map(SaveAcademicDisciplineDto dto);
+    public static partial AcademicDiscipline? Map(SaveAcademicDisciplineDto? dto);
 
-    public static partial AcademicDisciplinePayload? Map(AcademicDisciplinePayloadDto dto);
+    public static partial AcademicDisciplinePayload? Map(AcademicDisciplinePayloadDto? dto);
 
-    [MapperIgnoreSource(nameof(AcademicDisciplineLessonBatchInfo.StudentGroup))]
+    public static partial AcademicDisciplineRegistryItemDto? Map(AcademicDisciplineRegistryItem? item);
+
     [MapperIgnoreSource(nameof(AcademicDisciplineLessonBatchInfo.Teacher))]
     [MapperIgnoreSource(nameof(AcademicDisciplineLessonBatchInfo.Room))]
-    public static partial AcademicDisciplineLessonBatchInfoDto? Map(AcademicDisciplineLessonBatchInfo dto);
+    [MapperIgnoreSource(nameof(AcademicDisciplineLessonBatchInfo.StudentGroups))]
+    [MapperIgnoreTarget(nameof(AcademicDisciplineLessonBatchInfoDto.StudentGroupIds))]
+    private static partial AcademicDisciplineLessonBatchInfoDto? MapModelToDto(AcademicDisciplineLessonBatchInfo? dto);
 
-    [MapperIgnoreTarget(nameof(AcademicDisciplineLessonBatchInfo.StudentGroup))]
+    [MapperIgnoreSource(nameof(AcademicDisciplineLessonBatchInfoDto.StudentGroupIds))]
     [MapperIgnoreTarget(nameof(AcademicDisciplineLessonBatchInfo.Teacher))]
     [MapperIgnoreTarget(nameof(AcademicDisciplineLessonBatchInfo.Room))]
-    public static partial AcademicDisciplineLessonBatchInfo? Map(AcademicDisciplineLessonBatchInfoDto dto);
+    [MapperIgnoreTarget(nameof(AcademicDisciplineLessonBatchInfo.StudentGroups))]
+    private static partial AcademicDisciplineLessonBatchInfo? MapDtoToModel(AcademicDisciplineLessonBatchInfoDto? dto);
 
-    public static partial AcademicDisciplineRegistryItemDto Map(AcademicDisciplineRegistryItem item);
+    [MapperIgnoreSource(nameof(AcademicDiscipline.ScheduleId))]
+    [MapperIgnoreSource(nameof(AcademicDiscipline.Schedule))]
+    [MapperIgnoreSource(nameof(AcademicDiscipline.Cypher))]
+    [MapperIgnoreSource(nameof(AcademicDiscipline.SemesterNumber))]
+    [MapperIgnoreSource(nameof(AcademicDiscipline.AcademicDisciplineTargetType))]
+    [MapperIgnoreSource(nameof(AcademicDiscipline.AllowedLessonTypes))]
+    [MapperIgnoreSource(nameof(AcademicDiscipline.LecturePayload))]
+    [MapperIgnoreSource(nameof(AcademicDiscipline.PracticePayload))]
+    [MapperIgnoreSource(nameof(AcademicDiscipline.LabPayload))]
+    [MapperIgnoreSource(nameof(AcademicDiscipline.Comment))]
+    public static partial AcademicDisciplineShortDto? MapToRootDto(AcademicDiscipline? item);
 
     #endregion
 
@@ -40,30 +77,57 @@ public static partial class DtoMappingRegister
 
     public static partial Campus? Map(SaveCampusDto? dto);
 
-    public static partial CampusRegistryItemDto Map(CampusRegistryItem item);
+    public static partial CampusRegistryItemDto? Map(CampusRegistryItem? item);
+
+    public static partial CampusShortDto? MapShort(Campus? model);
 
     #endregion
 
     #region Lesson
 
+    [UserMapping(Default = true)]
+    public static LessonViewDto? Map(Lesson? model)
+    {
+        var dto = MapToDto(model);
+        if (model != null && dto != null)
+        {
+            dto.StudentGroupIds = model.StudentGroups.Select(x => x.Id!.Value).ToArray();
+        }
+        return dto;
+    }
+
+    [UserMapping(Default = true)]
+    public static Lesson? Map(SaveLessonDto? dto)
+    {
+        var model = MapToModel(dto);
+        if (dto != null && model != null)
+        {
+            model.StudentGroups = dto.StudentGroupIds.Select(x => new StudentGroup { Id = x }).ToArray();
+        }
+        return model;
+    }
+
+    public static partial LessonRegistryItemDto? Map(LessonRegistryItem? item);
+
+    public static partial LessonShortDto? MapShort(Lesson? model);
+
     [MapperIgnoreSource(nameof(Lesson.ScheduleId))]
     [MapperIgnoreSource(nameof(Lesson.Schedule))]
     [MapperIgnoreSource(nameof(Lesson.AcademicDiscipline))]
-    [MapperIgnoreSource(nameof(Lesson.StudentGroup))]
     [MapperIgnoreSource(nameof(Lesson.Teacher))]
     [MapperIgnoreSource(nameof(Lesson.Room))]
-    public static partial LessonViewDto? Map(Lesson? model);
+    [MapperIgnoreSource(nameof(Lesson.StudentGroups))]
+    [MapperIgnoreTarget(nameof(LessonViewDto.StudentGroupIds))]
+    private static partial LessonViewDto? MapToDto(Lesson? model);
 
+    [MapperIgnoreSource(nameof(SaveLessonDto.StudentGroupIds))]
     [MapperIgnoreTarget(nameof(Lesson.Schedule))]
     [MapperIgnoreTarget(nameof(Lesson.AcademicDiscipline))]
-    [MapperIgnoreTarget(nameof(Lesson.StudentGroup))]
     [MapperIgnoreTarget(nameof(Lesson.Teacher))]
     [MapperIgnoreTarget(nameof(Lesson.Room))]
     [MapperIgnoreTarget(nameof(Lesson.ValidationMessages))]
-    [MapValue(nameof(Lesson.CreatedFromDiscipline), false)]
-    public static partial Lesson? Map(SaveLessonDto? dto);
-
-    public static partial LessonRegistryItemDto Map(LessonRegistryItem item);
+    [MapperIgnoreTarget(nameof(Lesson.StudentGroups))]
+    private static partial Lesson? MapToModel(SaveLessonDto? dto);
 
     #endregion
 
@@ -75,13 +139,17 @@ public static partial class DtoMappingRegister
     [MapperIgnoreTarget(nameof(Room.Campus))]
     public static partial Room? Map(SaveRoomDto? dto);
 
+    public static partial RoomRegistryItemDto? Map(RoomRegistryItem? item);
+
     #endregion
 
     #region Schedule
 
     public static partial Schedule? Map(SaveScheduleDto? dto);
 
-    public static partial ScheduleRegistryItemDto Map(ScheduleRegistryItem item);
+    public static partial ScheduleRegistryItemDto? Map(ScheduleRegistryItem? item);
+
+    public static partial ScheduleShortDto? MapShort(Schedule? model);
 
     #endregion
 
@@ -103,7 +171,7 @@ public static partial class DtoMappingRegister
     [MapperIgnoreSource(nameof(StudentGroup.SemesterNumber))]
     [MapperIgnoreSource(nameof(StudentGroup.Cypher))]
     [MapperIgnoreSource(nameof(StudentGroup.StudentGroupType))]
-    public static partial StudentGroupShortViewDto? MapShort(StudentGroup? model);
+    public static partial StudentGroupShortDto? MapShort(StudentGroup? model);
 
     [MapperIgnoreSource(nameof(SaveStudentGroupDto.ChildIds))]
     [MapperIgnoreTarget(nameof(StudentGroup.Schedule))]
@@ -111,7 +179,7 @@ public static partial class DtoMappingRegister
     [MapperIgnoreTarget(nameof(StudentGroup.Children))]
     public static partial StudentGroup? Map(SaveStudentGroupDto? dto);
 
-    public static partial StudentGroupRegistryItemDto Map(StudentGroupRegistryItem item);
+    public static partial StudentGroupRegistryItemDto? Map(StudentGroupRegistryItem? item);
 
     #endregion
 
@@ -125,13 +193,18 @@ public static partial class DtoMappingRegister
     [MapperIgnoreTarget(nameof(Teacher.User))]
     public static partial Teacher? Map(SaveTeacherDto? dto);
 
-    public static partial TeacherRegistryItemDto Map(TeacherRegistryItem item);
+    public static partial TeacherRegistryItemDto? Map(TeacherRegistryItem? item);
+
+    [MapperIgnoreSource(nameof(Teacher.UserId))]
+    [MapperIgnoreSource(nameof(Teacher.User))]
+    [MapperIgnoreSource(nameof(Teacher.Contacts))]
+    public static partial TeacherShortDto? MapShort(Teacher? model);
 
     #endregion
 
     #region TeacherPreference
 
-    public static partial TeacherPreferenceRegistryItemDto Map(TeacherPreferenceRegistryItem item);
+    public static partial TeacherPreferenceRegistryItemDto? Map(TeacherPreferenceRegistryItem? item);
 
     #endregion
 }

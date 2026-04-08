@@ -3,6 +3,7 @@ using Dal.RegistryRepositories;
 using Dal.RegistryRepositories.AcademicDiscipline;
 using Dal.RegistryRepositories.Campus;
 using Dal.RegistryRepositories.Lesson;
+using Dal.RegistryRepositories.Room;
 using Dal.RegistryRepositories.Schedule;
 using Dal.RegistryRepositories.StudentGroup;
 using Dal.RegistryRepositories.Teacher;
@@ -14,7 +15,6 @@ using Dal.Repositories.Lessons;
 using Dal.Repositories.LessonValidationMessages;
 using Dal.Repositories.Rooms;
 using Dal.Repositories.Schedules;
-using Dal.Repositories.ScheduleSettings;
 using Dal.Repositories.StudentGroups;
 using Dal.Repositories.Students;
 using Dal.Repositories.TeacherPreferences;
@@ -68,6 +68,10 @@ public static class ServiceCollectionExtension
             .AddScoped<IRoomRepository, RoomRepository>()
             .AddScoped<IRepositoryMapper<DbRoom, Room>, RoomMapper>()
             .AddScoped<IPredicateBuilder<DbRoom, RoomSearchModel>, RoomPredicateBuilder>()
+            .AddScoped<IRoomRegistryRepository, RoomRegistryRepository>()
+            .AddScoped<IReadonlyRepositoryMapper<DbRoom, RoomRegistryItem>, RoomRegistryMapper>()
+            .AddScoped<IRegistryRepositoryOrderer<DbRoom, RoomRegistryInternalSearchModel>, RoomRegistryOrderer>()
+            .AddScoped<IPredicateBuilder<DbRoom, RoomRegistryInternalSearchModel>, RoomRegistryPredicateBuilder>()
 
             .AddScoped<IScheduleRepository, ScheduleRepository>()
             .AddScoped<IRepositoryMapper<DbSchedule, Schedule>, ScheduleMapper>()
@@ -76,10 +80,6 @@ public static class ServiceCollectionExtension
             .AddScoped<IReadonlyRepositoryMapper<DbSchedule, ScheduleRegistryItem>, ScheduleRegistryMapper>()
             .AddScoped<IRegistryRepositoryOrderer<DbSchedule, ScheduleRegistryInternalSearchModel>, ScheduleRegistryOrderer>()
             .AddScoped<IPredicateBuilder<DbSchedule, ScheduleRegistryInternalSearchModel>, ScheduleRegistryPredicateBuilder>()
-
-            .AddScoped<IScheduleSettingsRepository, ScheduleSettingsRepository>()
-            .AddScoped<IRepositoryMapper<DbScheduleSettings, ScheduleSettings>, ScheduleSettingsMapper>()
-            .AddScoped<IPredicateBuilder<DbScheduleSettings, ScheduleSettingsSearchModel>, ScheduleSettingsPredicateBuilder>()
 
             .AddScoped<IStudentGroupRepository, StudentGroupRepository>()
             .AddScoped<IRepositoryMapper<DbStudentGroup, StudentGroup>, StudentGroupMapper>()

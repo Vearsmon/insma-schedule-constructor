@@ -36,14 +36,9 @@ public class DbLesson : IDbEntityWithId
     public AcademicDisciplineType? AcademicDisciplineType { get; set; }
 
     /// <summary>
-    /// Академическая группа
+    /// Академические группы
     /// </summary>
-    public Guid StudentGroupId { get; set; }
-
-    /// <summary>
-    /// Академическая группа
-    /// </summary>
-    public DbStudentGroup StudentGroup { get; set; } = null!;
+    public ICollection<DbStudentGroup> StudentGroups { get; set; } = [];
 
     /// <summary>
     /// Преподаватель
@@ -97,11 +92,6 @@ public class DbLesson : IDbEntityWithId
     /// Занятие допускает совмещение
     /// </summary>
     public bool AllowCombining { get; set; }
-
-    /// <summary>
-    /// Занятие создано через определение дисциплины
-    /// </summary>
-    public bool CreatedFromDiscipline { get; set; }
 
     /// <summary>
     /// Сообщения валидации

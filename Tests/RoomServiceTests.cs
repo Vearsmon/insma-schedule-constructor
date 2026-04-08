@@ -1,4 +1,5 @@
 ﻿using AutoFixture;
+using Dal.RegistryRepositories.Room;
 using Dal.Repositories.Campuses;
 using Dal.Repositories.Rooms;
 using Domain.Dto.SaveDto;
@@ -14,10 +15,12 @@ public class RoomServiceTests
     private readonly Fixture _fixture = new();
 
     private readonly Mock<IRoomRepository> _roomRepositoryMock = new();
+    private readonly Mock<IRoomRegistryRepository> _roomRegistryRepositoryMock = new();
     private readonly Mock<ICampusRepository> _campusRepositoryMock = new();
 
     private RoomService CreateService() => new(
         _roomRepositoryMock.Object,
+        _roomRegistryRepositoryMock.Object,
         _campusRepositoryMock.Object
     );
 

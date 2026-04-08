@@ -1,4 +1,6 @@
-﻿namespace Domain.Dto;
+﻿using Domain.Dto.ShortDto;
+
+namespace Domain.Dto;
 
 public class RoomTreeDto
 {

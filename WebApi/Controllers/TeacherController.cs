@@ -1,6 +1,7 @@
 ﻿using Domain.Dto.ErrorDto;
 using Domain.Dto.RegistryDto;
 using Domain.Dto.SaveDto;
+using Domain.Dto.ShortDto;
 using Domain.Dto.ViewDto;
 using Domain.Models.RegistrySearchModels;
 using Domain.Services;
@@ -12,6 +13,24 @@ namespace WebApi.Controllers;
 [Route("api/teacher")]
 public class TeacherController(ITeacherService teacherService) : ApiController
 {
+    /// <summary>
+    /// Получить список преподавателей
+    /// </summary>
+    /// <returns>Список кратких моделей преподавателей</returns>
+    /// <response code="200">Поиск реестра выполнился успешно</response>
+    /// <response code="400">Поиск реестра завершился с ошибкой валидации входных данных</response>
+    /// <response code="401">Не удалось выполнить авторизацию</response>
+    /// <response code="403">Поиск реестра завершился с ошибкой валидации прав доступа</response>
+    /// <response code="500">Поиск реестра завершился с ошибкой</response>
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(TeacherShortDto[]), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationErrorDto), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorDto), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ErrorDto), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ErrorDto), StatusCodes.Status500InternalServerError)]
+    [HttpGet("search-short")]
+    public async Task<TeacherShortDto[]> SearchShort() => await teacherService.SearchShortAsync();
+
     /// <summary>
     /// Получить реестр данных преподавателей
     /// </summary>
@@ -70,5 +89,26 @@ public class TeacherController(ITeacherService teacherService) : ApiController
     public async Task Save([FromBody] SaveTeacherDto saveTeacherDto)
     {
         await teacherService.SaveAsync(saveTeacherDto);
+    }
+
+    /// <summary>
+    /// Удалить данные преподавателя
+    /// </summary>
+    /// <param name="teacherId">Идентификатор преподавателя</param>
+    /// <response code="200">Удаление данных выполнилось успешно</response>
+    /// <response code="400">Удаление данных завершилось с ошибкой валидации входных данных</response>
+    /// <response code="401">Не удалось выполнить авторизацию</response>
+    /// <response code="403">Удаление данных завершилось с ошибкой валидации прав доступа</response>
+    /// <response code="500">Удаление данных завершилось с ошибкой</response>
+    [AllowAnonymous]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationErrorDto), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorDto), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ErrorDto), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ErrorDto), StatusCodes.Status500InternalServerError)]
+    [HttpDelete("delete")]
+    public async Task Delete(Guid teacherId)
+    {
+        await teacherService.DeleteAsync(teacherId);
     }
 }

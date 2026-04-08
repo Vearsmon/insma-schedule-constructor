@@ -9,7 +9,7 @@ public class SaveLessonDto
     public Guid ScheduleId { get; set; }
     public Guid? AcademicDisciplineId { get; set; }
     public AcademicDisciplineType? AcademicDisciplineType { get; set; }
-    public Guid StudentGroupId { get; set; }
+    public Guid[] StudentGroupIds { get; set; } = [];
     public Guid? TeacherId { get; set; }
     public Guid? RoomId { get; set; }
     public DateWithTimeInterval? DateWithTimeInterval { get; set; }

@@ -2,7 +2,7 @@
 
 namespace Domain.Dto;
 
-public class LessonWeekConflictDto
+public class LessonSeriesConflictDto
 {
     public DayOfWeekTimeInterval DayOfWeekTimeInterval { get; set; } = null!;
     public string Message { get; set; } = null!;

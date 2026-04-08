@@ -53,16 +53,6 @@ public class DbAcademicDiscipline : IDbEntityWithId
     public int? LectureTotalHoursCount { get; set; }
 
     /// <summary>
-    /// Число учебных недель, в течение которых осваиваются лекционные занятия
-    /// </summary>
-    public int? LectureStudyWeeksCount { get; set; }
-
-    /// <summary>
-    /// Требуемое число лекционных занятий в неделю
-    /// </summary>
-    public int? LectureLessonsPerWeekCount { get; set; }
-
-    /// <summary>
     /// Информация о созданных через академическую дисциплину лекционных занятиях
     /// </summary>
     public Guid? AcademicDisciplineLectureLessonBatchInfoId { get; set; }
@@ -83,16 +73,6 @@ public class DbAcademicDiscipline : IDbEntityWithId
     public int? PracticeTotalHoursCount { get; set; }
 
     /// <summary>
-    /// Число учебных недель, в течение которых осваиваются практические занятия
-    /// </summary>
-    public int? PracticeStudyWeeksCount { get; set; }
-
-    /// <summary>
-    /// Требуемое число практических занятий в неделю
-    /// </summary>
-    public int? PracticeLessonsPerWeekCount { get; set; }
-
-    /// <summary>
     /// Информация о созданных через академическую дисциплину практических занятиях
     /// </summary>
     public Guid? AcademicDisciplinePracticeLessonBatchInfoId { get; set; }
@@ -111,16 +91,6 @@ public class DbAcademicDiscipline : IDbEntityWithId
     /// Требуемое количество часов освоения лабораторных занятий
     /// </summary>
     public int? LabTotalHoursCount { get; set; }
-
-    /// <summary>
-    /// Число учебных недель, в течение которых осваиваются лабораторные занятия
-    /// </summary>
-    public int? LabStudyWeeksCount { get; set; }
-
-    /// <summary>
-    /// Требуемое число лабораторных занятий в неделю
-    /// </summary>
-    public int? LabLessonsPerWeekCount { get; set; }
 
     /// <summary>
     /// Информация о созданных через академическую дисциплину лабораторных занятиях

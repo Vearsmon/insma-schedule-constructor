@@ -16,7 +16,6 @@ public static class ServiceCollectionExtension
             .AddScoped<ILessonValidationService, LessonValidationService>()
             .AddScoped<IRoomService, RoomService>()
             .AddScoped<IScheduleService, ScheduleService>()
-            .AddScoped<IScheduleSettingsService, ScheduleSettingsService>()
             .AddScoped<IStudentGroupService, StudentGroupService>()
             .AddScoped<IStudentService, StudentService>()
             .AddScoped<IAcademicDisciplineService, AcademicDisciplineService>()
