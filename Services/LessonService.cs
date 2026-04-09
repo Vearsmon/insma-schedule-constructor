@@ -168,15 +168,15 @@ public class LessonService(
             switch (lessonTypeToSave)
             {
                 case AcademicDisciplineType.Lecture:
-                    lessonsToSave.AddRange(GetBatchLessonsToAdd(academicDiscipline.LecturePayload!.LessonBatchInfo!,
+                    lessonsToSave.AddRange(GetBatchLessonsToAdd(academicDiscipline.LecturePayload?.LessonBatchInfo,
                         AcademicDisciplineType.Lecture));
                     break;
                 case AcademicDisciplineType.Lab:
-                    lessonsToSave.AddRange(GetBatchLessonsToAdd(academicDiscipline.LabPayload!.LessonBatchInfo!,
+                    lessonsToSave.AddRange(GetBatchLessonsToAdd(academicDiscipline.LabPayload?.LessonBatchInfo!,
                         AcademicDisciplineType.Lab));
                     break;
                 case AcademicDisciplineType.Practice:
-                    lessonsToSave.AddRange(GetBatchLessonsToAdd(academicDiscipline.PracticePayload!.LessonBatchInfo!,
+                    lessonsToSave.AddRange(GetBatchLessonsToAdd(academicDiscipline.PracticePayload?.LessonBatchInfo,
                         AcademicDisciplineType.Practice));
                     break;
             }
@@ -186,8 +186,12 @@ public class LessonService(
 
         return;
 
-        Lesson[] GetBatchLessonsToAdd(AcademicDisciplineLessonBatchInfo lessonBatchInfo, AcademicDisciplineType type)
+        Lesson[] GetBatchLessonsToAdd(AcademicDisciplineLessonBatchInfo? lessonBatchInfo, AcademicDisciplineType type)
         {
+            if (lessonBatchInfo == null)
+            {
+                return [];
+            }
             var dates = DateOnlyHelper.GetDatesInIntervalByDaysOfWeek(
                 lessonBatchInfo.DateInterval,
                 lessonBatchInfo.DayOfWeekTimeIntervals.Select(x => x.DayOfWeek).ToArray(),
