@@ -77,25 +77,9 @@ namespace Dal.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_practice_lessons_allowed");
 
-                    b.Property<int?>("LabLessonsPerWeekCount")
-                        .HasColumnType("integer")
-                        .HasColumnName("lab_lessons_per_week_count");
-
-                    b.Property<int?>("LabStudyWeeksCount")
-                        .HasColumnType("integer")
-                        .HasColumnName("lab_study_weeks_count");
-
                     b.Property<int?>("LabTotalHoursCount")
                         .HasColumnType("integer")
                         .HasColumnName("lab_total_hours_count");
-
-                    b.Property<int?>("LectureLessonsPerWeekCount")
-                        .HasColumnType("integer")
-                        .HasColumnName("lecture_lessons_per_week_count");
-
-                    b.Property<int?>("LectureStudyWeeksCount")
-                        .HasColumnType("integer")
-                        .HasColumnName("lecture_study_weeks_count");
 
                     b.Property<int?>("LectureTotalHoursCount")
                         .HasColumnType("integer")
@@ -106,14 +90,6 @@ namespace Dal.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)")
                         .HasColumnName("name");
-
-                    b.Property<int?>("PracticeLessonsPerWeekCount")
-                        .HasColumnType("integer")
-                        .HasColumnName("practice_lessons_per_week_count");
-
-                    b.Property<int?>("PracticeStudyWeeksCount")
-                        .HasColumnType("integer")
-                        .HasColumnName("practice_study_weeks_count");
 
                     b.Property<int?>("PracticeTotalHoursCount")
                         .HasColumnType("integer")
@@ -185,10 +161,6 @@ namespace Dal.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("room_id");
 
-                    b.Property<Guid>("StudentGroupId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("student_group_id");
-
                     b.Property<Guid?>("TeacherId")
                         .HasColumnType("uuid")
                         .HasColumnName("teacher_id");
@@ -198,9 +170,6 @@ namespace Dal.Migrations
 
                     b.HasIndex("RoomId")
                         .HasDatabaseName("ix_academic_discipline_lesson_batch_info_room_id");
-
-                    b.HasIndex("StudentGroupId")
-                        .HasDatabaseName("ix_academic_discipline_lesson_batch_info_student_group_id");
 
                     b.HasIndex("TeacherId")
                         .HasDatabaseName("ix_academic_discipline_lesson_batch_info_teacher_id");
@@ -246,10 +215,6 @@ namespace Dal.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("allow_combining");
 
-                    b.Property<bool>("CreatedFromDiscipline")
-                        .HasColumnType("boolean")
-                        .HasColumnName("created_from_discipline");
-
                     b.Property<DateOnly?>("Date")
                         .HasColumnType("Date")
                         .HasColumnName("date");
@@ -270,10 +235,6 @@ namespace Dal.Migrations
                     b.Property<Guid>("ScheduleId")
                         .HasColumnType("uuid")
                         .HasColumnName("schedule_id");
-
-                    b.Property<Guid>("StudentGroupId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("student_group_id");
 
                     b.Property<Guid?>("TeacherId")
                         .HasColumnType("uuid")
@@ -298,9 +259,6 @@ namespace Dal.Migrations
 
                     b.HasIndex("ScheduleId")
                         .HasDatabaseName("ix_lesson_schedule_id");
-
-                    b.HasIndex("StudentGroupId")
-                        .HasDatabaseName("ix_lesson_student_group_id");
 
                     b.HasIndex("TeacherId")
                         .HasDatabaseName("ix_lesson_teacher_id");
@@ -434,73 +392,28 @@ namespace Dal.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<DateOnly>("EndDate")
+                        .HasColumnType("Date")
+                        .HasColumnName("end_date");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)")
                         .HasColumnName("name");
 
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("Date")
+                        .HasColumnName("start_date");
+
+                    b.Property<bool>("StartsWithEvenWeek")
+                        .HasColumnType("boolean")
+                        .HasColumnName("starts_with_even_week");
+
                     b.HasKey("Id")
                         .HasName("pk_schedule");
 
                     b.ToTable("schedule", (string)null);
-                });
-
-            modelBuilder.Entity("Dal.Entities.DbScheduleSettings", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<bool>("IgnoreMultipleStudentGroupLessons")
-                        .HasColumnType("boolean")
-                        .HasColumnName("ignore_multiple_student_group_lessons");
-
-                    b.Property<bool>("IgnoreMultipleTeacherLessons")
-                        .HasColumnType("boolean")
-                        .HasColumnName("ignore_multiple_teacher_lessons");
-
-                    b.Property<bool>("IgnoreSequentialLectures")
-                        .HasColumnType("boolean")
-                        .HasColumnName("ignore_sequential_lectures");
-
-                    b.Property<bool>("IgnoreSequentialSeminars")
-                        .HasColumnType("boolean")
-                        .HasColumnName("ignore_sequential_seminars");
-
-                    b.Property<bool>("IgnoreTeacherPreferences")
-                        .HasColumnType("boolean")
-                        .HasColumnName("ignore_teacher_preferences");
-
-                    b.Property<Guid>("ScheduleId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("schedule_id");
-
-                    b.Property<int>("StudentMaxLessonsCount")
-                        .HasColumnType("integer")
-                        .HasColumnName("student_max_lessons_count");
-
-                    b.Property<int>("StudentTimeWindowMinutes")
-                        .HasColumnType("integer")
-                        .HasColumnName("student_time_window_minutes");
-
-                    b.Property<int>("TeacherMaxLessonsCount")
-                        .HasColumnType("integer")
-                        .HasColumnName("teacher_max_lessons_count");
-
-                    b.Property<int>("TeacherTimeWindowMinutes")
-                        .HasColumnType("integer")
-                        .HasColumnName("teacher_time_window_minutes");
-
-                    b.HasKey("Id")
-                        .HasName("pk_schedule_settings");
-
-                    b.HasIndex("ScheduleId")
-                        .IsUnique()
-                        .HasDatabaseName("ix_schedule_settings_schedule_id");
-
-                    b.ToTable("schedule_settings", (string)null);
                 });
 
             modelBuilder.Entity("Dal.Entities.DbStudent", b =>
@@ -700,6 +613,44 @@ namespace Dal.Migrations
                     b.ToTable("user", (string)null);
                 });
 
+            modelBuilder.Entity("DbLessonDbStudentGroup", b =>
+                {
+                    b.Property<Guid>("DbLessonId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("lesson_id");
+
+                    b.Property<Guid>("StudentGroupsId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("student_groups_id");
+
+                    b.HasKey("DbLessonId", "StudentGroupsId")
+                        .HasName("pk_lesson_student_group_dictionary_string_object");
+
+                    b.HasIndex("StudentGroupsId")
+                        .HasDatabaseName("ix_lesson_student_group_dictionary_string_object_student_");
+
+                    b.ToTable("lesson_student_group (_dictionary<string, object>)", (string)null);
+                });
+
+            modelBuilder.Entity("lesson_batch_info_student_group", b =>
+                {
+                    b.Property<Guid>("lesson_batch_info_id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("lesson_batch_info_id");
+
+                    b.Property<Guid>("student_groups_id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("student_groups_id");
+
+                    b.HasKey("lesson_batch_info_id", "student_groups_id")
+                        .HasName("pk_lesson_batch_info_student_group_dictionary_string_object");
+
+                    b.HasIndex("student_groups_id")
+                        .HasDatabaseName("ix_lesson_batch_info_student_group_dictionary_string_object");
+
+                    b.ToTable("lesson_batch_info_student_group (_dictionary<string, object>)", (string)null);
+                });
+
             modelBuilder.Entity("Dal.Entities.DbAcademicDiscipline", b =>
                 {
                     b.HasOne("Dal.Entities.DbAcademicDisciplineLessonBatchInfo", "AcademicDisciplineLabLessonBatchInfo")
@@ -744,13 +695,6 @@ namespace Dal.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("fk_academic_discipline_lesson_batch_info_db_room_room_id");
 
-                    b.HasOne("Dal.Entities.DbStudentGroup", "StudentGroup")
-                        .WithMany()
-                        .HasForeignKey("StudentGroupId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_academic_discipline_lesson_batch_info_db_student_group_stud");
-
                     b.HasOne("Dal.Entities.DbTeacher", "Teacher")
                         .WithMany()
                         .HasForeignKey("TeacherId")
@@ -758,8 +702,6 @@ namespace Dal.Migrations
                         .HasConstraintName("fk_academic_discipline_lesson_batch_info_db_teacher_teacher_id");
 
                     b.Navigation("Room");
-
-                    b.Navigation("StudentGroup");
 
                     b.Navigation("Teacher");
                 });
@@ -785,13 +727,6 @@ namespace Dal.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_lesson_db_schedule_schedule_id");
 
-                    b.HasOne("Dal.Entities.DbStudentGroup", "StudentGroup")
-                        .WithMany()
-                        .HasForeignKey("StudentGroupId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_lesson_db_student_group_student_group_id");
-
                     b.HasOne("Dal.Entities.DbTeacher", "Teacher")
                         .WithMany()
                         .HasForeignKey("TeacherId")
@@ -803,8 +738,6 @@ namespace Dal.Migrations
                     b.Navigation("Room");
 
                     b.Navigation("Schedule");
-
-                    b.Navigation("StudentGroup");
 
                     b.Navigation("Teacher");
                 });
@@ -871,18 +804,6 @@ namespace Dal.Migrations
                         .HasConstraintName("fk_room_campus_campus_id");
 
                     b.Navigation("Campus");
-                });
-
-            modelBuilder.Entity("Dal.Entities.DbScheduleSettings", b =>
-                {
-                    b.HasOne("Dal.Entities.DbSchedule", "Schedule")
-                        .WithOne()
-                        .HasForeignKey("Dal.Entities.DbScheduleSettings", "ScheduleId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_schedule_settings_schedule_schedule_id");
-
-                    b.Navigation("Schedule");
                 });
 
             modelBuilder.Entity("Dal.Entities.DbStudent", b =>
@@ -965,6 +886,40 @@ namespace Dal.Migrations
                     b.Navigation("Schedule");
 
                     b.Navigation("Teacher");
+                });
+
+            modelBuilder.Entity("DbLessonDbStudentGroup", b =>
+                {
+                    b.HasOne("Dal.Entities.DbLesson", null)
+                        .WithMany()
+                        .HasForeignKey("DbLessonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_lesson_student_group_dictionary_string_object_lesson_d");
+
+                    b.HasOne("Dal.Entities.DbStudentGroup", null)
+                        .WithMany()
+                        .HasForeignKey("StudentGroupsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_lesson_student_group_dictionary_string_object_student_");
+                });
+
+            modelBuilder.Entity("lesson_batch_info_student_group", b =>
+                {
+                    b.HasOne("Dal.Entities.DbAcademicDisciplineLessonBatchInfo", null)
+                        .WithMany()
+                        .HasForeignKey("lesson_batch_info_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_lesson_batch_info_student_group_lesson_batch_info");
+
+                    b.HasOne("Dal.Entities.DbStudentGroup", null)
+                        .WithMany()
+                        .HasForeignKey("student_groups_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_lesson_batch_info_student_group_student_group");
                 });
 
             modelBuilder.Entity("Dal.Entities.DbLesson", b =>

@@ -28,7 +28,10 @@ namespace Dal.Migrations
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
-                    name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false)
+                    name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    starts_with_even_week = table.Column<bool>(type: "boolean", nullable: false),
+                    start_date = table.Column<DateOnly>(type: "Date", nullable: false),
+                    end_date = table.Column<DateOnly>(type: "Date", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -68,33 +71,6 @@ namespace Dal.Migrations
                         name: "fk_room_campus_campus_id",
                         column: x => x.campus_id,
                         principalTable: "campus",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "schedule_settings",
-                columns: table => new
-                {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
-                    schedule_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    ignore_teacher_preferences = table.Column<bool>(type: "boolean", nullable: false),
-                    ignore_sequential_lectures = table.Column<bool>(type: "boolean", nullable: false),
-                    ignore_sequential_seminars = table.Column<bool>(type: "boolean", nullable: false),
-                    student_time_window_minutes = table.Column<int>(type: "integer", nullable: false),
-                    teacher_time_window_minutes = table.Column<int>(type: "integer", nullable: false),
-                    student_max_lessons_count = table.Column<int>(type: "integer", nullable: false),
-                    teacher_max_lessons_count = table.Column<int>(type: "integer", nullable: false),
-                    ignore_multiple_student_group_lessons = table.Column<bool>(type: "boolean", nullable: false),
-                    ignore_multiple_teacher_lessons = table.Column<bool>(type: "boolean", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("pk_schedule_settings", x => x.id);
-                    table.ForeignKey(
-                        name: "fk_schedule_settings_schedule_schedule_id",
-                        column: x => x.schedule_id,
-                        principalTable: "schedule",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -179,7 +155,6 @@ namespace Dal.Migrations
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
-                    student_group_id = table.Column<Guid>(type: "uuid", nullable: false),
                     teacher_id = table.Column<Guid>(type: "uuid", nullable: true),
                     room_id = table.Column<Guid>(type: "uuid", nullable: true),
                     day_of_week_time_intervals = table.Column<string>(type: "text", nullable: false),
@@ -196,12 +171,6 @@ namespace Dal.Migrations
                         name: "fk_academic_discipline_lesson_batch_info_db_room_room_id",
                         column: x => x.room_id,
                         principalTable: "room",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "fk_academic_discipline_lesson_batch_info_db_student_group_stud",
-                        column: x => x.student_group_id,
-                        principalTable: "student_group",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
@@ -261,18 +230,12 @@ namespace Dal.Migrations
                     academic_discipline_target_type = table.Column<string>(type: "text", nullable: false),
                     is_lecture_lessons_allowed = table.Column<bool>(type: "boolean", nullable: false),
                     lecture_total_hours_count = table.Column<int>(type: "integer", nullable: true),
-                    lecture_study_weeks_count = table.Column<int>(type: "integer", nullable: true),
-                    lecture_lessons_per_week_count = table.Column<int>(type: "integer", nullable: true),
                     academic_discipline_lecture_lesson_batch_info_id = table.Column<Guid>(type: "uuid", nullable: true),
                     is_practice_lessons_allowed = table.Column<bool>(type: "boolean", nullable: false),
                     practice_total_hours_count = table.Column<int>(type: "integer", nullable: true),
-                    practice_study_weeks_count = table.Column<int>(type: "integer", nullable: true),
-                    practice_lessons_per_week_count = table.Column<int>(type: "integer", nullable: true),
                     academic_discipline_practice_lesson_batch_info_id = table.Column<Guid>(type: "uuid", nullable: true),
                     is_lab_lessons_allowed = table.Column<bool>(type: "boolean", nullable: false),
                     lab_total_hours_count = table.Column<int>(type: "integer", nullable: true),
-                    lab_study_weeks_count = table.Column<int>(type: "integer", nullable: true),
-                    lab_lessons_per_week_count = table.Column<int>(type: "integer", nullable: true),
                     academic_discipline_lab_lesson_batch_info_id = table.Column<Guid>(type: "uuid", nullable: true),
                     has_exam = table.Column<bool>(type: "boolean", nullable: false),
                     has_test = table.Column<bool>(type: "boolean", nullable: false),
@@ -308,6 +271,30 @@ namespace Dal.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "lesson_batch_info_student_group (_dictionary<string, object>)",
+                columns: table => new
+                {
+                    lesson_batch_info_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    student_groups_id = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_lesson_batch_info_student_group_dictionary_string_object", x => new { x.lesson_batch_info_id, x.student_groups_id });
+                    table.ForeignKey(
+                        name: "fk_lesson_batch_info_student_group_lesson_batch_info",
+                        column: x => x.lesson_batch_info_id,
+                        principalTable: "academic_discipline_lesson_batch_info",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_lesson_batch_info_student_group_student_group",
+                        column: x => x.student_groups_id,
+                        principalTable: "student_group",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "lesson",
                 columns: table => new
                 {
@@ -315,7 +302,6 @@ namespace Dal.Migrations
                     schedule_id = table.Column<Guid>(type: "uuid", nullable: false),
                     academic_discipline_id = table.Column<Guid>(type: "uuid", nullable: true),
                     academic_discipline_type = table.Column<string>(type: "text", nullable: true),
-                    student_group_id = table.Column<Guid>(type: "uuid", nullable: false),
                     teacher_id = table.Column<Guid>(type: "uuid", nullable: true),
                     room_id = table.Column<Guid>(type: "uuid", nullable: true),
                     date = table.Column<DateOnly>(type: "Date", nullable: true),
@@ -323,8 +309,7 @@ namespace Dal.Migrations
                     time_to = table.Column<TimeOnly>(type: "time without time zone", nullable: true),
                     flexibility_type = table.Column<string>(type: "text", nullable: false),
                     hours_cost = table.Column<int>(type: "integer", nullable: false),
-                    allow_combining = table.Column<bool>(type: "boolean", nullable: false),
-                    created_from_discipline = table.Column<bool>(type: "boolean", nullable: false)
+                    allow_combining = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -348,17 +333,35 @@ namespace Dal.Migrations
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "fk_lesson_db_student_group_student_group_id",
-                        column: x => x.student_group_id,
-                        principalTable: "student_group",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
                         name: "fk_lesson_db_teacher_teacher_id",
                         column: x => x.teacher_id,
                         principalTable: "teacher",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "lesson_student_group (_dictionary<string, object>)",
+                columns: table => new
+                {
+                    lesson_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    student_groups_id = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_lesson_student_group_dictionary_string_object", x => new { x.lesson_id, x.student_groups_id });
+                    table.ForeignKey(
+                        name: "fk_lesson_student_group_dictionary_string_object_lesson_d",
+                        column: x => x.lesson_id,
+                        principalTable: "lesson",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_lesson_student_group_dictionary_string_object_student_",
+                        column: x => x.student_groups_id,
+                        principalTable: "student_group",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -447,11 +450,6 @@ namespace Dal.Migrations
                 column: "room_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_academic_discipline_lesson_batch_info_student_group_id",
-                table: "academic_discipline_lesson_batch_info",
-                column: "student_group_id");
-
-            migrationBuilder.CreateIndex(
                 name: "ix_academic_discipline_lesson_batch_info_teacher_id",
                 table: "academic_discipline_lesson_batch_info",
                 column: "teacher_id");
@@ -472,14 +470,19 @@ namespace Dal.Migrations
                 column: "schedule_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_lesson_student_group_id",
-                table: "lesson",
-                column: "student_group_id");
-
-            migrationBuilder.CreateIndex(
                 name: "ix_lesson_teacher_id",
                 table: "lesson",
                 column: "teacher_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_lesson_batch_info_student_group_dictionary_string_object",
+                table: "lesson_batch_info_student_group (_dictionary<string, object>)",
+                column: "student_groups_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_lesson_student_group_dictionary_string_object_student_",
+                table: "lesson_student_group (_dictionary<string, object>)",
+                column: "student_groups_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_lesson_validation_message_affected_by_academic_discipline_id",
@@ -515,12 +518,6 @@ namespace Dal.Migrations
                 name: "ix_room_campus_id",
                 table: "room",
                 column: "campus_id");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_schedule_settings_schedule_id",
-                table: "schedule_settings",
-                column: "schedule_id",
-                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "ix_student_student_group_id",
@@ -570,10 +567,13 @@ namespace Dal.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "lesson_validation_message");
+                name: "lesson_batch_info_student_group (_dictionary<string, object>)");
 
             migrationBuilder.DropTable(
-                name: "schedule_settings");
+                name: "lesson_student_group (_dictionary<string, object>)");
+
+            migrationBuilder.DropTable(
+                name: "lesson_validation_message");
 
             migrationBuilder.DropTable(
                 name: "student");
@@ -585,7 +585,13 @@ namespace Dal.Migrations
                 name: "lesson");
 
             migrationBuilder.DropTable(
+                name: "student_group");
+
+            migrationBuilder.DropTable(
                 name: "academic_discipline");
+
+            migrationBuilder.DropTable(
+                name: "schedule");
 
             migrationBuilder.DropTable(
                 name: "academic_discipline_lesson_batch_info");
@@ -594,16 +600,10 @@ namespace Dal.Migrations
                 name: "room");
 
             migrationBuilder.DropTable(
-                name: "student_group");
-
-            migrationBuilder.DropTable(
                 name: "teacher");
 
             migrationBuilder.DropTable(
                 name: "campus");
-
-            migrationBuilder.DropTable(
-                name: "schedule");
 
             migrationBuilder.DropTable(
                 name: "user");

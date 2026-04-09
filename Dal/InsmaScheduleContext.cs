@@ -60,7 +60,20 @@ public class InsmaScheduleContext(DbContextOptions options) : DbContextBase(opti
     private void AcademicDisciplineLessonBatchInfoConfigure(EntityTypeBuilder<DbAcademicDisciplineLessonBatchInfo> builder)
     {
         builder.HasMany(x => x.StudentGroups)
-            .WithMany();
+            .WithMany()
+            .UsingEntity<Dictionary<string, object>>(
+                "lesson_batch_info_student_group",
+                j => j
+                    .HasOne<DbStudentGroup>()
+                    .WithMany()
+                    .HasForeignKey("student_groups_id")
+                    .HasConstraintName("fk_lesson_batch_info_student_group_student_group"),
+                j => j
+                    .HasOne<DbAcademicDisciplineLessonBatchInfo>()
+                    .WithMany()
+                    .HasForeignKey("lesson_batch_info_id")
+                    .HasConstraintName("fk_lesson_batch_info_student_group_lesson_batch_info")
+            );
 
         builder.HasOne(x => x.Teacher)
             .WithMany()
