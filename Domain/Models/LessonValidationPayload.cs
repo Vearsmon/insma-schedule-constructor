@@ -1,4 +1,5 @@
-﻿using Domain.Models.Enums;
+﻿using Domain.Models.Common;
+using Domain.Models.Enums;
 
 namespace Domain.Models;
 
@@ -58,4 +59,14 @@ public class LessonValidationPayload
     /// Оказавшее влияние пожелание преподавателя
     /// </summary>
     public TeacherPreference? AffectedByTeacherPreference { get; set; }
+
+    /// <summary>
+    /// Дата и отрезок времени, оказавшие влияние (реквизит в БД не сохраняется)
+    /// </summary>
+    public DateWithTimeInterval? DateWithTimeInterval { get; set; }
+
+    /// <summary>
+    /// День недели и отрезок времени, оказавшие влияние (реквизит в БД не сохраняется)
+    /// </summary>
+    public DayOfWeekTimeInterval? DayOfWeekTimeInterval { get; set; }
 }

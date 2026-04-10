@@ -301,6 +301,7 @@ public class LessonValidationService(
                     DayOfWeekTimeInterval = new DayOfWeekTimeInterval(lesson.DateWithTimeInterval!.Date.DayOfWeek,
                         lesson.DateWithTimeInterval.TimeInterval),
                     Message = message,
+                    ErrorType = validationMessage.ErrorType,
                 });
             }
         }

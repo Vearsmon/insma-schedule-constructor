@@ -5,6 +5,7 @@ using Dal.Repositories.Lessons;
 using Dal.Repositories.Schedules;
 using Dal.Repositories.StudentGroups;
 using Dal.Repositories.TeacherPreferences;
+using Dal.Repositories.Teachers;
 using Domain.Models;
 using Domain.Models.Common;
 using Domain.Models.Enums;
@@ -25,6 +26,7 @@ public class LessonServiceTests
     private readonly Mock<IAcademicDisciplineRepository> _academicDisciplineRepositoryMock = new();
     private readonly Mock<IStudentGroupRepository> _studentGroupRepositoryMock = new();
     private readonly Mock<IScheduleRepository> _scheduleRepositoryMock = new();
+    private readonly Mock<ITeacherRepository> _teacherRepositoryMock = new();
     private readonly Mock<ITeacherPreferenceRepository> _teacherPreferenceRepositoryMock = new();
 
     private LessonService CreateService() => new(
@@ -34,6 +36,7 @@ public class LessonServiceTests
         _academicDisciplineRepositoryMock.Object,
         _studentGroupRepositoryMock.Object,
         _scheduleRepositoryMock.Object,
+        _teacherRepositoryMock.Object,
         _teacherPreferenceRepositoryMock.Object
     );
 
