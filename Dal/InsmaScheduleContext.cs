@@ -193,10 +193,10 @@ public class InsmaScheduleContext(DbContextOptions options) : DbContextBase(opti
 
     private void StudentConfigure(EntityTypeBuilder<DbStudent> builder)
     {
-        builder.HasOne(x => x.User)
-            .WithOne()
-            .HasForeignKey<DbStudent>(x => x.UserId)
-            .OnDelete(DeleteBehavior.Restrict);
+        // builder.HasOne(x => x.User)
+        //     .WithOne()
+        //     .HasForeignKey<DbStudent>(x => x.UserId)
+        //     .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(x => x.StudentGroup)
             .WithMany()
@@ -227,10 +227,10 @@ public class InsmaScheduleContext(DbContextOptions options) : DbContextBase(opti
 
     private void TeacherConfigure(EntityTypeBuilder<DbTeacher> builder)
     {
-        builder.HasOne(x => x.User)
-            .WithOne()
-            .HasForeignKey<DbTeacher>(x => x.UserId)
-            .OnDelete(DeleteBehavior.Cascade);
+        // builder.HasOne(x => x.User)
+        //     .WithOne()
+        //     .HasForeignKey<DbTeacher>(x => x.UserId)
+        //     .OnDelete(DeleteBehavior.Cascade);
     }
 
     private void TeacherPreferenceConfigure(EntityTypeBuilder<DbTeacherPreference> builder)

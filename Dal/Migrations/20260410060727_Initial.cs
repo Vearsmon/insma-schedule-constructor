@@ -147,7 +147,7 @@ namespace Dal.Migrations
                         column: x => x.user_id,
                         principalTable: "user",
                         principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -527,8 +527,7 @@ namespace Dal.Migrations
             migrationBuilder.CreateIndex(
                 name: "ix_student_user_id",
                 table: "student",
-                column: "user_id",
-                unique: true);
+                column: "user_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_student_group_parent_id",
@@ -543,8 +542,7 @@ namespace Dal.Migrations
             migrationBuilder.CreateIndex(
                 name: "ix_teacher_user_id",
                 table: "teacher",
-                column: "user_id",
-                unique: true);
+                column: "user_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_teacher_preference_room_id",

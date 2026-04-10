@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Dal.Migrations
 {
     [DbContext(typeof(InsmaScheduleContext))]
-    [Migration("20260409212311_Initial")]
+    [Migration("20260410060727_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -447,7 +447,6 @@ namespace Dal.Migrations
                         .HasDatabaseName("ix_student_student_group_id");
 
                     b.HasIndex("UserId")
-                        .IsUnique()
                         .HasDatabaseName("ix_student_user_id");
 
                     b.ToTable("student", (string)null);
@@ -527,7 +526,6 @@ namespace Dal.Migrations
                         .HasName("pk_teacher");
 
                     b.HasIndex("UserId")
-                        .IsUnique()
                         .HasDatabaseName("ix_teacher_user_id");
 
                     b.ToTable("teacher", (string)null);
@@ -819,9 +817,9 @@ namespace Dal.Migrations
                         .HasConstraintName("fk_student_db_student_group_student_group_id");
 
                     b.HasOne("Dal.Entities.DbUser", "User")
-                        .WithOne()
-                        .HasForeignKey("Dal.Entities.DbStudent", "UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_student_db_user_user_id");
 
@@ -853,8 +851,8 @@ namespace Dal.Migrations
             modelBuilder.Entity("Dal.Entities.DbTeacher", b =>
                 {
                     b.HasOne("Dal.Entities.DbUser", "User")
-                        .WithOne()
-                        .HasForeignKey("Dal.Entities.DbTeacher", "UserId")
+                        .WithMany()
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_teacher_db_user_user_id");
