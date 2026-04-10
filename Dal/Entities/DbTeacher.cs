@@ -9,15 +9,15 @@ public class DbTeacher : IDbEntityWithId
 {
     public Guid Id { get; set; }
 
-    /// <summary>
-    /// Пользователь
-    /// </summary>
-    public Guid UserId { get; set; }
-
-    /// <summary>
-    /// Пользователь
-    /// </summary>
-    public DbUser User { get; set; } = null!;
+    // /// <summary>
+    // /// Пользователь
+    // /// </summary>
+    // public Guid UserId { get; set; }
+    //
+    // /// <summary>
+    // /// Пользователь
+    // /// </summary>
+    // public DbUser User { get; set; } = null!;
 
     /// <summary>
     /// ФИО преподавателя

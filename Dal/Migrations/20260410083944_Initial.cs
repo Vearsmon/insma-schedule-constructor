@@ -39,6 +39,19 @@ namespace Dal.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "teacher",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    fullname = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    contacts = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_teacher", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "user",
                 columns: table => new
                 {
@@ -100,52 +113,6 @@ namespace Dal.Migrations
                         name: "fk_student_group_student_group_parent_id",
                         column: x => x.parent_id,
                         principalTable: "student_group",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "teacher",
-                columns: table => new
-                {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
-                    user_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    fullname = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    contacts = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("pk_teacher", x => x.id);
-                    table.ForeignKey(
-                        name: "fk_teacher_db_user_user_id",
-                        column: x => x.user_id,
-                        principalTable: "user",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "student",
-                columns: table => new
-                {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
-                    user_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    fullname = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    student_group_id = table.Column<Guid>(type: "uuid", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("pk_student", x => x.id);
-                    table.ForeignKey(
-                        name: "fk_student_db_student_group_student_group_id",
-                        column: x => x.student_group_id,
-                        principalTable: "student_group",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "fk_student_db_user_user_id",
-                        column: x => x.user_id,
-                        principalTable: "user",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -216,6 +183,32 @@ namespace Dal.Migrations
                         principalTable: "teacher",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "student",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    user_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    fullname = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    student_group_id = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_student", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_student_db_student_group_student_group_id",
+                        column: x => x.student_group_id,
+                        principalTable: "student_group",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "fk_student_db_user_user_id",
+                        column: x => x.user_id,
+                        principalTable: "user",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -540,11 +533,6 @@ namespace Dal.Migrations
                 column: "schedule_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_teacher_user_id",
-                table: "teacher",
-                column: "user_id");
-
-            migrationBuilder.CreateIndex(
                 name: "ix_teacher_preference_room_id",
                 table: "teacher_preference",
                 column: "room_id");
@@ -586,6 +574,9 @@ namespace Dal.Migrations
                 name: "student_group");
 
             migrationBuilder.DropTable(
+                name: "user");
+
+            migrationBuilder.DropTable(
                 name: "academic_discipline");
 
             migrationBuilder.DropTable(
@@ -602,9 +593,6 @@ namespace Dal.Migrations
 
             migrationBuilder.DropTable(
                 name: "campus");
-
-            migrationBuilder.DropTable(
-                name: "user");
         }
     }
 }

@@ -704,8 +704,6 @@ namespace Dal.Mapping
                 return default;
             var target = new global::Domain.Models.Teacher();
             target.Id = teacher.Id;
-            target.UserId = teacher.UserId;
-            target.User = Map(teacher.User);
             target.Fullname = teacher.Fullname;
             target.Contacts = teacher.Contacts;
             return target;
@@ -722,8 +720,6 @@ namespace Dal.Mapping
             {
                 target.Id = teacher.Id.Value;
             }
-            target.UserId = teacher.UserId;
-            target.User = Map(teacher.User);
             target.Fullname = teacher.Fullname;
             target.Contacts = teacher.Contacts;
             return target;
@@ -736,8 +732,6 @@ namespace Dal.Mapping
             {
                 dbTeacher.Id = teacher.Id.Value;
             }
-            dbTeacher.UserId = teacher.UserId;
-            dbTeacher.User = Map(teacher.User);
             dbTeacher.Fullname = teacher.Fullname;
             dbTeacher.Contacts = teacher.Contacts;
         }

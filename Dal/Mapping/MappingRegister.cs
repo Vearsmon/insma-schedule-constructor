@@ -362,8 +362,8 @@ public static partial class MappingRegister
     public static partial DbTeacher? Map(Teacher? teacher);
     public static partial void Update(Teacher teacher, DbTeacher dbTeacher);
 
-    [MapperIgnoreSource(nameof(DbTeacher.UserId))]
-    [MapperIgnoreSource(nameof(DbTeacher.User))]
+    // [MapperIgnoreSource(nameof(DbTeacher.UserId))]
+    // [MapperIgnoreSource(nameof(DbTeacher.User))]
     public static partial TeacherRegistryItem? MapRegistryItem(DbTeacher? entity);
 
     #endregion

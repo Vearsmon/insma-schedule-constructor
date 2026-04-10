@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Dal.Migrations
 {
     [DbContext(typeof(InsmaScheduleContext))]
-    [Migration("20260410060727_Initial")]
+    [Migration("20260410083944_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -518,15 +518,8 @@ namespace Dal.Migrations
                         .HasColumnType("character varying(255)")
                         .HasColumnName("fullname");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("user_id");
-
                     b.HasKey("Id")
                         .HasName("pk_teacher");
-
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("ix_teacher_user_id");
 
                     b.ToTable("teacher", (string)null);
                 });
@@ -846,18 +839,6 @@ namespace Dal.Migrations
                     b.Navigation("Parent");
 
                     b.Navigation("Schedule");
-                });
-
-            modelBuilder.Entity("Dal.Entities.DbTeacher", b =>
-                {
-                    b.HasOne("Dal.Entities.DbUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_teacher_db_user_user_id");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Dal.Entities.DbTeacherPreference", b =>
