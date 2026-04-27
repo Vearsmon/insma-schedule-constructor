@@ -36,10 +36,10 @@ public static class DateOnlyHelper
     public static DateOnly[] GetDatesInIntervalByDaysOfWeek(DateInterval dateInterval,
         DayOfWeek[] daysOfWeek,
         DisciplineLessonRepeatType repeatType,
-        DateOnly firstEvenWeekStartDate)
+        DateInterval scheduleDateInterval)
     {
         var result = new List<DateOnly>();
-        var isIntervalStartIntersectEvenWeek = ((dateInterval.DateFrom.Day - firstEvenWeekStartDate.Day) / 7) % 2 == 0;
+        var isIntervalStartIntersectEvenWeek = ((dateInterval.DateFrom.Day - scheduleDateInterval.DateFrom.Day) / 7) % 2 == 0;
         var skipUntilDate = repeatType == DisciplineLessonRepeatType.OddWeeks && isIntervalStartIntersectEvenWeek
                             || repeatType == DisciplineLessonRepeatType.EvenWeeks && !isIntervalStartIntersectEvenWeek
             ? dateInterval.DateFrom.GetNextWeekStartDate()

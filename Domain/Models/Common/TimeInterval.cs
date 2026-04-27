@@ -2,18 +2,8 @@
 
 public class TimeInterval
 {
-    public TimeInterval()
-    {
-    }
-
-    public TimeInterval(TimeOnly timeFrom, TimeOnly timeTo)
-    {
-        TimeFrom = timeFrom;
-        TimeTo = timeTo;
-    }
-
-    public TimeOnly TimeFrom { get; }
-    public TimeOnly TimeTo { get; }
+    public TimeOnly TimeFrom { get; init; }
+    public TimeOnly TimeTo { get; init; }
 
     public override bool Equals(object? obj)
         => obj is TimeInterval timeInterval
@@ -22,8 +12,5 @@ public class TimeInterval
 
     public override int GetHashCode() => HashCode.Combine(TimeFrom, TimeTo);
 
-    public override string ToString()
-    {
-        return $"{TimeFrom:HH:mm}-{TimeTo:HH:mm}";
-    }
+    public override string ToString() => $"{TimeFrom:HH:mm}-{TimeTo:HH:mm}";
 }

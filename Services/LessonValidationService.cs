@@ -221,12 +221,12 @@ public class LessonValidationService(
                     : null;
                 var message = validationMessage.Code switch
                 {
-                    LessonValidationCode.MismatchedCyphers => string.Format(
-                        LessonValidationMessageTemplates.MismatchedCyphersTemplate,
-                        discipline!.Name,
-                        studentGroup!.Name,
-                        studentGroup.Cypher,
-                        discipline.Cypher),
+                    // LessonValidationCode.MismatchedCyphers => string.Format(
+                    //     LessonValidationMessageTemplates.MismatchedCyphersTemplate,
+                    //     discipline!.Name,
+                    //     studentGroup!.Name,
+                    //     studentGroup.Cypher,
+                    //     discipline.Cypher),
                     LessonValidationCode.MismatchedSemesterNumber => string.Format(
                         LessonValidationMessageTemplates.MismatchedSemesterNumberTemplate,
                         discipline!.Name,
@@ -298,8 +298,11 @@ public class LessonValidationService(
                 };
                 lessonConflicts.Add(new LessonSeriesConflictDto
                 {
-                    DayOfWeekTimeInterval = new DayOfWeekTimeInterval(lesson.DateWithTimeInterval!.Date.DayOfWeek,
-                        lesson.DateWithTimeInterval.TimeInterval),
+                    DayOfWeekTimeInterval = new DayOfWeekTimeInterval
+                    {
+                        DayOfWeek = lesson.DateWithTimeInterval!.Date.DayOfWeek,
+                        TimeInterval = lesson.DateWithTimeInterval.TimeInterval,
+                    },
                     Message = message,
                     ErrorType = validationMessage.ErrorType,
                 });
@@ -340,9 +343,9 @@ public class LessonValidationService(
                 AffectedByAcademicDisciplineId = saveDtoAcademicDiscipline.Id,
                 AffectedByStudentGroupId = saveDtoStudentGroup.Id,
             };
-            validationMessages
-                .AddErrorIf(saveDtoAcademicDiscipline.Cypher != saveDtoStudentGroup.Cypher,
-                    payload, LessonValidationCode.MismatchedCyphers);
+            // validationMessages
+            //     .AddErrorIf(saveDtoAcademicDiscipline.Cypher != saveDtoStudentGroup.Cypher,
+            //         payload, LessonValidationCode.MismatchedCyphers);
             validationMessages
                 .AddErrorIf(saveDtoAcademicDiscipline.SemesterNumber != saveDtoStudentGroup.SemesterNumber,
                     payload, LessonValidationCode.MismatchedSemesterNumber);

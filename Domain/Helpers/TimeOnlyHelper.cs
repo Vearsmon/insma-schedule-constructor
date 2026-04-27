@@ -16,7 +16,8 @@ public static class TimeOnlyHelper
 
     public static bool HasIntersection(this DayOfWeekTimeInterval first, DateWithTimeInterval? second)
     {
-        return second != null && first.DayOfWeek == second.Date.DayOfWeek && first.TimeInterval.HasIntersection(second.TimeInterval);
+        return second != null && first.DayOfWeek == second.Date.DayOfWeek
+                              && first.TimeInterval.HasIntersection(second.TimeInterval);
     }
 
     public static bool HasIntersection(this DateWithTimeInterval first, DateWithTimeInterval second)
@@ -36,8 +37,11 @@ public static class TimeOnlyHelper
             if (lastInterval.TimeTo >= current.TimeFrom)
             {
                 result.Remove(lastInterval);
-                result.Add(new TimeInterval(lastInterval.TimeFrom,
-                    lastInterval.TimeTo > current.TimeTo ? lastInterval.TimeTo : current.TimeTo));
+                result.Add(new TimeInterval
+                {
+                    TimeFrom = lastInterval.TimeFrom,
+                    TimeTo = lastInterval.TimeTo > current.TimeTo ? lastInterval.TimeTo : current.TimeTo,
+                });
             }
             else
             {

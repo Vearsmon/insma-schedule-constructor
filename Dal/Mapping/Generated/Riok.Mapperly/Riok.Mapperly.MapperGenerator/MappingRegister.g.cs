@@ -311,9 +311,6 @@ namespace Dal.Mapping
             var target = new global::Domain.Models.Schedule();
             target.Id = schedule.Id;
             target.Name = schedule.Name;
-            target.StartsWithEvenWeek = schedule.StartsWithEvenWeek;
-            target.StartDate = schedule.StartDate;
-            target.EndDate = schedule.EndDate;
             return target;
         }
 
@@ -329,9 +326,6 @@ namespace Dal.Mapping
                 target.Id = schedule.Id.Value;
             }
             target.Name = schedule.Name;
-            target.StartsWithEvenWeek = schedule.StartsWithEvenWeek;
-            target.StartDate = schedule.StartDate;
-            target.EndDate = schedule.EndDate;
             return target;
         }
 
@@ -343,9 +337,6 @@ namespace Dal.Mapping
                 dbSchedule.Id = schedule.Id.Value;
             }
             dbSchedule.Name = schedule.Name;
-            dbSchedule.StartsWithEvenWeek = schedule.StartsWithEvenWeek;
-            dbSchedule.StartDate = schedule.StartDate;
-            dbSchedule.EndDate = schedule.EndDate;
         }
 
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
@@ -502,33 +493,6 @@ namespace Dal.Mapping
             target.Cypher = academicDiscipline.Cypher;
             target.SemesterNumber = academicDiscipline.SemesterNumber;
             target.AcademicDisciplineTargetType = academicDiscipline.AcademicDisciplineTargetType;
-            if (academicDiscipline.LectureTotalHoursCount != null)
-            {
-                target.LecturePayload ??= new global::Domain.Models.AcademicDisciplinePayload();
-                target.LecturePayload.TotalHoursCount = academicDiscipline.LectureTotalHoursCount.Value;
-            }
-            target.LecturePayload ??= new global::Domain.Models.AcademicDisciplinePayload();
-            target.LecturePayload.LessonBatchInfo = Map(academicDiscipline.AcademicDisciplineLectureLessonBatchInfo);
-            target.LecturePayload.LessonBatchInfo ??= new global::Domain.Models.AcademicDisciplineLessonBatchInfo();
-            target.LecturePayload.LessonBatchInfo.Id = academicDiscipline.AcademicDisciplineLectureLessonBatchInfoId;
-            if (academicDiscipline.PracticeTotalHoursCount != null)
-            {
-                target.PracticePayload ??= new global::Domain.Models.AcademicDisciplinePayload();
-                target.PracticePayload.TotalHoursCount = academicDiscipline.PracticeTotalHoursCount.Value;
-            }
-            target.PracticePayload ??= new global::Domain.Models.AcademicDisciplinePayload();
-            target.PracticePayload.LessonBatchInfo = Map(academicDiscipline.AcademicDisciplinePracticeLessonBatchInfo);
-            target.PracticePayload.LessonBatchInfo ??= new global::Domain.Models.AcademicDisciplineLessonBatchInfo();
-            target.PracticePayload.LessonBatchInfo.Id = academicDiscipline.AcademicDisciplinePracticeLessonBatchInfoId;
-            if (academicDiscipline.LabTotalHoursCount != null)
-            {
-                target.LabPayload ??= new global::Domain.Models.AcademicDisciplinePayload();
-                target.LabPayload.TotalHoursCount = academicDiscipline.LabTotalHoursCount.Value;
-            }
-            target.LabPayload ??= new global::Domain.Models.AcademicDisciplinePayload();
-            target.LabPayload.LessonBatchInfo = Map(academicDiscipline.AcademicDisciplineLabLessonBatchInfo);
-            target.LabPayload.LessonBatchInfo ??= new global::Domain.Models.AcademicDisciplineLessonBatchInfo();
-            target.LabPayload.LessonBatchInfo.Id = academicDiscipline.AcademicDisciplineLabLessonBatchInfoId;
             target.Comment = academicDiscipline.Comment;
             return target;
         }
@@ -600,30 +564,18 @@ namespace Dal.Mapping
             target.Cypher = entity.Cypher;
             target.SemesterNumber = entity.SemesterNumber;
             target.AcademicDisciplineTargetType = entity.AcademicDisciplineTargetType;
-            if (entity.LectureTotalHoursCount != null)
-            {
-                target.LecturePayload ??= new global::Domain.Models.AcademicDisciplinePayload();
-                target.LecturePayload.TotalHoursCount = entity.LectureTotalHoursCount.Value;
-            }
             target.LecturePayload ??= new global::Domain.Models.AcademicDisciplinePayload();
+            target.LecturePayload.TotalHoursCount = entity.LectureTotalHoursCount;
             target.LecturePayload.LessonBatchInfo = Map(entity.AcademicDisciplineLectureLessonBatchInfo);
             target.LecturePayload.LessonBatchInfo ??= new global::Domain.Models.AcademicDisciplineLessonBatchInfo();
             target.LecturePayload.LessonBatchInfo.Id = entity.AcademicDisciplineLectureLessonBatchInfoId;
-            if (entity.PracticeTotalHoursCount != null)
-            {
-                target.PracticePayload ??= new global::Domain.Models.AcademicDisciplinePayload();
-                target.PracticePayload.TotalHoursCount = entity.PracticeTotalHoursCount.Value;
-            }
             target.PracticePayload ??= new global::Domain.Models.AcademicDisciplinePayload();
+            target.PracticePayload.TotalHoursCount = entity.PracticeTotalHoursCount;
             target.PracticePayload.LessonBatchInfo = Map(entity.AcademicDisciplinePracticeLessonBatchInfo);
             target.PracticePayload.LessonBatchInfo ??= new global::Domain.Models.AcademicDisciplineLessonBatchInfo();
             target.PracticePayload.LessonBatchInfo.Id = entity.AcademicDisciplinePracticeLessonBatchInfoId;
-            if (entity.LabTotalHoursCount != null)
-            {
-                target.LabPayload ??= new global::Domain.Models.AcademicDisciplinePayload();
-                target.LabPayload.TotalHoursCount = entity.LabTotalHoursCount.Value;
-            }
             target.LabPayload ??= new global::Domain.Models.AcademicDisciplinePayload();
+            target.LabPayload.TotalHoursCount = entity.LabTotalHoursCount;
             target.LabPayload.LessonBatchInfo = Map(entity.AcademicDisciplineLabLessonBatchInfo);
             target.LabPayload.LessonBatchInfo ??= new global::Domain.Models.AcademicDisciplineLessonBatchInfo();
             target.LabPayload.LessonBatchInfo.Id = entity.AcademicDisciplineLabLessonBatchInfoId;

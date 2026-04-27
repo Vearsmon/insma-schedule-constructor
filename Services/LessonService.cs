@@ -107,9 +107,9 @@ public class LessonService(
                         affectedLessonValidationMessages;
                 }
 
-                affectedLessonValidationMessages!
-                    .AddErrorIf(studentGroup.Cypher != academicDiscipline.Cypher,
-                        payload, LessonValidationCode.MismatchedCyphers);
+                // affectedLessonValidationMessages!
+                //     .AddErrorIf(studentGroup.Cypher != academicDiscipline.Cypher,
+                //         payload, LessonValidationCode.MismatchedCyphers);
                 affectedLessonValidationMessages!
                     .AddErrorIf(studentGroup.SemesterNumber != academicDiscipline.SemesterNumber,
                         payload, LessonValidationCode.MismatchedSemesterNumber);
@@ -199,9 +199,7 @@ public class LessonService(
                 lessonBatchInfo.DateInterval,
                 lessonBatchInfo.DayOfWeekTimeIntervals.Select(x => x.DayOfWeek).ToArray(),
                 lessonBatchInfo.RepeatType,
-                schedule.StartsWithEvenWeek
-                    ? schedule.StartDate.GetWeekStartDate()
-                    : schedule.StartDate.GetNextWeekStartDate());
+                schedule.DateInterval);
             var timeIntervalsByDayOfWeek =
                 lessonBatchInfo.DayOfWeekTimeIntervals.ToDictionary(x => x.DayOfWeek);
             return dates
@@ -213,8 +211,11 @@ public class LessonService(
                     StudentGroups = lessonBatchInfo.StudentGroups,
                     TeacherId = lessonBatchInfo.TeacherId,
                     RoomId = lessonBatchInfo.RoomId,
-                    DateWithTimeInterval = new DateWithTimeInterval(date,
-                        timeIntervalsByDayOfWeek[date.DayOfWeek].TimeInterval),
+                    DateWithTimeInterval = new DateWithTimeInterval
+                    {
+                        Date = date,
+                        TimeInterval = timeIntervalsByDayOfWeek[date.DayOfWeek].TimeInterval,
+                    },
                     FlexibilityType = LessonFlexibilityType.Fixed,
                     AllowCombining = lessonBatchInfo.AllowCombining,
                     HoursCost = lessonBatchInfo.HoursCost,
@@ -356,9 +357,9 @@ public class LessonService(
                     affectedLessonValidationMessages;
             }
 
-            affectedLessonValidationMessages!
-                .AddErrorIf(mismatchedDisciplineLesson.AcademicDiscipline.Cypher != studentGroup.Cypher,
-                    payload, LessonValidationCode.MismatchedCyphers);
+            // affectedLessonValidationMessages!
+            //     .AddErrorIf(mismatchedDisciplineLesson.AcademicDiscipline.Cypher != studentGroup.Cypher,
+            //         payload, LessonValidationCode.MismatchedCyphers);
             affectedLessonValidationMessages!
                 .AddErrorIf(mismatchedDisciplineLesson.AcademicDiscipline.SemesterNumber != studentGroup.SemesterNumber,
                     payload, LessonValidationCode.MismatchedSemesterNumber);
@@ -662,8 +663,11 @@ public class LessonService(
             lessonConflicts.Add(new LessonSeriesConflictDto
             {
                 DayOfWeekTimeInterval = validationMessage.Payload.DateWithTimeInterval != null
-                    ? new DayOfWeekTimeInterval(validationMessage.Payload.DateWithTimeInterval!.Date.DayOfWeek,
-                        validationMessage.Payload.DateWithTimeInterval.TimeInterval)
+                    ? new DayOfWeekTimeInterval
+                    {
+                        DayOfWeek = validationMessage.Payload.DateWithTimeInterval!.Date.DayOfWeek,
+                        TimeInterval = validationMessage.Payload.DateWithTimeInterval.TimeInterval,
+                    }
                     : validationMessage.Payload.DayOfWeekTimeInterval!,
                 Message = message,
                 ErrorType = validationMessage.ErrorType,

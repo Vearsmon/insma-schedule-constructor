@@ -2,18 +2,8 @@
 
 public class DateWithTimeInterval
 {
-    public DateWithTimeInterval()
-    {
-    }
-
-    public DateWithTimeInterval(DateOnly date, TimeInterval timeInterval)
-    {
-        Date = date;
-        TimeInterval = timeInterval;
-    }
-
-    public DateOnly Date { get; }
-    public TimeInterval TimeInterval { get; } = null!;
+    public DateOnly Date { get; init; }
+    public TimeInterval TimeInterval { get; init; } = null!;
 
     public override bool Equals(object? obj)
         => obj is DateWithTimeInterval dateWithTimeInterval

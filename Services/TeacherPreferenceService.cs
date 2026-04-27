@@ -114,7 +114,11 @@ public class TeacherPreferenceService(
                     .Select(mergedInterval => new TeacherTimeAvailabilityDto
                     {
                         TeacherPreferenceType = groupByPreferenceType.Key,
-                        DayOfWeekTimeInterval = new DayOfWeekTimeInterval(groupByDayOfWeek.Key, mergedInterval)
+                        DayOfWeekTimeInterval = new DayOfWeekTimeInterval
+                        {
+                            DayOfWeek = groupByDayOfWeek.Key,
+                            TimeInterval = mergedInterval,
+                        },
                     }));
             }
         }

@@ -2,18 +2,8 @@
 
 public class DayOfWeekTimeInterval
 {
-    public DayOfWeekTimeInterval()
-    {
-    }
-
-    public DayOfWeekTimeInterval(DayOfWeek dayOfWeek, TimeInterval timeInterval)
-    {
-        DayOfWeek = dayOfWeek;
-        TimeInterval = timeInterval;
-    }
-
-    public DayOfWeek DayOfWeek { get; }
-    public TimeInterval TimeInterval { get; } = null!;
+    public DayOfWeek DayOfWeek { get; init; }
+    public TimeInterval TimeInterval { get; init; } = null!;
 
     public override bool Equals(object? obj)
         => obj is DayOfWeekTimeInterval dayOfWeekTimeInterval

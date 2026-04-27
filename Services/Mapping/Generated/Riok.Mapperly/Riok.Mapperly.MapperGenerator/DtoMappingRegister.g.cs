@@ -348,9 +348,6 @@ namespace Services.Mapping
             var target = new global::Domain.Models.Schedule();
             target.Id = dto.Id;
             target.Name = dto.Name;
-            target.StartsWithEvenWeek = dto.StartsWithEvenWeek;
-            target.StartDate = dto.StartDate;
-            target.EndDate = dto.EndDate;
             return target;
         }
 
@@ -528,7 +525,10 @@ namespace Services.Mapping
         private static global::Domain.Dto.AcademicDisciplinePayloadDto MapToAcademicDisciplinePayloadDto(global::Domain.Models.AcademicDisciplinePayload source)
         {
             var target = new global::Domain.Dto.AcademicDisciplinePayloadDto();
-            target.TotalHoursCount = source.TotalHoursCount;
+            if (source.TotalHoursCount != null)
+            {
+                target.TotalHoursCount = source.TotalHoursCount.Value;
+            }
             target.LessonBatchInfo = Map(source.LessonBatchInfo);
             return target;
         }
