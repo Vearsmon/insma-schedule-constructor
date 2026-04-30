@@ -120,26 +120,6 @@ public class AcademicDisciplineController(IAcademicDisciplineService academicDis
         await academicDisciplineService.GetLessonSeriesConflictsAsync(academicDisciplineId, academicDisciplineType);
 
     /// <summary>
-    /// Получить список шифров академических дисциплин
-    /// </summary>
-    /// <param name="scheduleId">Идентификатор проекта расписания</param>
-    /// <returns>Список шифров академических дисциплин</returns>
-    /// <response code="200">Поиск реестра выполнился успешно</response>
-    /// <response code="400">Поиск реестра завершился с ошибкой валидации входных данных</response>
-    /// <response code="401">Не удалось выполнить авторизацию</response>
-    /// <response code="403">Поиск реестра завершился с ошибкой валидации прав доступа</response>
-    /// <response code="500">Поиск реестра завершился с ошибкой</response>
-    [AllowAnonymous]
-    [ProducesResponseType(typeof(string[]), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ValidationErrorDto), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ErrorDto), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(ErrorDto), StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(typeof(ErrorDto), StatusCodes.Status500InternalServerError)]
-    [HttpGet("search-cyphers")]
-    public async Task<string[]> SearchCyphers(Guid scheduleId) =>
-        await academicDisciplineService.SearchCyphersAsync(scheduleId);
-
-    /// <summary>
     /// Удалить данные академической дисциплины
     /// </summary>
     /// <param name="academicDisciplineId">Идентификатор академичекой дисциплины</param>

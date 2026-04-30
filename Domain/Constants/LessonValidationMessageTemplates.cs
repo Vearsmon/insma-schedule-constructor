@@ -2,9 +2,6 @@
 
 public static class LessonValidationMessageTemplates
 {
-    public const string MismatchedCyphersTemplate =
-        "Занятие по дисциплине \"{0}\" не может преподаваться у группы \"{1}\" (шифр группы \"{2}\" отличается от шифра учебного плана дисциплины \"{3}\").";
-
     public const string MismatchedSemesterNumberTemplate =
         "Занятие по дисциплине \"{0}\" не может преподаваться у группы \"{1}\" (номер семетра группы \"{2}\" отличается от номера семестра дисциплины \"{3}\" в учебном плане).";
 

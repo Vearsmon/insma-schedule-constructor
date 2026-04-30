@@ -41,24 +41,14 @@ public class DbLesson : IDbEntityWithId
     public ICollection<DbStudentGroup> StudentGroups { get; set; } = [];
 
     /// <summary>
-    /// Преподаватель
+    /// Преподаватели
     /// </summary>
-    public Guid? TeacherId { get; set; }
+    public ICollection<DbTeacher> Teachers { get; set; } = [];
 
     /// <summary>
-    /// Преподаватель
+    /// Аудитории
     /// </summary>
-    public DbTeacher? Teacher { get; set; }
-
-    /// <summary>
-    /// Аудитория
-    /// </summary>
-    public Guid? RoomId { get; set; }
-
-    /// <summary>
-    /// Аудитория
-    /// </summary>
-    public DbRoom? Room { get; set; }
+    public ICollection<DbRoom> Rooms { get; set; } = [];
 
     /// <summary>
     /// Дата проведения занятия
@@ -86,7 +76,7 @@ public class DbLesson : IDbEntityWithId
     /// <summary>
     /// Вес занятия в часах
     /// </summary>
-    public int HoursCost { get; set; }
+    public int? HoursCost { get; set; }
 
     /// <summary>
     /// Занятие допускает совмещение

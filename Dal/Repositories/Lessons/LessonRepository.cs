@@ -21,10 +21,10 @@ public class LessonRepository(
     protected override IQueryable<DbLesson> Query()
     {
         return Context.Set<DbLesson>()
-            .Include(x => x.Room)
+            .Include(x => x.Rooms)
             .Include(x => x.StudentGroups)
             .Include(x => x.AcademicDiscipline)
-            .Include(x => x.Teacher)
+            .Include(x => x.Teachers)
             .Include(x => x.ValidationMessages);
     }
 }

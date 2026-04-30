@@ -3,12 +3,12 @@ using Domain.Models.Enums;
 
 namespace Domain.Dto;
 
-public class AcademicDisciplineLessonBatchInfoDto
+public class LessonBatchInfoDto
 {
     public Guid? Id { get; set; }
     public Guid[] StudentGroupIds { get; set; } = [];
-    public Guid? TeacherId { get; set; }
-    public Guid? RoomId { get; set; }
+    public Guid[] TeacherIds { get; set; } = [];
+    public Guid[] RoomIds { get; set; } = [];
     public DayOfWeekTimeInterval[] DayOfWeekTimeIntervals { get; set; } = [];
     public DisciplineLessonRepeatType RepeatType { get; set; }
     public DateInterval DateInterval { get; set; } = null!;

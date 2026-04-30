@@ -13,7 +13,7 @@ internal class TeacherPreferencePredicateBuilder : IPredicateBuilder<DbTeacherPr
     {
         return Predicate
                 .AndIf(searchModel.ScheduleId.HasValue, f => f.ScheduleId == searchModel.ScheduleId)
-                .AndIf(searchModel.TeacherId.HasValue, f => f.TeacherId == searchModel.TeacherId)
+                .AndIf(searchModel.TeacherIds.Length > 0, f => searchModel.TeacherIds.Contains(f.TeacherId))
                 .AndIf(searchModel.DaysOfWeek.Length > 0, f => f.DayOfWeek != null && searchModel.DaysOfWeek.Contains(f.DayOfWeek!.Value))
                 // .And(PredicateBuilder.False<DbTeacherPreference>()
                     // .OrIf(searchModel.TimeFrom.HasValue, f => f.TimeSequences.Any(t => t.Item1 <= searchModel.TimeFrom && t.Item2 >= searchModel.TimeFrom))

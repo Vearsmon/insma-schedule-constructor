@@ -70,10 +70,8 @@ namespace Dal.Mapping
             target.AcademicDiscipline = Map(lesson.AcademicDiscipline);
             target.AcademicDisciplineType = lesson.AcademicDisciplineType;
             target.StudentGroups = MapToListOfDbStudentGroup(lesson.StudentGroups);
-            target.TeacherId = lesson.TeacherId;
-            target.Teacher = Map(lesson.Teacher);
-            target.RoomId = lesson.RoomId;
-            target.Room = Map(lesson.Room);
+            target.Teachers = MapToListOfDbTeacher(lesson.Teachers);
+            target.Rooms = MapToListOfDbRoom(lesson.Rooms);
             target.Date = lesson.DateWithTimeInterval?.Date;
             target.TimeFrom = lesson.DateWithTimeInterval?.TimeInterval.TimeFrom;
             target.TimeTo = lesson.DateWithTimeInterval?.TimeInterval.TimeTo;
@@ -97,10 +95,8 @@ namespace Dal.Mapping
             dbLesson.AcademicDiscipline = Map(lesson.AcademicDiscipline);
             dbLesson.AcademicDisciplineType = lesson.AcademicDisciplineType;
             dbLesson.StudentGroups = MapToListOfDbStudentGroup(lesson.StudentGroups);
-            dbLesson.TeacherId = lesson.TeacherId;
-            dbLesson.Teacher = Map(lesson.Teacher);
-            dbLesson.RoomId = lesson.RoomId;
-            dbLesson.Room = Map(lesson.Room);
+            dbLesson.Teachers = MapToListOfDbTeacher(lesson.Teachers);
+            dbLesson.Rooms = MapToListOfDbRoom(lesson.Rooms);
             dbLesson.Date = lesson.DateWithTimeInterval?.Date;
             dbLesson.TimeFrom = lesson.DateWithTimeInterval?.TimeInterval.TimeFrom;
             dbLesson.TimeTo = lesson.DateWithTimeInterval?.TimeInterval.TimeTo;
@@ -119,18 +115,16 @@ namespace Dal.Mapping
             var target = new global::Domain.Models.Lesson();
             target.Id = lesson.Id;
             target.ScheduleId = lesson.ScheduleId;
-            target.Schedule = Map(lesson.Schedule);
+            target.Schedule = MapDbToModel(lesson.Schedule);
             target.AcademicDisciplineId = lesson.AcademicDisciplineId;
             target.AcademicDiscipline = Map(lesson.AcademicDiscipline);
             target.AcademicDisciplineType = lesson.AcademicDisciplineType;
             target.StudentGroups = MapChildrenCollection(lesson.StudentGroups);
-            target.TeacherId = lesson.TeacherId;
-            target.Teacher = Map(lesson.Teacher);
-            target.RoomId = lesson.RoomId;
-            target.Room = Map(lesson.Room);
+            target.Teachers = MapToTeacherArray(lesson.Teachers);
+            target.Rooms = MapToRoomArray(lesson.Rooms);
             target.FlexibilityType = lesson.FlexibilityType;
-            target.AllowCombining = lesson.AllowCombining;
             target.HoursCost = lesson.HoursCost;
+            target.AllowCombining = lesson.AllowCombining;
             target.ValidationMessages = MapValidationMessagesCollection(lesson.ValidationMessages);
             return target;
         }
@@ -145,8 +139,9 @@ namespace Dal.Mapping
             target.Id = entity.Id;
             target.AcademicDisciplineId = entity.AcademicDisciplineId;
             target.AcademicDisciplineType = entity.AcademicDisciplineType;
-            target.TeacherId = entity.TeacherId;
-            target.RoomId = entity.RoomId;
+            target.StudentGroupIds = MapStudentGroupsCollection(entity.StudentGroups);
+            target.TeacherIds = MapTeachersCollection(entity.Teachers);
+            target.RoomIds = MapRoomsCollection(entity.Rooms);
             target.FlexibilityType = entity.FlexibilityType;
             target.AllowCombining = entity.AllowCombining;
             target.HoursCost = entity.HoursCost;
@@ -299,33 +294,29 @@ namespace Dal.Mapping
                 return default;
             var target = new global::Domain.Models.RegistryItemModels.RoomRegistryItem();
             target.Id = room.Id;
+            target.Name = room.Name;
+            target.CampusName = room.Campus.Name;
+            target.RoomType = room.RoomType;
+            target.Capacity = room.Capacity;
+            target.RoomBoardType = room.RoomBoardType;
+            target.HasProjector = room.HasProjector;
             return target;
         }
 
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(schedule))]
-        public static partial global::Domain.Models.Schedule? Map(global::Dal.Entities.DbSchedule? schedule)
+        [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(model))]
+        public static partial global::Dal.Entities.DbSchedule? Map(global::Domain.Models.Schedule? model)
         {
-            if (schedule == null)
-                return default;
-            var target = new global::Domain.Models.Schedule();
-            target.Id = schedule.Id;
-            target.Name = schedule.Name;
-            return target;
-        }
-
-        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(schedule))]
-        public static partial global::Dal.Entities.DbSchedule? Map(global::Domain.Models.Schedule? schedule)
-        {
-            if (schedule == null)
+            if (model == null)
                 return default;
             var target = new global::Dal.Entities.DbSchedule();
-            if (schedule.Id != null)
+            if (model.Id != null)
             {
-                target.Id = schedule.Id.Value;
+                target.Id = model.Id.Value;
             }
-            target.Name = schedule.Name;
+            target.Name = model.Name;
+            target.DateFrom = model.DateInterval.DateFrom;
+            target.DateTo = model.DateInterval.DateTo;
             return target;
         }
 
@@ -337,20 +328,31 @@ namespace Dal.Mapping
                 dbSchedule.Id = schedule.Id.Value;
             }
             dbSchedule.Name = schedule.Name;
+            dbSchedule.DateFrom = schedule.DateInterval.DateFrom;
+            dbSchedule.DateTo = schedule.DateInterval.DateTo;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(schedule))]
+        private static partial global::Domain.Models.Schedule? MapDbToModel(global::Dal.Entities.DbSchedule? schedule)
+        {
+            if (schedule == null)
+                return default;
+            var target = new global::Domain.Models.Schedule();
+            target.Id = schedule.Id;
+            target.Name = schedule.Name;
+            return target;
         }
 
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
         [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(entity))]
-        public static partial global::Domain.Models.RegistryItemModels.ScheduleRegistryItem? MapRegistryItem(global::Dal.Entities.DbSchedule? entity)
+        private static partial global::Domain.Models.RegistryItemModels.ScheduleRegistryItem? MapDbToRegistryItem(global::Dal.Entities.DbSchedule? entity)
         {
             if (entity == null)
                 return default;
             var target = new global::Domain.Models.RegistryItemModels.ScheduleRegistryItem();
             target.Id = entity.Id;
             target.Name = entity.Name;
-            target.StartsWithEvenWeek = entity.StartsWithEvenWeek;
-            target.StartDate = entity.StartDate;
-            target.EndDate = entity.EndDate;
             return target;
         }
 
@@ -412,13 +414,11 @@ namespace Dal.Mapping
             var target = new global::Domain.Models.StudentGroup();
             target.Id = studentGroup.Id;
             target.ScheduleId = studentGroup.ScheduleId;
-            target.Schedule = Map(studentGroup.Schedule);
+            target.Schedule = MapDbToModel(studentGroup.Schedule);
             target.Name = studentGroup.Name;
             target.SemesterNumber = studentGroup.SemesterNumber;
             target.StudentGroupType = studentGroup.StudentGroupType;
-            target.Cypher = studentGroup.Cypher;
-            target.ParentId = studentGroup.ParentId;
-            target.Parent = Map(studentGroup.Parent);
+            target.Parents = MapChildrenCollection(studentGroup.Parents);
             target.Children = MapChildrenCollection(studentGroup.Children);
             return target;
         }
@@ -439,9 +439,7 @@ namespace Dal.Mapping
             target.Name = studentGroup.Name;
             target.SemesterNumber = studentGroup.SemesterNumber;
             target.StudentGroupType = studentGroup.StudentGroupType;
-            target.Cypher = studentGroup.Cypher;
-            target.ParentId = studentGroup.ParentId;
-            target.Parent = Map(studentGroup.Parent);
+            target.Parents = MapToListOfDbStudentGroup(studentGroup.Parents);
             target.Children = MapToListOfDbStudentGroup(studentGroup.Children);
             return target;
         }
@@ -458,9 +456,7 @@ namespace Dal.Mapping
             dbStudentGroup.Name = studentGroup.Name;
             dbStudentGroup.SemesterNumber = studentGroup.SemesterNumber;
             dbStudentGroup.StudentGroupType = studentGroup.StudentGroupType;
-            dbStudentGroup.Cypher = studentGroup.Cypher;
-            dbStudentGroup.ParentId = studentGroup.ParentId;
-            dbStudentGroup.Parent = Map(studentGroup.Parent);
+            dbStudentGroup.Parents = MapToListOfDbStudentGroup(studentGroup.Parents);
             dbStudentGroup.Children = MapToListOfDbStudentGroup(studentGroup.Children);
         }
 
@@ -475,7 +471,6 @@ namespace Dal.Mapping
             target.Name = entity.Name;
             target.SemesterNumber = entity.SemesterNumber;
             target.StudentGroupType = entity.StudentGroupType;
-            target.Cypher = entity.Cypher;
             return target;
         }
 
@@ -488,9 +483,9 @@ namespace Dal.Mapping
             var target = new global::Domain.Models.AcademicDiscipline();
             target.Id = academicDiscipline.Id;
             target.ScheduleId = academicDiscipline.ScheduleId;
-            target.Schedule = Map(academicDiscipline.Schedule);
+            target.Schedule = MapDbToModel(academicDiscipline.Schedule);
             target.Name = academicDiscipline.Name;
-            target.Cypher = academicDiscipline.Cypher;
+            target.AssociatedNames = academicDiscipline.AssociatedNames;
             target.SemesterNumber = academicDiscipline.SemesterNumber;
             target.AcademicDisciplineTargetType = academicDiscipline.AcademicDisciplineTargetType;
             target.Comment = academicDiscipline.Comment;
@@ -511,18 +506,24 @@ namespace Dal.Mapping
             target.ScheduleId = academicDiscipline.ScheduleId;
             target.Schedule = Map(academicDiscipline.Schedule);
             target.Name = academicDiscipline.Name;
-            target.Cypher = academicDiscipline.Cypher;
+            target.AssociatedNames = academicDiscipline.AssociatedNames;
             target.SemesterNumber = academicDiscipline.SemesterNumber;
             target.AcademicDisciplineTargetType = academicDiscipline.AcademicDisciplineTargetType;
             target.LectureTotalHoursCount = academicDiscipline.LecturePayload?.TotalHoursCount;
-            target.AcademicDisciplineLectureLessonBatchInfoId = academicDiscipline.LecturePayload?.LessonBatchInfo?.Id;
-            target.AcademicDisciplineLectureLessonBatchInfo = Map(academicDiscipline.LecturePayload?.LessonBatchInfo);
+            if (academicDiscipline.LecturePayload != null)
+            {
+                target.AcademicDisciplineLectureLessonBatchInfos = MapToListOfDbLessonBatchInfo(academicDiscipline.LecturePayload.LessonBatchInfos);
+            }
             target.PracticeTotalHoursCount = academicDiscipline.PracticePayload?.TotalHoursCount;
-            target.AcademicDisciplinePracticeLessonBatchInfoId = academicDiscipline.PracticePayload?.LessonBatchInfo?.Id;
-            target.AcademicDisciplinePracticeLessonBatchInfo = Map(academicDiscipline.PracticePayload?.LessonBatchInfo);
+            if (academicDiscipline.PracticePayload != null)
+            {
+                target.AcademicDisciplinePracticeLessonBatchInfos = MapToListOfDbLessonBatchInfo(academicDiscipline.PracticePayload.LessonBatchInfos);
+            }
             target.LabTotalHoursCount = academicDiscipline.LabPayload?.TotalHoursCount;
-            target.AcademicDisciplineLabLessonBatchInfoId = academicDiscipline.LabPayload?.LessonBatchInfo?.Id;
-            target.AcademicDisciplineLabLessonBatchInfo = Map(academicDiscipline.LabPayload?.LessonBatchInfo);
+            if (academicDiscipline.LabPayload != null)
+            {
+                target.AcademicDisciplineLabLessonBatchInfos = MapToListOfDbLessonBatchInfo(academicDiscipline.LabPayload.LessonBatchInfos);
+            }
             target.Comment = academicDiscipline.Comment;
             return target;
         }
@@ -537,18 +538,24 @@ namespace Dal.Mapping
             dbAcademicDiscipline.ScheduleId = academicDiscipline.ScheduleId;
             dbAcademicDiscipline.Schedule = Map(academicDiscipline.Schedule);
             dbAcademicDiscipline.Name = academicDiscipline.Name;
-            dbAcademicDiscipline.Cypher = academicDiscipline.Cypher;
+            dbAcademicDiscipline.AssociatedNames = academicDiscipline.AssociatedNames;
             dbAcademicDiscipline.SemesterNumber = academicDiscipline.SemesterNumber;
             dbAcademicDiscipline.AcademicDisciplineTargetType = academicDiscipline.AcademicDisciplineTargetType;
             dbAcademicDiscipline.LectureTotalHoursCount = academicDiscipline.LecturePayload?.TotalHoursCount;
-            dbAcademicDiscipline.AcademicDisciplineLectureLessonBatchInfoId = academicDiscipline.LecturePayload?.LessonBatchInfo?.Id;
-            dbAcademicDiscipline.AcademicDisciplineLectureLessonBatchInfo = Map(academicDiscipline.LecturePayload?.LessonBatchInfo);
+            if (academicDiscipline.LecturePayload != null)
+            {
+                dbAcademicDiscipline.AcademicDisciplineLectureLessonBatchInfos = MapToListOfDbLessonBatchInfo(academicDiscipline.LecturePayload.LessonBatchInfos);
+            }
             dbAcademicDiscipline.PracticeTotalHoursCount = academicDiscipline.PracticePayload?.TotalHoursCount;
-            dbAcademicDiscipline.AcademicDisciplinePracticeLessonBatchInfoId = academicDiscipline.PracticePayload?.LessonBatchInfo?.Id;
-            dbAcademicDiscipline.AcademicDisciplinePracticeLessonBatchInfo = Map(academicDiscipline.PracticePayload?.LessonBatchInfo);
+            if (academicDiscipline.PracticePayload != null)
+            {
+                dbAcademicDiscipline.AcademicDisciplinePracticeLessonBatchInfos = MapToListOfDbLessonBatchInfo(academicDiscipline.PracticePayload.LessonBatchInfos);
+            }
             dbAcademicDiscipline.LabTotalHoursCount = academicDiscipline.LabPayload?.TotalHoursCount;
-            dbAcademicDiscipline.AcademicDisciplineLabLessonBatchInfoId = academicDiscipline.LabPayload?.LessonBatchInfo?.Id;
-            dbAcademicDiscipline.AcademicDisciplineLabLessonBatchInfo = Map(academicDiscipline.LabPayload?.LessonBatchInfo);
+            if (academicDiscipline.LabPayload != null)
+            {
+                dbAcademicDiscipline.AcademicDisciplineLabLessonBatchInfos = MapToListOfDbLessonBatchInfo(academicDiscipline.LabPayload.LessonBatchInfos);
+            }
             dbAcademicDiscipline.Comment = academicDiscipline.Comment;
         }
 
@@ -561,90 +568,78 @@ namespace Dal.Mapping
             var target = new global::Domain.Models.RegistryItemModels.AcademicDisciplineRegistryItem();
             target.Id = entity.Id;
             target.Name = entity.Name;
-            target.Cypher = entity.Cypher;
+            target.AssociatedNames = entity.AssociatedNames;
             target.SemesterNumber = entity.SemesterNumber;
             target.AcademicDisciplineTargetType = entity.AcademicDisciplineTargetType;
             target.LecturePayload ??= new global::Domain.Models.AcademicDisciplinePayload();
             target.LecturePayload.TotalHoursCount = entity.LectureTotalHoursCount;
-            target.LecturePayload.LessonBatchInfo = Map(entity.AcademicDisciplineLectureLessonBatchInfo);
-            target.LecturePayload.LessonBatchInfo ??= new global::Domain.Models.AcademicDisciplineLessonBatchInfo();
-            target.LecturePayload.LessonBatchInfo.Id = entity.AcademicDisciplineLectureLessonBatchInfoId;
+            target.LecturePayload.LessonBatchInfos = MapToLessonBatchInfoArray(entity.AcademicDisciplineLectureLessonBatchInfos);
             target.PracticePayload ??= new global::Domain.Models.AcademicDisciplinePayload();
             target.PracticePayload.TotalHoursCount = entity.PracticeTotalHoursCount;
-            target.PracticePayload.LessonBatchInfo = Map(entity.AcademicDisciplinePracticeLessonBatchInfo);
-            target.PracticePayload.LessonBatchInfo ??= new global::Domain.Models.AcademicDisciplineLessonBatchInfo();
-            target.PracticePayload.LessonBatchInfo.Id = entity.AcademicDisciplinePracticeLessonBatchInfoId;
+            target.PracticePayload.LessonBatchInfos = MapToLessonBatchInfoArray(entity.AcademicDisciplinePracticeLessonBatchInfos);
             target.LabPayload ??= new global::Domain.Models.AcademicDisciplinePayload();
             target.LabPayload.TotalHoursCount = entity.LabTotalHoursCount;
-            target.LabPayload.LessonBatchInfo = Map(entity.AcademicDisciplineLabLessonBatchInfo);
-            target.LabPayload.LessonBatchInfo ??= new global::Domain.Models.AcademicDisciplineLessonBatchInfo();
-            target.LabPayload.LessonBatchInfo.Id = entity.AcademicDisciplineLabLessonBatchInfoId;
+            target.LabPayload.LessonBatchInfos = MapToLessonBatchInfoArray(entity.AcademicDisciplineLabLessonBatchInfos);
             target.Comment = entity.Comment;
             return target;
         }
 
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(academicDisciplineLessonBatchInfo))]
-        public static partial global::Dal.Entities.DbAcademicDisciplineLessonBatchInfo? Map(global::Domain.Models.AcademicDisciplineLessonBatchInfo? academicDisciplineLessonBatchInfo)
+        [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(lessonBatchInfo))]
+        public static partial global::Dal.Entities.DbLessonBatchInfo? Map(global::Domain.Models.LessonBatchInfo? lessonBatchInfo)
         {
-            if (academicDisciplineLessonBatchInfo == null)
+            if (lessonBatchInfo == null)
                 return default;
-            var target = new global::Dal.Entities.DbAcademicDisciplineLessonBatchInfo();
-            if (academicDisciplineLessonBatchInfo.Id != null)
+            var target = new global::Dal.Entities.DbLessonBatchInfo();
+            if (lessonBatchInfo.Id != null)
             {
-                target.Id = academicDisciplineLessonBatchInfo.Id.Value;
+                target.Id = lessonBatchInfo.Id.Value;
             }
-            target.StudentGroups = MapToListOfDbStudentGroup(academicDisciplineLessonBatchInfo.StudentGroups);
-            target.TeacherId = academicDisciplineLessonBatchInfo.TeacherId;
-            target.Teacher = Map(academicDisciplineLessonBatchInfo.Teacher);
-            target.RoomId = academicDisciplineLessonBatchInfo.RoomId;
-            target.Room = Map(academicDisciplineLessonBatchInfo.Room);
-            target.DayOfWeekTimeIntervals = academicDisciplineLessonBatchInfo.DayOfWeekTimeIntervals;
-            target.RepeatType = academicDisciplineLessonBatchInfo.RepeatType;
-            target.DateFrom = academicDisciplineLessonBatchInfo.DateInterval.DateFrom;
-            target.DateTo = academicDisciplineLessonBatchInfo.DateInterval.DateTo;
-            target.AllowCombining = academicDisciplineLessonBatchInfo.AllowCombining;
-            target.HoursCost = academicDisciplineLessonBatchInfo.HoursCost;
+            target.StudentGroups = MapToListOfDbStudentGroup(lessonBatchInfo.StudentGroups);
+            target.Teachers = MapToListOfDbTeacher(lessonBatchInfo.Teachers);
+            target.Rooms = MapToListOfDbRoom(lessonBatchInfo.Rooms);
+            target.DayOfWeekTimeIntervals = lessonBatchInfo.DayOfWeekTimeIntervals;
+            target.RepeatType = lessonBatchInfo.RepeatType;
+            target.DateFrom = lessonBatchInfo.DateInterval.DateFrom;
+            target.DateTo = lessonBatchInfo.DateInterval.DateTo;
+            target.AllowCombining = lessonBatchInfo.AllowCombining;
+            target.HoursCost = lessonBatchInfo.HoursCost;
             return target;
         }
 
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        public static partial void Update(global::Domain.Models.AcademicDisciplineLessonBatchInfo academicDisciplineLessonBatchInfo, global::Dal.Entities.DbAcademicDisciplineLessonBatchInfo dbAcademicDisciplineLessonBatchInfo)
+        public static partial void Update(global::Domain.Models.LessonBatchInfo lessonBatchInfo, global::Dal.Entities.DbLessonBatchInfo dbLessonBatchInfo)
         {
-            if (academicDisciplineLessonBatchInfo.Id != null)
+            if (lessonBatchInfo.Id != null)
             {
-                dbAcademicDisciplineLessonBatchInfo.Id = academicDisciplineLessonBatchInfo.Id.Value;
+                dbLessonBatchInfo.Id = lessonBatchInfo.Id.Value;
             }
-            dbAcademicDisciplineLessonBatchInfo.StudentGroups = MapToListOfDbStudentGroup(academicDisciplineLessonBatchInfo.StudentGroups);
-            dbAcademicDisciplineLessonBatchInfo.TeacherId = academicDisciplineLessonBatchInfo.TeacherId;
-            dbAcademicDisciplineLessonBatchInfo.Teacher = Map(academicDisciplineLessonBatchInfo.Teacher);
-            dbAcademicDisciplineLessonBatchInfo.RoomId = academicDisciplineLessonBatchInfo.RoomId;
-            dbAcademicDisciplineLessonBatchInfo.Room = Map(academicDisciplineLessonBatchInfo.Room);
-            dbAcademicDisciplineLessonBatchInfo.DayOfWeekTimeIntervals = academicDisciplineLessonBatchInfo.DayOfWeekTimeIntervals;
-            dbAcademicDisciplineLessonBatchInfo.RepeatType = academicDisciplineLessonBatchInfo.RepeatType;
-            dbAcademicDisciplineLessonBatchInfo.DateFrom = academicDisciplineLessonBatchInfo.DateInterval.DateFrom;
-            dbAcademicDisciplineLessonBatchInfo.DateTo = academicDisciplineLessonBatchInfo.DateInterval.DateTo;
-            dbAcademicDisciplineLessonBatchInfo.AllowCombining = academicDisciplineLessonBatchInfo.AllowCombining;
-            dbAcademicDisciplineLessonBatchInfo.HoursCost = academicDisciplineLessonBatchInfo.HoursCost;
+            dbLessonBatchInfo.StudentGroups = MapToListOfDbStudentGroup(lessonBatchInfo.StudentGroups);
+            dbLessonBatchInfo.Teachers = MapToListOfDbTeacher(lessonBatchInfo.Teachers);
+            dbLessonBatchInfo.Rooms = MapToListOfDbRoom(lessonBatchInfo.Rooms);
+            dbLessonBatchInfo.DayOfWeekTimeIntervals = lessonBatchInfo.DayOfWeekTimeIntervals;
+            dbLessonBatchInfo.RepeatType = lessonBatchInfo.RepeatType;
+            dbLessonBatchInfo.DateFrom = lessonBatchInfo.DateInterval.DateFrom;
+            dbLessonBatchInfo.DateTo = lessonBatchInfo.DateInterval.DateTo;
+            dbLessonBatchInfo.AllowCombining = lessonBatchInfo.AllowCombining;
+            dbLessonBatchInfo.HoursCost = lessonBatchInfo.HoursCost;
         }
 
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(academicDisciplineLessonBatchInfo))]
-        private static partial global::Domain.Models.AcademicDisciplineLessonBatchInfo? MapDbToModel(global::Dal.Entities.DbAcademicDisciplineLessonBatchInfo? academicDisciplineLessonBatchInfo)
+        [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(lessonBatchInfo))]
+        private static partial global::Domain.Models.LessonBatchInfo? MapDbToModel(global::Dal.Entities.DbLessonBatchInfo? lessonBatchInfo)
         {
-            if (academicDisciplineLessonBatchInfo == null)
+            if (lessonBatchInfo == null)
                 return default;
-            var target = new global::Domain.Models.AcademicDisciplineLessonBatchInfo();
-            target.Id = academicDisciplineLessonBatchInfo.Id;
-            target.StudentGroups = MapChildrenCollection(academicDisciplineLessonBatchInfo.StudentGroups);
-            target.TeacherId = academicDisciplineLessonBatchInfo.TeacherId;
-            target.Teacher = Map(academicDisciplineLessonBatchInfo.Teacher);
-            target.RoomId = academicDisciplineLessonBatchInfo.RoomId;
-            target.Room = Map(academicDisciplineLessonBatchInfo.Room);
-            target.DayOfWeekTimeIntervals = academicDisciplineLessonBatchInfo.DayOfWeekTimeIntervals;
-            target.RepeatType = academicDisciplineLessonBatchInfo.RepeatType;
-            target.AllowCombining = academicDisciplineLessonBatchInfo.AllowCombining;
-            target.HoursCost = academicDisciplineLessonBatchInfo.HoursCost;
+            var target = new global::Domain.Models.LessonBatchInfo();
+            target.Id = lessonBatchInfo.Id;
+            target.StudentGroups = MapChildrenCollection(lessonBatchInfo.StudentGroups);
+            target.Teachers = MapToTeacherArray(lessonBatchInfo.Teachers);
+            target.Rooms = MapToRoomArray(lessonBatchInfo.Rooms);
+            target.DayOfWeekTimeIntervals = lessonBatchInfo.DayOfWeekTimeIntervals;
+            target.RepeatType = lessonBatchInfo.RepeatType;
+            target.AllowCombining = lessonBatchInfo.AllowCombining;
+            target.HoursCost = lessonBatchInfo.HoursCost;
             return target;
         }
 
@@ -766,7 +761,7 @@ namespace Dal.Mapping
             var target = new global::Domain.Models.TeacherPreference();
             target.Id = teacherPreference.Id;
             target.ScheduleId = teacherPreference.ScheduleId;
-            target.Schedule = Map(teacherPreference.Schedule);
+            target.Schedule = MapDbToModel(teacherPreference.Schedule);
             target.TeacherId = teacherPreference.TeacherId;
             target.Teacher = Map(teacherPreference.Teacher);
             target.RoomId = teacherPreference.RoomId;
@@ -831,12 +826,84 @@ namespace Dal.Mapping
         }
 
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        private static global::System.Collections.Generic.List<global::Dal.Entities.DbTeacher> MapToListOfDbTeacher(global::System.Collections.Generic.IReadOnlyCollection<global::Domain.Models.Teacher> source)
+        {
+            var target = new global::System.Collections.Generic.List<global::Dal.Entities.DbTeacher>(source.Count);
+            foreach (var item in source)
+            {
+                target.Add(Map(item));
+            }
+            return target;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        private static global::System.Collections.Generic.List<global::Dal.Entities.DbRoom> MapToListOfDbRoom(global::System.Collections.Generic.IReadOnlyCollection<global::Domain.Models.Room> source)
+        {
+            var target = new global::System.Collections.Generic.List<global::Dal.Entities.DbRoom>(source.Count);
+            foreach (var item in source)
+            {
+                target.Add(Map(item));
+            }
+            return target;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
         private static global::System.Collections.Generic.List<global::Dal.Entities.DbLessonValidationMessage> MapToListOfDbLessonValidationMessage(global::System.Collections.Generic.IReadOnlyCollection<global::Domain.Models.LessonValidationMessage> source)
         {
             var target = new global::System.Collections.Generic.List<global::Dal.Entities.DbLessonValidationMessage>(source.Count);
             foreach (var item in source)
             {
                 target.Add(Map(item));
+            }
+            return target;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        private static global::Domain.Models.Teacher[] MapToTeacherArray(global::System.Collections.Generic.ICollection<global::Dal.Entities.DbTeacher> source)
+        {
+            var target = new global::Domain.Models.Teacher?[source.Count];
+            var i = 0;
+            foreach (var item in source)
+            {
+                target[i] = Map(item);
+                i++;
+            }
+            return target;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        private static global::Domain.Models.Room[] MapToRoomArray(global::System.Collections.Generic.ICollection<global::Dal.Entities.DbRoom> source)
+        {
+            var target = new global::Domain.Models.Room?[source.Count];
+            var i = 0;
+            foreach (var item in source)
+            {
+                target[i] = Map(item);
+                i++;
+            }
+            return target;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        private static global::System.Collections.Generic.List<global::Dal.Entities.DbLessonBatchInfo> MapToListOfDbLessonBatchInfo(global::System.Collections.Generic.IReadOnlyCollection<global::Domain.Models.LessonBatchInfo> source)
+        {
+            var target = new global::System.Collections.Generic.List<global::Dal.Entities.DbLessonBatchInfo>(source.Count);
+            foreach (var item in source)
+            {
+                target.Add(Map(item));
+            }
+            return target;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        private static global::Domain.Models.LessonBatchInfo[] MapToLessonBatchInfoArray(global::System.Collections.Generic.ICollection<global::Dal.Entities.DbLessonBatchInfo> source)
+        {
+            var target = new global::Domain.Models.LessonBatchInfo?[source.Count];
+            var i = 0;
+            foreach (var item in source)
+            {
+                target[i] = MapDbToModel(item);
+                i++;
             }
             return target;
         }

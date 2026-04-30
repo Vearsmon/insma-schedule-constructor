@@ -28,20 +28,20 @@ public class Room : IModelWithId
     /// <summary>
     /// Тип аудитории
     /// </summary>
-    public RoomType RoomType { get; set; }
+    public RoomType? RoomType { get; set; }
 
     /// <summary>
     /// Вместимость
     /// </summary>
-    public int Capacity { get; set; }
+    public int? Capacity { get; set; }
 
     /// <summary>
     /// Тип доски
     /// </summary>
-    public RoomBoardType RoomBoardType { get; set; }
+    public RoomBoardType? RoomBoardType { get; set; }
 
     /// <summary>
     /// Имеет в наличии проектор
     /// </summary>
-    public bool HasProjector { get; set; }
+    public bool? HasProjector { get; set; }
 }

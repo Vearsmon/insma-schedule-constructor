@@ -89,19 +89,9 @@ public class StudentGroupService(
                 $"Указанный номер семестра ({saveStudentGroupDto.SemesterNumber}) должен лежать в интервале от 1 до 12"));
         }
 
-        if (saveStudentGroupDto.Cypher == null!)
-        {
-            validationMessages.Add(new ValidationMessage("Не допускается отсутствие шифра"));
-        }
-
-        if (saveStudentGroupDto is { StudentGroupType: StudentGroupType.Thread, ParentId: not null })
+        if (saveStudentGroupDto is { StudentGroupType: StudentGroupType.Thread, ParentIds: not null })
         {
             validationMessages.Add(new ValidationMessage("При создании потока не может указываться группа-предок"));
-        }
-
-        if (saveStudentGroupDto is { StudentGroupType: StudentGroupType.Thread, Cypher: null })
-        {
-            validationMessages.Add(new ValidationMessage("При создании потока должен быть указан шифр"));
         }
 
         if (saveStudentGroupDto is { StudentGroupType: StudentGroupType.Thread, SemesterNumber: null })
@@ -121,20 +111,16 @@ public class StudentGroupService(
                 new ValidationMessage("Не найден проект расписания для сохранения академической группы"));
         }
 
-        if (saveStudentGroupDto.ParentId.HasValue
-            && !(await studentGroupRepository.ExistsAsync(saveStudentGroupDto.ParentId!.Value)))
+        var parents = Array.Empty<StudentGroup>();
+        var parentIds = saveStudentGroupDto.ChildIds.Distinct().ToArray();
+        if (parentIds.Length != 0)
         {
-            validationMessages.Add(
-                new ValidationMessage("Не найдена группа-предок для сохранения академической группы"));
-        }
-
-        var previousStudentGroup = saveStudentGroupDto.Id.HasValue
-            ? await studentGroupRepository.GetAsync(saveStudentGroupDto.Id!.Value)
-            : null;
-        if (previousStudentGroup != null && saveStudentGroupDto.ScheduleId != previousStudentGroup.ScheduleId)
-        {
-            validationMessages.Add(
-                new ValidationMessage("Запрещено менять проект расписания для академической группы"));
+            parents = await studentGroupRepository.SelectAsync(parentIds);
+            if (parents.Length != parentIds.Length)
+            {
+                validationMessages.Add(
+                    new ValidationMessage("Не найдены группы-предки для сохранения академической группы"));
+            }
         }
 
         var children = Array.Empty<StudentGroup>();
@@ -149,24 +135,40 @@ public class StudentGroupService(
             }
         }
 
+        var previousStudentGroup = saveStudentGroupDto.Id.HasValue
+            ? await studentGroupRepository.GetAsync(saveStudentGroupDto.Id!.Value)
+            : null;
+        if (previousStudentGroup != null && saveStudentGroupDto.ScheduleId != previousStudentGroup.ScheduleId)
+        {
+            validationMessages.Add(
+                new ValidationMessage("Запрещено менять проект расписания для академической группы"));
+        }
+
         if (validationMessages.Count > 0)
         {
             throw new ServiceException(validationMessages.ToArray());
         }
 
         var studentGroup = DtoMappingRegister.Map(saveStudentGroupDto)!;
-        studentGroup.Children = children;
+
+        var newSemiGroupNames = saveStudentGroupDto.SemiGroupToCreateNames.Where(x => children.All(y => y.Name != x));
+        var newSemiGroups = newSemiGroupNames.Select(name => new StudentGroup
+        {
+            ScheduleId = saveStudentGroupDto.ScheduleId,
+            Name = name,
+            SemesterNumber = saveStudentGroupDto.SemesterNumber,
+            StudentGroupType = StudentGroupType.SemiGroup,
+            Parents = [studentGroup],
+        });
+
+        studentGroup.Parents = parents;
+        studentGroup.Children = children.Concat(newSemiGroups).ToArray();
         await studentGroupRepository.SaveAsync(studentGroup);
 
         if (saveStudentGroupDto.Id.HasValue)
         {
             await lessonService.RecalculateConflictsForNewStudentGroup(studentGroup);
         }
-    }
-
-    public async Task<string[]> SearchCyphersAsync(Guid scheduleId)
-    {
-        return await studentGroupRepository.SearchCyphersAsync(scheduleId);
     }
 
     public async Task DeleteAsync(Guid studentGroupId)

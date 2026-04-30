@@ -95,26 +95,6 @@ public class StudentGroupController(IStudentGroupService studentGroupService) : 
     }
 
     /// <summary>
-    /// Получить список шифров академических групп
-    /// </summary>
-    /// <param name="scheduleId">Идентификатор проекта расписания</param>
-    /// <returns>Список шифров академических групп</returns>
-    /// <response code="200">Поиск реестра выполнился успешно</response>
-    /// <response code="400">Поиск реестра завершился с ошибкой валидации входных данных</response>
-    /// <response code="401">Не удалось выполнить авторизацию</response>
-    /// <response code="403">Поиск реестра завершился с ошибкой валидации прав доступа</response>
-    /// <response code="500">Поиск реестра завершился с ошибкой</response>
-    [AllowAnonymous]
-    [ProducesResponseType(typeof(string[]), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ValidationErrorDto), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ErrorDto), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(ErrorDto), StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(typeof(ErrorDto), StatusCodes.Status500InternalServerError)]
-    [HttpGet("search-cyphers")]
-    public async Task<string[]> SearchCyphers(Guid scheduleId) =>
-        await studentGroupService.SearchCyphersAsync(scheduleId);
-
-    /// <summary>
     /// Удалить данные академической группы
     /// </summary>
     /// <param name="studentGroupId">Идентификатор академической группы</param>

@@ -8,7 +8,7 @@ public class AcademicDisciplinePayload
     public int? TotalHoursCount { get; set; }
 
     /// <summary>
-    /// Информация о созданных через академическую дисциплину занятиях
+    /// Сведения о созданных через академическую дисциплину занятиях
     /// </summary>
-    public AcademicDisciplineLessonBatchInfo? LessonBatchInfo { get; set; }
+    public LessonBatchInfo[] LessonBatchInfos { get; set; } = [];
 }

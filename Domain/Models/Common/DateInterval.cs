@@ -2,19 +2,9 @@ namespace Domain.Models.Common;
 
 public class DateInterval
 {
-    public DateInterval()
-    {
-    }
+    public DateOnly DateFrom { get; init; }
 
-    public DateInterval(DateOnly dateFrom, DateOnly dateTo)
-    {
-        DateFrom = dateFrom;
-        DateTo = dateTo;
-    }
-
-    public DateOnly DateFrom { get; }
-
-    public DateOnly DateTo { get; }
+    public DateOnly DateTo { get; init; }
 
     public override bool Equals(object? obj)
         => obj is DateInterval dateInterval

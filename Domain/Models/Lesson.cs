@@ -43,22 +43,12 @@ public class Lesson : IModelWithId
     /// <summary>
     /// Преподаватель
     /// </summary>
-    public Guid? TeacherId { get; set; }
-
-    /// <summary>
-    /// Преподаватель
-    /// </summary>
-    public Teacher? Teacher { get; set; }
+    public Teacher[] Teachers { get; set; } = [];
 
     /// <summary>
     /// Аудитория
     /// </summary>
-    public Guid? RoomId { get; set; }
-
-    /// <summary>
-    /// Аудитория
-    /// </summary>
-    public Room? Room { get; set; }
+    public Room[] Rooms { get; set; } = [];
 
     /// <summary>
     /// Дата с временным отрезком проведения занятия
@@ -71,14 +61,14 @@ public class Lesson : IModelWithId
     public LessonFlexibilityType FlexibilityType { get; set; }
 
     /// <summary>
+    /// Вес занятия в часах
+    /// </summary>
+    public int? HoursCost { get; set; }
+
+    /// <summary>
     /// Занятие допускает совмещение
     /// </summary>
     public bool AllowCombining { get; set; }
-
-    /// <summary>
-    /// Вес занятия в часах
-    /// </summary>
-    public int HoursCost { get; set; }
 
     /// <summary>
     /// Сообщения валидации

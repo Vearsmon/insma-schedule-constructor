@@ -58,11 +58,6 @@ public class AcademicDisciplineService(
             validationMessages.Add(new ValidationMessage("Не допускается отсутствие названия"));
         }
 
-        if (saveAcademicDisciplineDto.Cypher == null!)
-        {
-            validationMessages.Add(new ValidationMessage("Не допускается отсутствие шифра"));
-        }
-
         if (saveAcademicDisciplineDto.Id.HasValue
             && !(await academicDisciplineRepository.ExistsAsync(saveAcademicDisciplineDto.Id!.Value)))
         {
@@ -136,12 +131,12 @@ public class AcademicDisciplineService(
 
         var payload = academicDiscipline.GetPayloadByType(academicDisciplineType);
 
-        return await lessonService.GetLessonSeriesConflictsAsync(academicDiscipline.Id!.Value, payload!.LessonBatchInfo!, academicDisciplineType, academicDiscipline.ScheduleId);
-    }
-
-    public async Task<string[]> SearchCyphersAsync(Guid scheduleId)
-    {
-        return await academicDisciplineRepository.SearchCyphersAsync(scheduleId);
+        var result = new List<LessonSeriesConflictDto>();
+        foreach (var lessonBatchInfo in payload!.LessonBatchInfos)
+        {
+            result.AddRange(await lessonService.GetLessonSeriesConflictsAsync(academicDiscipline.Id!.Value, lessonBatchInfo, academicDisciplineType, academicDiscipline.ScheduleId));
+        }
+        return result.ToArray();
     }
 
     public async Task DeleteAsync(Guid academicDisciplineId)

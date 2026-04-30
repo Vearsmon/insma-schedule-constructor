@@ -51,6 +51,16 @@ public class LessonValidationPayload
     public Teacher? AffectedByTeacher { get; set; }
 
     /// <summary>
+    /// Оказавшая влияние аудитория
+    /// </summary>
+    public Guid? AffectedByRoomId { get; set; }
+
+    /// <summary>
+    /// Оказавшая влияние аудитория
+    /// </summary>
+    public Room? AffectedByRoom { get; set; }
+
+    /// <summary>
     /// Оказавшее влияние пожелание преподавателя
     /// </summary>
     public Guid? AffectedByTeacherPreferenceId { get; set; }

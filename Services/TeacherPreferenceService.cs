@@ -46,7 +46,7 @@ public class TeacherPreferenceService(
         var teacherPreferences = await teacherPreferenceRepository.SearchAsync(new TeacherPreferenceSearchModel
         {
             ScheduleId = scheduleId,
-            TeacherId = teacherId,
+            TeacherIds = [teacherId],
         });
         return new TeacherPreferenceViewDto
         {
@@ -66,7 +66,7 @@ public class TeacherPreferenceService(
                     TeacherPreferenceType = x.TeacherPreferenceType!.Value,
                 })
                 .ToArray(),
-            Comment = teacherPreferences.First(x => x.Comment != null).Comment,
+            Comment = teacherPreferences.FirstOrDefault(x => x.Comment != null)?.Comment,
         };
     }
 
@@ -218,7 +218,7 @@ public class TeacherPreferenceService(
         var previousPreferences = await teacherPreferenceRepository.SearchAsync(new TeacherPreferenceSearchModel
         {
             ScheduleId = saveTeacherPreferenceDto.ScheduleId,
-            TeacherId = saveTeacherPreferenceDto.TeacherId,
+            TeacherIds = [saveTeacherPreferenceDto.TeacherId],
         });
 
         await teacherPreferenceRepository.DeleteAsync(previousPreferences.Select(x => x.Id!.Value).ToArray());
@@ -236,7 +236,7 @@ public class TeacherPreferenceService(
             new TeacherPreferenceSearchModel
             {
                 ScheduleId = scheduleId,
-                TeacherId = teacherId,
+                TeacherIds = [teacherId],
             });
         await teacherRepository.DeleteAsync(teacherPreferences.Select(x => x.Id!.Value).ToArray());
     }

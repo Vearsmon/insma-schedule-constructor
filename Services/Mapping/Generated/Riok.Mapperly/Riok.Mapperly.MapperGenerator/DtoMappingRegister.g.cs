@@ -13,7 +13,7 @@ namespace Services.Mapping
             var target = new global::Domain.Dto.ViewDto.AcademicDisciplineViewDto();
             target.Id = model.Id;
             target.Name = model.Name;
-            target.Cypher = model.Cypher;
+            target.AssociatedNames = model.AssociatedNames;
             target.SemesterNumber = model.SemesterNumber;
             target.AcademicDisciplineTargetType = model.AcademicDisciplineTargetType;
             target.AllowedLessonTypes = model.AllowedLessonTypes;
@@ -55,7 +55,7 @@ namespace Services.Mapping
             target.Id = dto.Id;
             target.ScheduleId = dto.ScheduleId;
             target.Name = dto.Name;
-            target.Cypher = dto.Cypher;
+            target.AssociatedNames = dto.AssociatedNames;
             target.SemesterNumber = dto.SemesterNumber;
             target.AcademicDisciplineTargetType = dto.AcademicDisciplineTargetType;
             target.AllowedLessonTypes = dto.AllowedLessonTypes;
@@ -74,7 +74,7 @@ namespace Services.Mapping
                 return default;
             var target = new global::Domain.Models.AcademicDisciplinePayload();
             target.TotalHoursCount = dto.TotalHoursCount;
-            target.LessonBatchInfo = Map(dto.LessonBatchInfo);
+            target.LessonBatchInfos = MapToLessonBatchInfoArray(dto.LessonBatchInfos);
             return target;
         }
 
@@ -87,7 +87,7 @@ namespace Services.Mapping
             var target = new global::Domain.Dto.RegistryDto.AcademicDisciplineRegistryItemDto();
             target.Id = item.Id;
             target.Name = item.Name;
-            target.Cypher = item.Cypher;
+            target.AssociatedNames = item.AssociatedNames;
             target.SemesterNumber = item.SemesterNumber;
             target.AcademicDisciplineTargetType = item.AcademicDisciplineTargetType;
             target.AllowedLessonTypes = item.AllowedLessonTypes;
@@ -120,42 +120,6 @@ namespace Services.Mapping
         }
 
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(dto))]
-        private static partial global::Domain.Dto.AcademicDisciplineLessonBatchInfoDto? MapModelToDto(global::Domain.Models.AcademicDisciplineLessonBatchInfo? dto)
-        {
-            if (dto == null)
-                return default;
-            var target = new global::Domain.Dto.AcademicDisciplineLessonBatchInfoDto();
-            target.Id = dto.Id;
-            target.TeacherId = dto.TeacherId;
-            target.RoomId = dto.RoomId;
-            target.DayOfWeekTimeIntervals = dto.DayOfWeekTimeIntervals;
-            target.RepeatType = dto.RepeatType;
-            target.DateInterval = dto.DateInterval;
-            target.AllowCombining = dto.AllowCombining;
-            target.HoursCost = dto.HoursCost;
-            return target;
-        }
-
-        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(dto))]
-        private static partial global::Domain.Models.AcademicDisciplineLessonBatchInfo? MapDtoToModel(global::Domain.Dto.AcademicDisciplineLessonBatchInfoDto? dto)
-        {
-            if (dto == null)
-                return default;
-            var target = new global::Domain.Models.AcademicDisciplineLessonBatchInfo();
-            target.Id = dto.Id;
-            target.TeacherId = dto.TeacherId;
-            target.RoomId = dto.RoomId;
-            target.DayOfWeekTimeIntervals = dto.DayOfWeekTimeIntervals;
-            target.RepeatType = dto.RepeatType;
-            target.DateInterval = dto.DateInterval;
-            target.AllowCombining = dto.AllowCombining;
-            target.HoursCost = dto.HoursCost;
-            return target;
-        }
-
-        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
         [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(item))]
         public static partial global::Domain.Dto.ShortDto.AcademicDisciplineShortDto? MapToRootDto(global::Domain.Models.AcademicDiscipline? item)
         {
@@ -167,6 +131,47 @@ namespace Services.Mapping
                 target.Id = item.Id.Value;
             }
             target.Name = item.Name;
+            return target;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(dto))]
+        private static partial global::Domain.Dto.LessonBatchInfoDto? MapModelToDto(global::Domain.Models.LessonBatchInfo? dto)
+        {
+            if (dto == null)
+                return default;
+            var target = new global::Domain.Dto.LessonBatchInfoDto();
+            target.Id = dto.Id;
+            target.StudentGroupIds = MapStudentGroupsCollection(dto.StudentGroups);
+            target.TeacherIds = MapTeachersCollection(dto.Teachers);
+            target.RoomIds = MapRoomsCollection(dto.Rooms);
+            target.DayOfWeekTimeIntervals = dto.DayOfWeekTimeIntervals;
+            target.RepeatType = dto.RepeatType;
+            target.DateInterval = dto.DateInterval;
+            target.AllowCombining = dto.AllowCombining;
+            if (dto.HoursCost != null)
+            {
+                target.HoursCost = dto.HoursCost.Value;
+            }
+            return target;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(dto))]
+        private static partial global::Domain.Models.LessonBatchInfo? MapDtoToModel(global::Domain.Dto.LessonBatchInfoDto? dto)
+        {
+            if (dto == null)
+                return default;
+            var target = new global::Domain.Models.LessonBatchInfo();
+            target.Id = dto.Id;
+            target.StudentGroups = MapStudentGroupIds(dto.StudentGroupIds);
+            target.Teachers = MapTeacherIds(dto.TeacherIds);
+            target.Rooms = MapRoomIds(dto.RoomIds);
+            target.DayOfWeekTimeIntervals = dto.DayOfWeekTimeIntervals;
+            target.RepeatType = dto.RepeatType;
+            target.DateInterval = dto.DateInterval;
+            target.AllowCombining = dto.AllowCombining;
+            target.HoursCost = dto.HoursCost;
             return target;
         }
 
@@ -220,12 +225,15 @@ namespace Services.Mapping
             target.AcademicDisciplineId = item.AcademicDisciplineId;
             target.AcademicDisciplineType = item.AcademicDisciplineType;
             target.StudentGroupIds = item.StudentGroupIds;
-            target.TeacherId = item.TeacherId;
-            target.RoomId = item.RoomId;
+            target.TeacherIds = item.TeacherIds;
+            target.RoomIds = item.RoomIds;
             target.DateWithTimeInterval = item.DateWithTimeInterval;
             target.FlexibilityType = item.FlexibilityType;
             target.AllowCombining = item.AllowCombining;
-            target.HoursCost = item.HoursCost;
+            if (item.HoursCost != null)
+            {
+                target.HoursCost = item.HoursCost.Value;
+            }
             target.ValidationMessages = item.ValidationMessages;
             return target;
         }
@@ -238,16 +246,19 @@ namespace Services.Mapping
                 return default;
             var target = new global::Domain.Dto.ShortDto.LessonShortDto();
             target.Id = model.Id;
-            target.ScheduleId = model.ScheduleId;
             target.AcademicDisciplineId = model.AcademicDisciplineId;
             target.AcademicDisciplineType = model.AcademicDisciplineType;
             target.StudentGroups = MapToStudentGroupShortDtoArray(model.StudentGroups);
-            target.TeacherId = model.TeacherId;
-            target.RoomId = model.RoomId;
+            target.Teachers = MapToTeacherShortDtoArray(model.Teachers);
+            target.Rooms = MapToRoomShortDtoArray(model.Rooms);
             target.DateWithTimeInterval = model.DateWithTimeInterval;
             target.FlexibilityType = model.FlexibilityType;
             target.AllowCombining = model.AllowCombining;
-            target.HoursCost = model.HoursCost;
+            if (model.HoursCost != null)
+            {
+                target.HoursCost = model.HoursCost.Value;
+            }
+            target.CurrentErrorsMaxLevel = GetErrorsMaxLevel(model.ValidationMessages);
             return target;
         }
 
@@ -261,12 +272,13 @@ namespace Services.Mapping
             target.Id = model.Id;
             target.AcademicDisciplineId = model.AcademicDisciplineId;
             target.AcademicDisciplineType = model.AcademicDisciplineType;
-            target.TeacherId = model.TeacherId;
-            target.RoomId = model.RoomId;
             target.DateWithTimeInterval = model.DateWithTimeInterval;
             target.FlexibilityType = model.FlexibilityType;
             target.AllowCombining = model.AllowCombining;
-            target.HoursCost = model.HoursCost;
+            if (model.HoursCost != null)
+            {
+                target.HoursCost = model.HoursCost.Value;
+            }
             target.ValidationMessages = model.ValidationMessages;
             return target;
         }
@@ -282,12 +294,10 @@ namespace Services.Mapping
             target.ScheduleId = dto.ScheduleId;
             target.AcademicDisciplineId = dto.AcademicDisciplineId;
             target.AcademicDisciplineType = dto.AcademicDisciplineType;
-            target.TeacherId = dto.TeacherId;
-            target.RoomId = dto.RoomId;
             target.DateWithTimeInterval = dto.DateWithTimeInterval;
             target.FlexibilityType = dto.FlexibilityType;
-            target.AllowCombining = dto.AllowCombining;
             target.HoursCost = dto.HoursCost;
+            target.AllowCombining = dto.AllowCombining;
             return target;
         }
 
@@ -303,7 +313,7 @@ namespace Services.Mapping
                 target.Id = model.Id.Value;
             }
             target.Name = model.Name;
-            target.CampusId = model.CampusId;
+            target.CampusName = model.Campus.Name;
             target.RoomType = model.RoomType;
             target.Capacity = model.Capacity;
             target.RoomBoardType = model.RoomBoardType;
@@ -336,18 +346,32 @@ namespace Services.Mapping
                 return default;
             var target = new global::Domain.Dto.RegistryDto.RoomRegistryItemDto();
             target.Id = item.Id;
+            target.Name = item.Name;
+            target.CampusName = item.CampusName;
+            target.RoomType = item.RoomType;
+            target.Capacity = item.Capacity;
+            target.RoomBoardType = item.RoomBoardType;
+            target.HasProjector = item.HasProjector;
             return target;
         }
 
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(dto))]
-        public static partial global::Domain.Models.Schedule? Map(global::Domain.Dto.SaveDto.SaveScheduleDto? dto)
+        [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(model))]
+        public static partial global::Domain.Dto.ShortDto.RoomShortDto? MapShort(global::Domain.Models.Room? model)
         {
-            if (dto == null)
+            if (model == null)
                 return default;
-            var target = new global::Domain.Models.Schedule();
-            target.Id = dto.Id;
-            target.Name = dto.Name;
+            var target = new global::Domain.Dto.ShortDto.RoomShortDto();
+            if (model.Id != null)
+            {
+                target.Id = model.Id.Value;
+            }
+            target.Name = model.Name;
+            target.CampusName = model.Campus.Name;
+            target.RoomType = model.RoomType;
+            target.Capacity = model.Capacity;
+            target.RoomBoardType = model.RoomBoardType;
+            target.HasProjector = model.HasProjector;
             return target;
         }
 
@@ -360,9 +384,7 @@ namespace Services.Mapping
             var target = new global::Domain.Dto.RegistryDto.ScheduleRegistryItemDto();
             target.Id = item.Id;
             target.Name = item.Name;
-            target.StartsWithEvenWeek = item.StartsWithEvenWeek;
-            target.StartDate = item.StartDate;
-            target.EndDate = item.EndDate;
+            target.DateInterval = item.DateInterval;
             return target;
         }
 
@@ -378,6 +400,19 @@ namespace Services.Mapping
                 target.Id = model.Id.Value;
             }
             target.Name = model.Name;
+            target.DateInterval = model.DateInterval;
+            return target;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(dto))]
+        private static partial global::Domain.Models.Schedule? MapToModel(global::Domain.Dto.SaveDto.SaveScheduleDto? dto)
+        {
+            if (dto == null)
+                return default;
+            var target = new global::Domain.Models.Schedule();
+            target.Id = dto.Id;
+            target.Name = dto.Name;
             return target;
         }
 
@@ -393,9 +428,11 @@ namespace Services.Mapping
                 target.Id = model.Id.Value;
             }
             target.Name = model.Name;
-            target.SemesterNumber = model.SemesterNumber;
+            if (model.SemesterNumber != null)
+            {
+                target.SemesterNumber = model.SemesterNumber.Value;
+            }
             target.StudentGroupType = model.StudentGroupType;
-            target.Cypher = model.Cypher;
             target.Children = MapToStudentGroupShortDtoArray(model.Children);
             return target;
         }
@@ -425,16 +462,8 @@ namespace Services.Mapping
             target.Id = dto.Id;
             target.ScheduleId = dto.ScheduleId;
             target.Name = dto.Name;
-            if (dto.SemesterNumber != null)
-            {
-                target.SemesterNumber = dto.SemesterNumber.Value;
-            }
+            target.SemesterNumber = dto.SemesterNumber;
             target.StudentGroupType = dto.StudentGroupType;
-            if (dto.Cypher != null)
-            {
-                target.Cypher = dto.Cypher;
-            }
-            target.ParentId = dto.ParentId;
             return target;
         }
 
@@ -447,9 +476,11 @@ namespace Services.Mapping
             var target = new global::Domain.Dto.RegistryDto.StudentGroupRegistryItemDto();
             target.Id = item.Id;
             target.Name = item.Name;
-            target.SemesterNumber = item.SemesterNumber;
+            if (item.SemesterNumber != null)
+            {
+                target.SemesterNumber = item.SemesterNumber.Value;
+            }
             target.StudentGroupType = item.StudentGroupType;
-            target.Cypher = item.Cypher;
             return target;
         }
 
@@ -507,6 +538,7 @@ namespace Services.Mapping
                 target.Id = model.Id.Value;
             }
             target.Fullname = model.Fullname;
+            target.Contacts = model.Contacts;
             return target;
         }
 
@@ -529,7 +561,18 @@ namespace Services.Mapping
             {
                 target.TotalHoursCount = source.TotalHoursCount.Value;
             }
-            target.LessonBatchInfo = Map(source.LessonBatchInfo);
+            target.LessonBatchInfos = MapToLessonBatchInfoDtoArray(source.LessonBatchInfos);
+            return target;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        private static global::Domain.Models.LessonBatchInfo[] MapToLessonBatchInfoArray(global::Domain.Dto.LessonBatchInfoDto[] source)
+        {
+            var target = new global::Domain.Models.LessonBatchInfo?[source.Length];
+            for (var i = 0; i < source.Length; i++)
+            {
+                target[i] = MapDtoToModel(source[i]);
+            }
             return target;
         }
 
@@ -540,6 +583,39 @@ namespace Services.Mapping
             for (var i = 0; i < source.Length; i++)
             {
                 target[i] = MapShort(source[i]);
+            }
+            return target;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        private static global::Domain.Dto.ShortDto.TeacherShortDto[] MapToTeacherShortDtoArray(global::Domain.Models.Teacher[] source)
+        {
+            var target = new global::Domain.Dto.ShortDto.TeacherShortDto?[source.Length];
+            for (var i = 0; i < source.Length; i++)
+            {
+                target[i] = MapShort(source[i]);
+            }
+            return target;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        private static global::Domain.Dto.ShortDto.RoomShortDto[] MapToRoomShortDtoArray(global::Domain.Models.Room[] source)
+        {
+            var target = new global::Domain.Dto.ShortDto.RoomShortDto?[source.Length];
+            for (var i = 0; i < source.Length; i++)
+            {
+                target[i] = MapShort(source[i]);
+            }
+            return target;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        private static global::Domain.Dto.LessonBatchInfoDto[] MapToLessonBatchInfoDtoArray(global::Domain.Models.LessonBatchInfo[] source)
+        {
+            var target = new global::Domain.Dto.LessonBatchInfoDto?[source.Length];
+            for (var i = 0; i < source.Length; i++)
+            {
+                target[i] = MapModelToDto(source[i]);
             }
             return target;
         }

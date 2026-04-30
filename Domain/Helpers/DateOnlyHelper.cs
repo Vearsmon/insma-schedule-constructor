@@ -78,6 +78,6 @@ public static class DateOnlyHelper
     {
         var startOfWeek = date.AddDays(-GetLogicalDayOfWeekNumber(date.DayOfWeek));
         var endOfWeek = startOfWeek.AddDays(6);
-        return new DateInterval(startOfWeek, endOfWeek);
+        return new DateInterval { DateFrom = startOfWeek, DateTo = endOfWeek };
     }
 }

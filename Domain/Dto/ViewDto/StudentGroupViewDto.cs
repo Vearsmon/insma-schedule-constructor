@@ -9,6 +9,5 @@ public class StudentGroupViewDto
     public string Name { get; set; } = null!;
     public int SemesterNumber { get; set; }
     public StudentGroupType StudentGroupType { get; set; }
-    public string Cypher { get; set; } = null!;
     public StudentGroupShortDto[] Children { get; set; } = [];
 }

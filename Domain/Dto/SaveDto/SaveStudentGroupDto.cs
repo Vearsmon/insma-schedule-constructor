@@ -9,8 +9,7 @@ public class SaveStudentGroupDto
     public string Name { get; set; } = null!;
     public int? SemesterNumber { get; set; }
     public StudentGroupType StudentGroupType { get; set; }
-    public string? Cypher { get; set; } = null!;
-    public Guid? ParentId { get; set; }
+    public Guid[] ParentIds { get; set; } = [];
     public Guid[] ChildIds { get; set; } = [];
     public string[] SemiGroupToCreateNames { get; set; } = [];
 }

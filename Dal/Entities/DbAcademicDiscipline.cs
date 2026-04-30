@@ -27,15 +27,14 @@ public class DbAcademicDiscipline : IDbEntityWithId
     public string Name { get; set; } = null!;
 
     /// <summary>
-    /// Шифр направления
+    /// Названия, ассоциируемые с академической дисциплиной
     /// </summary>
-    [StringLength(8)]
-    public string Cypher { get; set; } = null!;
+    public string[] AssociatedNames { get; set; } = [];
 
     /// <summary>
     /// Номер семестра
     /// </summary>
-    public int SemesterNumber { get; set; }
+    public int? SemesterNumber { get; set; }
 
     /// <summary>
     /// Вид дисциплины
@@ -53,14 +52,9 @@ public class DbAcademicDiscipline : IDbEntityWithId
     public int? LectureTotalHoursCount { get; set; }
 
     /// <summary>
-    /// Информация о созданных через академическую дисциплину лекционных занятиях
+    /// Сведения о созданных через академическую дисциплину лекционных занятиях
     /// </summary>
-    public Guid? AcademicDisciplineLectureLessonBatchInfoId { get; set; }
-
-    /// <summary>
-    /// Информация о созданных через академическую дисциплину лекционных занятиях
-    /// </summary>
-    public DbAcademicDisciplineLessonBatchInfo? AcademicDisciplineLectureLessonBatchInfo { get; set; }
+    public ICollection<DbLessonBatchInfo> AcademicDisciplineLectureLessonBatchInfos { get; set; } = [];
 
     /// <summary>
     /// Поддерживает назначение практических занятий
@@ -73,14 +67,9 @@ public class DbAcademicDiscipline : IDbEntityWithId
     public int? PracticeTotalHoursCount { get; set; }
 
     /// <summary>
-    /// Информация о созданных через академическую дисциплину практических занятиях
+    /// Сведения о созданных через академическую дисциплину практических занятиях
     /// </summary>
-    public Guid? AcademicDisciplinePracticeLessonBatchInfoId { get; set; }
-
-    /// <summary>
-    /// Информация о созданных через академическую дисциплину практических занятиях
-    /// </summary>
-    public DbAcademicDisciplineLessonBatchInfo? AcademicDisciplinePracticeLessonBatchInfo { get; set; }
+    public ICollection<DbLessonBatchInfo> AcademicDisciplinePracticeLessonBatchInfos { get; set; } = [];
 
     /// <summary>
     /// Поддерживает назначение лабораторных занятий
@@ -93,14 +82,9 @@ public class DbAcademicDiscipline : IDbEntityWithId
     public int? LabTotalHoursCount { get; set; }
 
     /// <summary>
-    /// Информация о созданных через академическую дисциплину лабораторных занятиях
+    /// Сведения о созданных через академическую дисциплину лабораторных занятиях
     /// </summary>
-    public Guid? AcademicDisciplineLabLessonBatchInfoId { get; set; }
-
-    /// <summary>
-    /// Информация о созданных через академическую дисциплину лабораторных занятиях
-    /// </summary>
-    public DbAcademicDisciplineLessonBatchInfo? AcademicDisciplineLabLessonBatchInfo { get; set; }
+    public ICollection<DbLessonBatchInfo> AcademicDisciplineLabLessonBatchInfos { get; set; } = [];
 
     /// <summary>
     /// Дисциплина предусматривает проведение экзамена

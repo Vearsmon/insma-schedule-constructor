@@ -3,5 +3,5 @@
 public class AcademicDisciplinePayloadDto
 {
     public int TotalHoursCount { get; set; }
-    public AcademicDisciplineLessonBatchInfoDto? LessonBatchInfo { get; set; }
+    public LessonBatchInfoDto[] LessonBatchInfos { get; set; } = [];
 }

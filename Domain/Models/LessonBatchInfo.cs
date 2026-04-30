@@ -3,7 +3,7 @@ using Domain.Models.Enums;
 
 namespace Domain.Models;
 
-public class AcademicDisciplineLessonBatchInfo : IModelWithId
+public class LessonBatchInfo : IModelWithId
 {
     public Guid? Id { get; set; }
 
@@ -13,24 +13,14 @@ public class AcademicDisciplineLessonBatchInfo : IModelWithId
     public StudentGroup[] StudentGroups { get; set; } = [];
 
     /// <summary>
-    /// Преподаватель
+    /// Преподаватели
     /// </summary>
-    public Guid? TeacherId { get; set; }
+    public Teacher[] Teachers { get; set; } = [];
 
     /// <summary>
-    /// Преподаватель
+    /// Аудитории
     /// </summary>
-    public Teacher? Teacher { get; set; }
-
-    /// <summary>
-    /// Аудитория
-    /// </summary>
-    public Guid? RoomId { get; set; }
-
-    /// <summary>
-    /// Аудитория
-    /// </summary>
-    public Room? Room { get; set; }
+    public Room[] Rooms { get; set; } = [];
 
     /// <summary>
     /// Отрезки времени занятий по дням недели
@@ -55,5 +45,5 @@ public class AcademicDisciplineLessonBatchInfo : IModelWithId
     /// <summary>
     /// Вес для всех занятий в часах
     /// </summary>
-    public int HoursCost { get; set; }
+    public int? HoursCost { get; set; }
 }

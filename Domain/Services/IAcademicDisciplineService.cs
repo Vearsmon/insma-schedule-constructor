@@ -21,7 +21,5 @@ public interface IAcademicDisciplineService
     Task<LessonSeriesConflictDto[]> GetLessonSeriesConflictsAsync(Guid academicDisciplineId,
         AcademicDisciplineType academicDisciplineType);
 
-    Task<string[]> SearchCyphersAsync(Guid scheduleId);
-
     Task DeleteAsync(Guid academicDisciplineId);
 }

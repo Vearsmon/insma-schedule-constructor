@@ -26,14 +26,14 @@ public class AcademicDiscipline : IModelWithId
     public string Name { get; set; } = null!;
 
     /// <summary>
-    /// Шифр направления
+    /// Названия, ассоциируемые с академической дисциплиной
     /// </summary>
-    public string Cypher { get; set; } = null!;
+    public string[] AssociatedNames { get; set; } = [];
 
     /// <summary>
     /// Номер семестра
     /// </summary>
-    public int SemesterNumber { get; set; }
+    public int? SemesterNumber { get; set; }
 
     /// <summary>
     /// Вид дисциплины

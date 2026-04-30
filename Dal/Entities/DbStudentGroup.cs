@@ -29,7 +29,7 @@ public class DbStudentGroup : IDbEntityWithId
     /// <summary>
     /// Номер семестра
     /// </summary>
-    public int SemesterNumber { get; set; }
+    public int? SemesterNumber { get; set; }
 
     /// <summary>
     /// Тип академической группы
@@ -37,23 +37,12 @@ public class DbStudentGroup : IDbEntityWithId
     public StudentGroupType StudentGroupType { get; set; }
 
     /// <summary>
-    /// Шифр направления
+    /// Родительские академические группы
     /// </summary>
-    [StringLength(8)]
-    public string Cypher { get; set; } = null!;
+    public ICollection<DbStudentGroup> Parents { get; set; } = [];
 
     /// <summary>
-    /// Академическая группа-предок
-    /// </summary>
-    public Guid? ParentId { get; set; }
-
-    /// <summary>
-    /// Академическая группа-предок
-    /// </summary>
-    public DbStudentGroup? Parent { get; set; }
-
-    /// <summary>
-    /// Академические группы-наследники
+    /// Составляющие академические группы
     /// </summary>
     public ICollection<DbStudentGroup> Children { get; set; } = [];
 }

@@ -7,7 +7,7 @@ namespace Dal.Entities;
 /// <summary>
 /// Информация о созданных через академическую дисциплину занятиях
 /// </summary>
-public class DbAcademicDisciplineLessonBatchInfo : IDbEntityWithId
+public class DbLessonBatchInfo : IDbEntityWithId
 {
     public Guid Id { get; set; }
 
@@ -17,24 +17,14 @@ public class DbAcademicDisciplineLessonBatchInfo : IDbEntityWithId
     public ICollection<DbStudentGroup> StudentGroups { get; set; } = [];
 
     /// <summary>
-    /// Преподаватель
+    /// Преподаватели
     /// </summary>
-    public Guid? TeacherId { get; set; }
+    public ICollection<DbTeacher> Teachers { get; set; } = [];
 
     /// <summary>
-    /// Преподаватель
+    /// Аудитории
     /// </summary>
-    public DbTeacher? Teacher { get; set; }
-
-    /// <summary>
-    /// Аудитория
-    /// </summary>
-    public Guid? RoomId { get; set; }
-
-    /// <summary>
-    /// Аудитория
-    /// </summary>
-    public DbRoom? Room { get; set; }
+    public ICollection<DbRoom> Rooms { get; set; } = [];
 
     /// <summary>
     /// Отрезки времени занятий по дням недели
@@ -66,5 +56,5 @@ public class DbAcademicDisciplineLessonBatchInfo : IDbEntityWithId
     /// <summary>
     /// Вес для всех занятий в часах
     /// </summary>
-    public int HoursCost { get; set; }
+    public int? HoursCost { get; set; }
 }

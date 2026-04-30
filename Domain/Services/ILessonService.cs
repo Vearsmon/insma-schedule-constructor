@@ -29,7 +29,7 @@ public interface ILessonService
 
     Task<LessonSeriesConflictDto[]> GetLessonSeriesConflictsAsync(
         Guid academicDisciplineId,
-        AcademicDisciplineLessonBatchInfo lessonBatchInfo,
+        LessonBatchInfo lessonBatchInfo,
         AcademicDisciplineType academicDisciplineType, Guid scheduleId);
 
     Task DeleteAsync(Guid scheduleId, Guid lessonId);

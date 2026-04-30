@@ -17,19 +17,14 @@ public class DbSchedule : IDbEntityWithId
     public string Name { get; set; } = null!;
 
     /// <summary>
-    /// Расписание начинается с четной недели
-    /// </summary>
-    public bool StartsWithEvenWeek { get; set; }
-
-    /// <summary>
     /// Дата начала проведения занятий
     /// </summary>
     [Column(TypeName = DbDataTypes.Date)]
-    public DateOnly StartDate { get; set; }
+    public DateOnly DateFrom { get; set; }
 
     /// <summary>
     /// Дата завершения проведения занятий
     /// </summary>
     [Column(TypeName = DbDataTypes.Date)]
-    public DateOnly EndDate { get; set; }
+    public DateOnly DateTo { get; set; }
 }

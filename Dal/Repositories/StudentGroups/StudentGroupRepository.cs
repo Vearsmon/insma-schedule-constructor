@@ -15,7 +15,18 @@ public class StudentGroupRepository(
 {
     public async Task<StudentGroup[]> SearchAsync(StudentGroupSearchModel searchModel)
     {
-        return await base.SearchAsync(predicateBuilder, searchModel);
+        var predicate = predicateBuilder.Build(searchModel);
+
+        var entities = await Query()
+            .AsNoTracking()
+            .Include(x => x.Parents)
+            .ThenInclude(x => x!.Parents)
+            .Include(x => x.Children)
+            .ThenInclude(x => x!.Children)
+            .Where(predicate)
+            .ToArrayAsync();
+
+        return entities.Select(x => MapperReadonly.Map(x)).ToArray();
     }
 
     public async Task<bool> ExistsAsync(Guid id)
@@ -27,8 +38,8 @@ public class StudentGroupRepository(
     {
         var studentGroupTrees = await Query()
             .AsNoTracking()
-            .Include(x => x.Parent)
-            .ThenInclude(x => x!.Parent)
+            .Include(x => x.Parents)
+            .ThenInclude(x => x!.Parents)
             .Include(x => x.Children)
             .ThenInclude(x => x!.Children)
             .Where(x => studentGroupIds.Contains(x.Id))
@@ -38,26 +49,9 @@ public class StudentGroupRepository(
         foreach (var studentGroup in studentGroupTrees)
         {
             result[studentGroup.Id] = [studentGroup.Id];
-            if (studentGroup.Parent != null)
-            {
-                result[studentGroup.Id].Add(studentGroup.Parent.Id);
-            }
-
-            if (studentGroup.Children.Count > 0)
-            {
-                result[studentGroup.Id].AddRange(studentGroup.Children.Select(x => x.Id));
-            }
+            result[studentGroup.Id].AddRange(studentGroup.Parents.Select(x => x.Id));
+            result[studentGroup.Id].AddRange(studentGroup.Children.Select(x => x.Id));
         }
         return result;
-    }
-
-    public async Task<string[]> SearchCyphersAsync(Guid scheduleId)
-    {
-        return await Query()
-            .AsNoTracking()
-            .Where(x => x.ScheduleId == scheduleId)
-            .Select(x => x.Cypher)
-            .Distinct()
-            .ToArrayAsync();
     }
 }

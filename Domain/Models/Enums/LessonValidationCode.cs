@@ -8,7 +8,6 @@ namespace Domain.Models.Enums;
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum LessonValidationCode
 {
-    // MismatchedCyphers = 1,
     MismatchedSemesterNumber = 2,
     MismatchedAcademicDisciplineType = 3,
     FixedLessonTypeConflictByGroup = 4,

@@ -13,7 +13,7 @@ public class LessonSearchModel
     public DateOnly? Date { get; set; }
     public DateOnly? DateFrom { get; set; }
     public DateOnly? DateTo { get; set; }
-    public Guid? TeacherId { get; set; }
+    public Guid[] TeacherIds { get; set; } = [];
     public TimeInterval[] TimeIntervals { get; set; } = [];
     public DayOfWeekTimeInterval[] DayOfWeekTimeIntervals { get; set; } = [];
     public bool ExcludeAllowCombining { get; set; }

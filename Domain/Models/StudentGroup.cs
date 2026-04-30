@@ -28,7 +28,7 @@ public class StudentGroup : IModelWithId
     /// <summary>
     /// Номер семестра
     /// </summary>
-    public int SemesterNumber { get; set; }
+    public int? SemesterNumber { get; set; }
 
     /// <summary>
     /// Тип академической группы
@@ -36,22 +36,12 @@ public class StudentGroup : IModelWithId
     public StudentGroupType StudentGroupType { get; set; }
 
     /// <summary>
-    /// Шифр направления
+    /// Родительские академические группы
     /// </summary>
-    public string Cypher { get; set; } = null!;
+    public StudentGroup[] Parents { get; set; } = [];
 
     /// <summary>
-    /// Академическая группа-предок
-    /// </summary>
-    public Guid? ParentId { get; set; }
-
-    /// <summary>
-    /// Академическая группа-предок
-    /// </summary>
-    public StudentGroup? Parent { get; set; }
-
-    /// <summary>
-    /// Академические группы-наследники
+    /// Составляющие академические группы
     /// </summary>
     public StudentGroup[] Children { get; set; } = [];
 
@@ -68,15 +58,13 @@ public class StudentGroup : IModelWithId
 
     private IEnumerable<StudentGroup> GetChildrenFlat()
     {
-        if (Children.Length > 0)
+        if (Children.Length <= 0) yield break;
+        foreach (var child in Children)
         {
-            foreach (var child in Children)
+            yield return child;
+            foreach (var result in child.GetChildrenFlat())
             {
-                yield return child;
-                foreach (var result in child.GetChildrenFlat())
-                {
-                    yield return result;
-                }
+                yield return result;
             }
         }
     }

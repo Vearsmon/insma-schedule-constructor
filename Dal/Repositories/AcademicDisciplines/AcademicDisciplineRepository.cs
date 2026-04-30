@@ -2,7 +2,6 @@
 using Dal.Transactions;
 using Domain.Models;
 using Domain.Models.SearchModels;
-using Microsoft.EntityFrameworkCore;
 
 namespace Dal.Repositories.AcademicDisciplines;
 
@@ -16,16 +15,6 @@ public class AcademicDisciplineRepository(
     public async Task<AcademicDiscipline[]> SearchAsync(AcademicDisciplineSearchModel searchModel)
     {
         return await base.SearchAsync(predicateBuilder, searchModel);
-    }
-
-    public async Task<string[]> SearchCyphersAsync(Guid scheduleId)
-    {
-        return await Query()
-            .AsNoTracking()
-            .Where(x => x.ScheduleId == scheduleId)
-            .Select(x => x.Cypher)
-            .Distinct()
-            .ToArrayAsync();
     }
 
     public async Task<bool> ExistsAsync(Guid id)
