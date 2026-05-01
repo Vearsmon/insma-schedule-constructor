@@ -70,12 +70,6 @@ public class AcademicDisciplineService(
                 new ValidationMessage("Не найден проект расписания для сохранения академической дисциплины"));
         }
 
-        if (saveAcademicDisciplineDto.SemesterNumber is < 1 or > 12)
-        {
-            validationMessages.Add(new ValidationMessage(
-                $"Указанный номер семестра ({saveAcademicDisciplineDto.SemesterNumber}) должен лежать в интервале от 1 до 12"));
-        }
-
         saveAcademicDisciplineDto.AllowedLessonTypes =
             saveAcademicDisciplineDto.AllowedLessonTypes.Distinct().ToArray();
         var notAllowedLessonTypes = new[]
