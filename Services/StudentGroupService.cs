@@ -89,7 +89,7 @@ public class StudentGroupService(
                 $"Указанный номер семестра ({saveStudentGroupDto.SemesterNumber}) должен лежать в интервале от 1 до 12"));
         }
 
-        if (saveStudentGroupDto is { StudentGroupType: StudentGroupType.Thread, ParentIds: not null })
+        if (saveStudentGroupDto is { StudentGroupType: StudentGroupType.Thread, ParentIds.Length: > 0 })
         {
             validationMessages.Add(new ValidationMessage("При создании потока не может указываться группа-предок"));
         }
