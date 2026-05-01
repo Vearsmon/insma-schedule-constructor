@@ -146,7 +146,7 @@ public static partial class DtoMappingRegister
     [MapperIgnoreTarget(nameof(Lesson.ValidationMessages))]
     private static partial Lesson? MapToModel(SaveLessonDto? dto);
 
-    private static LessonValidationErrorType GetErrorsMaxLevel(LessonValidationMessage[] messages) => messages.Max(x => x.ErrorType);
+    private static LessonValidationErrorType? GetErrorsMaxLevel(LessonValidationMessage[] messages) => messages.Length == 0 ? null : messages.Max(x => x.ErrorType);
 
     #endregion
 

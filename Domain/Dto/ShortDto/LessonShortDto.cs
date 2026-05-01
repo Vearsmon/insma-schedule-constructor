@@ -15,5 +15,5 @@ public class LessonShortDto
     public LessonFlexibilityType FlexibilityType { get; set; }
     public bool AllowCombining { get; set; }
     public int HoursCost { get; set; }
-    public LessonValidationErrorType CurrentErrorsMaxLevel { get; set; }
+    public LessonValidationErrorType? CurrentErrorsMaxLevel { get; set; }
 }
