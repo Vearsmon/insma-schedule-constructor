@@ -50,6 +50,16 @@ public class InsmaScheduleContext(DbContextOptions options) : DbContextBase(opti
             .HasConstraintName("fk_lesson_batch_info_lab")
             .OnDelete(DeleteBehavior.Cascade);
 
+        builder.HasMany(x => x.AcademicDisciplineExamLessonBatchInfos)
+            .WithOne()
+            .HasConstraintName("fk_lesson_batch_info_exam")
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany(x => x.AcademicDisciplineTestLessonBatchInfos)
+            .WithOne()
+            .HasConstraintName("fk_lesson_batch_info_test")
+            .OnDelete(DeleteBehavior.Cascade);
+
         builder.Property(x => x.AcademicDisciplineTargetType)
             .HasConversion(new EnumToStringConverter<AcademicDisciplineTargetType>());
     }
@@ -92,6 +102,19 @@ public class InsmaScheduleContext(DbContextOptions options) : DbContextBase(opti
 
     private void CampusConfigure(EntityTypeBuilder<DbCampus> builder)
     {
+        builder.HasData(new List<DbCampus>
+        {
+            new()
+            {
+                Id = new Guid("f68b22ca-dc97-4aed-ab4f-db709e670d36"),
+                Name = "Куйбышева",
+            },
+            new()
+            {
+                Id = new Guid("453addd1-7fc7-4028-9e1c-bf042c2164a3"),
+                Name = "Тургенева",
+            },
+        });
     }
 
     private void LessonConfigure(EntityTypeBuilder<DbLesson> builder)
@@ -253,8 +276,8 @@ public class InsmaScheduleContext(DbContextOptions options) : DbContextBase(opti
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(x => x.Teacher)
-            .WithOne()
-            .HasForeignKey<DbTeacherPreference>(x => x.TeacherId)
+            .WithMany()
+            .HasForeignKey(x => x.TeacherId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(x => x.Room)

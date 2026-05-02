@@ -14,5 +14,7 @@ public class AcademicDisciplineRegistryItem : IModelWithId
     public AcademicDisciplinePayload? LecturePayload { get; set; }
     public AcademicDisciplinePayload? PracticePayload { get; set; }
     public AcademicDisciplinePayload? LabPayload { get; set; }
+    public AcademicDisciplinePayload? ExamPayload { get; set; }
+    public AcademicDisciplinePayload? TestPayload { get; set; }
     public string? Comment { get; set; }
 }

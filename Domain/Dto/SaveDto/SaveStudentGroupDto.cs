@@ -8,6 +8,7 @@ public class SaveStudentGroupDto
     public Guid ScheduleId { get; set; }
     public string Name { get; set; } = null!;
     public int? SemesterNumber { get; set; }
+    public int? StudentsCount { get; set; }
     public StudentGroupType StudentGroupType { get; set; }
     public Guid[] ParentIds { get; set; } = [];
     public Guid[] ChildIds { get; set; } = [];

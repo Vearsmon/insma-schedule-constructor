@@ -4,7 +4,6 @@ using Domain.Dto.SaveDto;
 using Domain.Dto.ShortDto;
 using Domain.Dto.ViewDto;
 using Domain.Models;
-using Domain.Models.Common;
 using Domain.Models.Enums;
 using Domain.Models.RegistryItemModels;
 using Riok.Mapperly.Abstractions;
@@ -58,6 +57,8 @@ public static partial class DtoMappingRegister
     [MapperIgnoreSource(nameof(AcademicDiscipline.LecturePayload))]
     [MapperIgnoreSource(nameof(AcademicDiscipline.PracticePayload))]
     [MapperIgnoreSource(nameof(AcademicDiscipline.LabPayload))]
+    [MapperIgnoreSource(nameof(AcademicDiscipline.ExamPayload))]
+    [MapperIgnoreSource(nameof(AcademicDiscipline.TestPayload))]
     [MapperIgnoreSource(nameof(AcademicDiscipline.Comment))]
     public static partial AcademicDisciplineShortDto? MapToRootDto(AcademicDiscipline? item);
 
@@ -167,25 +168,11 @@ public static partial class DtoMappingRegister
 
     #region Schedule
 
-    [UserMapping(Default = true)]
-    public static Schedule? Map(SaveScheduleDto? dto)
-    {
-        var model = MapToModel(dto);
-        if (dto != null && model != null)
-        {
-            model.DateInterval = new DateInterval { DateFrom = dto.DateFrom, DateTo = dto.DateTo };
-        }
-        return model;
-    }
+    public static partial Schedule? Map(SaveScheduleDto? dto);
 
     public static partial ScheduleRegistryItemDto? Map(ScheduleRegistryItem? item);
 
     public static partial ScheduleShortDto? MapShort(Schedule? model);
-
-    [MapperIgnoreSource(nameof(SaveScheduleDto.DateFrom))]
-    [MapperIgnoreSource(nameof(SaveScheduleDto.DateTo))]
-    [MapperIgnoreTarget(nameof(Schedule.DateInterval))]
-    private static partial Schedule? MapToModel(SaveScheduleDto? dto);
 
     #endregion
 

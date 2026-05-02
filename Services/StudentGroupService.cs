@@ -112,7 +112,7 @@ public class StudentGroupService(
         }
 
         var parents = Array.Empty<StudentGroup>();
-        var parentIds = saveStudentGroupDto.ChildIds.Distinct().ToArray();
+        var parentIds = saveStudentGroupDto.ParentIds.Distinct().ToArray();
         if (parentIds.Length != 0)
         {
             parents = await studentGroupRepository.SelectAsync(parentIds);
@@ -158,12 +158,21 @@ public class StudentGroupService(
             Name = name,
             SemesterNumber = saveStudentGroupDto.SemesterNumber,
             StudentGroupType = StudentGroupType.SemiGroup,
-            Parents = [studentGroup],
         });
+        studentGroup.Children = newSemiGroups.ToArray();
 
-        studentGroup.Parents = parents;
-        studentGroup.Children = children.Concat(newSemiGroups).ToArray();
-        await studentGroupRepository.SaveAsync(studentGroup);
+        if (parents.Length > 0)
+        {
+            foreach (var parent in parents)
+            {
+                parent.Children = parent.Children.Concat([studentGroup]).ToArray();
+            }
+            await studentGroupRepository.SaveAllAsync(parents);
+        }
+        else
+        {
+            await studentGroupRepository.SaveAsync(studentGroup);
+        }
 
         if (saveStudentGroupDto.Id.HasValue)
         {

@@ -1,6 +1,8 @@
 ﻿using Dal.Entities;
 using Dal.Transactions;
+using Domain.Exceptions;
 using Domain.Models;
+using Domain.Models.Enums;
 using Domain.Models.SearchModels;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,6 +15,20 @@ public class StudentGroupRepository(
     IPredicateBuilder<DbStudentGroup, StudentGroupSearchModel> predicateBuilder)
     : Repository<InsmaScheduleContext, DbStudentGroup, StudentGroup>(context, mapper, transactionalService), IStudentGroupRepository
 {
+    public override async Task<StudentGroup> GetAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var entity = await Query().AsNoTracking()
+            .AsNoTracking()
+            .Include(x => x.Parents)
+            .ThenInclude(x => x!.Parents)
+            .Include(x => x.Children)
+            .ThenInclude(x => x!.Children)
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+
+        var foundEntity = entity ?? throw new ServiceException(ServiceExceptionTypes.EntityNotFound);
+        return MapperReadonly.Map(foundEntity);
+    }
+
     public async Task<StudentGroup[]> SearchAsync(StudentGroupSearchModel searchModel)
     {
         var predicate = predicateBuilder.Build(searchModel);

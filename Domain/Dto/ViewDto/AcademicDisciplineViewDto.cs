@@ -13,5 +13,7 @@ public class AcademicDisciplineViewDto
     public AcademicDisciplinePayloadDto? LecturePayload { get; set; }
     public AcademicDisciplinePayloadDto? PracticePayload { get; set; }
     public AcademicDisciplinePayloadDto? LabPayload { get; set; }
+    public AcademicDisciplinePayloadDto? ExamPayload { get; set; }
+    public AcademicDisciplinePayloadDto? TestPayload { get; set; }
     public string? Comment { get; set; }
 }

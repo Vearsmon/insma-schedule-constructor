@@ -203,7 +203,7 @@ public class TeacherPreferenceService(
                         TeacherPreferenceType = x.TeacherPreferenceType,
                         RoomId = x.RoomId,
                     }));
-        if (saveTeacherPreferenceDto.Comment != null)
+        if (!string.IsNullOrEmpty(saveTeacherPreferenceDto.Comment))
         {
             teacherPreferences = teacherPreferences.Concat([
                 new TeacherPreference

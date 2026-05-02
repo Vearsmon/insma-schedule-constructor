@@ -41,6 +41,22 @@ namespace Services.Mapping
             {
                 target.LabPayload = null;
             }
+            if (model.ExamPayload != null)
+            {
+                target.ExamPayload = MapToAcademicDisciplinePayloadDto(model.ExamPayload);
+            }
+            else
+            {
+                target.ExamPayload = null;
+            }
+            if (model.TestPayload != null)
+            {
+                target.TestPayload = MapToAcademicDisciplinePayloadDto(model.TestPayload);
+            }
+            else
+            {
+                target.TestPayload = null;
+            }
             target.Comment = model.Comment;
             return target;
         }
@@ -62,6 +78,8 @@ namespace Services.Mapping
             target.LecturePayload = Map(dto.LecturePayload);
             target.PracticePayload = Map(dto.PracticePayload);
             target.LabPayload = Map(dto.LabPayload);
+            target.ExamPayload = Map(dto.ExamPayload);
+            target.TestPayload = Map(dto.TestPayload);
             target.Comment = dto.Comment;
             return target;
         }
@@ -114,6 +132,22 @@ namespace Services.Mapping
             else
             {
                 target.LabPayload = null;
+            }
+            if (item.ExamPayload != null)
+            {
+                target.ExamPayload = MapToAcademicDisciplinePayloadDto(item.ExamPayload);
+            }
+            else
+            {
+                target.ExamPayload = null;
+            }
+            if (item.TestPayload != null)
+            {
+                target.TestPayload = MapToAcademicDisciplinePayloadDto(item.TestPayload);
+            }
+            else
+            {
+                target.TestPayload = null;
             }
             target.Comment = item.Comment;
             return target;
@@ -313,6 +347,10 @@ namespace Services.Mapping
                 target.Id = model.Id.Value;
             }
             target.Name = model.Name;
+            if (model.Campus.Id != null)
+            {
+                target.CampusId = model.Campus.Id.Value;
+            }
             target.CampusName = model.Campus.Name;
             target.RoomType = model.RoomType;
             target.Capacity = model.Capacity;
@@ -347,6 +385,7 @@ namespace Services.Mapping
             var target = new global::Domain.Dto.RegistryDto.RoomRegistryItemDto();
             target.Id = item.Id;
             target.Name = item.Name;
+            target.CampusId = item.CampusId;
             target.CampusName = item.CampusName;
             target.RoomType = item.RoomType;
             target.Capacity = item.Capacity;
@@ -367,11 +406,28 @@ namespace Services.Mapping
                 target.Id = model.Id.Value;
             }
             target.Name = model.Name;
+            if (model.Campus.Id != null)
+            {
+                target.CampusId = model.Campus.Id.Value;
+            }
             target.CampusName = model.Campus.Name;
             target.RoomType = model.RoomType;
             target.Capacity = model.Capacity;
             target.RoomBoardType = model.RoomBoardType;
             target.HasProjector = model.HasProjector;
+            return target;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(dto))]
+        public static partial global::Domain.Models.Schedule? Map(global::Domain.Dto.SaveDto.SaveScheduleDto? dto)
+        {
+            if (dto == null)
+                return default;
+            var target = new global::Domain.Models.Schedule();
+            target.Id = dto.Id;
+            target.Name = dto.Name;
+            target.DateInterval = dto.DateInterval;
             return target;
         }
 
@@ -405,18 +461,6 @@ namespace Services.Mapping
         }
 
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(dto))]
-        private static partial global::Domain.Models.Schedule? MapToModel(global::Domain.Dto.SaveDto.SaveScheduleDto? dto)
-        {
-            if (dto == null)
-                return default;
-            var target = new global::Domain.Models.Schedule();
-            target.Id = dto.Id;
-            target.Name = dto.Name;
-            return target;
-        }
-
-        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
         [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(model))]
         public static partial global::Domain.Dto.ViewDto.StudentGroupViewDto? Map(global::Domain.Models.StudentGroup? model)
         {
@@ -428,10 +472,8 @@ namespace Services.Mapping
                 target.Id = model.Id.Value;
             }
             target.Name = model.Name;
-            if (model.SemesterNumber != null)
-            {
-                target.SemesterNumber = model.SemesterNumber.Value;
-            }
+            target.SemesterNumber = model.SemesterNumber;
+            target.StudentsCount = model.StudentsCount;
             target.StudentGroupType = model.StudentGroupType;
             target.Children = MapToStudentGroupShortDtoArray(model.Children);
             return target;
@@ -463,6 +505,7 @@ namespace Services.Mapping
             target.ScheduleId = dto.ScheduleId;
             target.Name = dto.Name;
             target.SemesterNumber = dto.SemesterNumber;
+            target.StudentsCount = dto.StudentsCount;
             target.StudentGroupType = dto.StudentGroupType;
             return target;
         }
@@ -476,10 +519,8 @@ namespace Services.Mapping
             var target = new global::Domain.Dto.RegistryDto.StudentGroupRegistryItemDto();
             target.Id = item.Id;
             target.Name = item.Name;
-            if (item.SemesterNumber != null)
-            {
-                target.SemesterNumber = item.SemesterNumber.Value;
-            }
+            target.SemesterNumber = item.SemesterNumber;
+            target.StudentsCount = item.StudentsCount;
             target.StudentGroupType = item.StudentGroupType;
             return target;
         }

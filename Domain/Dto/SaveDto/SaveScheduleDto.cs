@@ -1,9 +1,10 @@
-﻿namespace Domain.Dto.SaveDto;
+﻿using Domain.Models.Common;
+
+namespace Domain.Dto.SaveDto;
 
 public class SaveScheduleDto
 {
     public Guid? Id { get; set; }
     public string Name { get; set; } = null!;
-    public DateOnly DateFrom { get; set; }
-    public DateOnly DateTo { get; set; }
+    public DateInterval DateInterval { get; set; } = null!;
 }

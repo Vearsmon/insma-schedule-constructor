@@ -179,6 +179,14 @@ public class LessonService(
                     lessonsToSave.AddRange(GetBatchLessonsToAdd(academicDiscipline.PracticePayload.LessonBatchInfos,
                         AcademicDisciplineType.Practice));
                     break;
+                case AcademicDisciplineType.Exam when academicDiscipline.ExamPayload != null:
+                    lessonsToSave.AddRange(GetBatchLessonsToAdd(academicDiscipline.ExamPayload.LessonBatchInfos,
+                        AcademicDisciplineType.Exam));
+                    break;
+                case AcademicDisciplineType.Test when academicDiscipline.TestPayload != null:
+                    lessonsToSave.AddRange(GetBatchLessonsToAdd(academicDiscipline.TestPayload.LessonBatchInfos,
+                        AcademicDisciplineType.Test));
+                    break;
             }
         }
 
@@ -681,7 +689,7 @@ public class LessonService(
                         TimeInterval = validationMessage.Payload.DateWithTimeInterval.TimeInterval,
                     }
                     : validationMessage.Payload.DayOfWeekTimeInterval!,
-                Message = message,
+                Messages = [message],
                 ErrorType = validationMessage.ErrorType,
             });
         }

@@ -76,7 +76,9 @@ public class AcademicDisciplineService(
             {
                 AcademicDisciplineType.Lecture,
                 AcademicDisciplineType.Practice,
-                AcademicDisciplineType.Lab
+                AcademicDisciplineType.Lab,
+                AcademicDisciplineType.Exam,
+                AcademicDisciplineType.Test,
             }
             .Except(saveAcademicDisciplineDto.AllowedLessonTypes)
             .ToArray();
@@ -91,6 +93,12 @@ public class AcademicDisciplineService(
             (IsSpecified: saveAcademicDisciplineDto.LabPayload != null,
                 IsNotAllowed: notAllowedLessonTypes.Contains(AcademicDisciplineType.Lab),
                 Type: AcademicDisciplineType.Lab),
+            (IsSpecified: saveAcademicDisciplineDto.ExamPayload != null,
+                IsNotAllowed: notAllowedLessonTypes.Contains(AcademicDisciplineType.Exam),
+                Type: AcademicDisciplineType.Exam),
+            (IsSpecified: saveAcademicDisciplineDto.TestPayload != null,
+                IsNotAllowed: notAllowedLessonTypes.Contains(AcademicDisciplineType.Test),
+                Type: AcademicDisciplineType.Test),
         };
 
         validationMessages.AddRange(specifiedPayloads

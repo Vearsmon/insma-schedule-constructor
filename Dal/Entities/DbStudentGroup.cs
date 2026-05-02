@@ -32,6 +32,11 @@ public class DbStudentGroup : IDbEntityWithId
     public int? SemesterNumber { get; set; }
 
     /// <summary>
+    /// Количество студентов в группе
+    /// </summary>
+    public int? StudentsCount { get; set; }
+
+    /// <summary>
     /// Тип академической группы
     /// </summary>
     public StudentGroupType StudentGroupType { get; set; }

@@ -150,7 +150,6 @@ public static partial class MappingRegister
     public static partial void Update(Room room, DbRoom dbRoom);
 
     [MapProperty($"{nameof(DbRoom.Campus)}.{nameof(DbRoom.Campus.Name)}", nameof(RoomRegistryItem.CampusName))]
-    [MapperIgnoreSource(nameof(DbRoom.CampusId))]
     public static partial RoomRegistryItem? MapRegistryItem(DbRoom? room);
 
     #endregion
@@ -266,13 +265,27 @@ public static partial class MappingRegister
                 LessonBatchInfos = entity.AcademicDisciplinePracticeLessonBatchInfos.Select(Map).ToArray()!,
             };
         }
+        if (entity is { IsExamLessonsAllowed: true, AcademicDisciplineExamLessonBatchInfos.Count: > 0 })
+        {
+            model.ExamPayload = new AcademicDisciplinePayload
+            {
+                LessonBatchInfos = entity.AcademicDisciplineExamLessonBatchInfos.Select(Map).ToArray()!,
+            };
+        }
+        if (entity is { IsTestLessonsAllowed: true, AcademicDisciplineTestLessonBatchInfos.Count: > 0 })
+        {
+            model.TestPayload = new AcademicDisciplinePayload
+            {
+                LessonBatchInfos = entity.AcademicDisciplineTestLessonBatchInfos.Select(Map).ToArray()!,
+            };
+        }
 
         var allowedLessonTypes = new List<AcademicDisciplineType>();
         if (entity.IsLectureLessonsAllowed) allowedLessonTypes.Add(AcademicDisciplineType.Lecture);
         if (entity.IsLabLessonsAllowed) allowedLessonTypes.Add(AcademicDisciplineType.Lab);
         if (entity.IsPracticeLessonsAllowed) allowedLessonTypes.Add(AcademicDisciplineType.Practice);
-        if (entity.HasExam) allowedLessonTypes.Add(AcademicDisciplineType.Exam);
-        if (entity.HasTest) allowedLessonTypes.Add(AcademicDisciplineType.Test);
+        if (entity.IsExamLessonsAllowed) allowedLessonTypes.Add(AcademicDisciplineType.Exam);
+        if (entity.IsTestLessonsAllowed) allowedLessonTypes.Add(AcademicDisciplineType.Test);
         model.AllowedLessonTypes = allowedLessonTypes.ToArray();
 
         return model;
@@ -289,8 +302,8 @@ public static partial class MappingRegister
         entity.IsLectureLessonsAllowed = model.AllowedLessonTypes.Contains(AcademicDisciplineType.Lecture);
         entity.IsLabLessonsAllowed = model.AllowedLessonTypes.Contains(AcademicDisciplineType.Lab);
         entity.IsPracticeLessonsAllowed = model.AllowedLessonTypes.Contains(AcademicDisciplineType.Practice);
-        entity.HasExam = model.AllowedLessonTypes.Contains(AcademicDisciplineType.Exam);
-        entity.HasTest = model.AllowedLessonTypes.Contains(AcademicDisciplineType.Test);
+        entity.IsExamLessonsAllowed = model.AllowedLessonTypes.Contains(AcademicDisciplineType.Exam);
+        entity.IsTestLessonsAllowed = model.AllowedLessonTypes.Contains(AcademicDisciplineType.Test);
         return entity;
     }
 
@@ -301,8 +314,8 @@ public static partial class MappingRegister
         entity.IsLectureLessonsAllowed = model.AllowedLessonTypes.Contains(AcademicDisciplineType.Lecture);
         entity.IsLabLessonsAllowed = model.AllowedLessonTypes.Contains(AcademicDisciplineType.Lab);
         entity.IsPracticeLessonsAllowed = model.AllowedLessonTypes.Contains(AcademicDisciplineType.Practice);
-        entity.HasExam = model.AllowedLessonTypes.Contains(AcademicDisciplineType.Exam);
-        entity.HasTest = model.AllowedLessonTypes.Contains(AcademicDisciplineType.Test);
+        entity.IsExamLessonsAllowed = model.AllowedLessonTypes.Contains(AcademicDisciplineType.Exam);
+        entity.IsTestLessonsAllowed = model.AllowedLessonTypes.Contains(AcademicDisciplineType.Test);
     }
 
     [UserMapping(Default = true)]
@@ -317,8 +330,8 @@ public static partial class MappingRegister
         if (entity.IsLectureLessonsAllowed) allowedLessonTypes.Add(AcademicDisciplineType.Lecture);
         if (entity.IsLabLessonsAllowed) allowedLessonTypes.Add(AcademicDisciplineType.Lab);
         if (entity.IsPracticeLessonsAllowed) allowedLessonTypes.Add(AcademicDisciplineType.Practice);
-        if (entity.HasExam) allowedLessonTypes.Add(AcademicDisciplineType.Exam);
-        if (entity.HasTest) allowedLessonTypes.Add(AcademicDisciplineType.Test);
+        if (entity.IsExamLessonsAllowed) allowedLessonTypes.Add(AcademicDisciplineType.Exam);
+        if (entity.IsTestLessonsAllowed) allowedLessonTypes.Add(AcademicDisciplineType.Test);
         item.AllowedLessonTypes = allowedLessonTypes.ToArray();
         return item;
     }
@@ -326,46 +339,54 @@ public static partial class MappingRegister
     [MapperIgnoreSource(nameof(DbAcademicDiscipline.IsLectureLessonsAllowed))]
     [MapperIgnoreSource(nameof(DbAcademicDiscipline.IsLabLessonsAllowed))]
     [MapperIgnoreSource(nameof(DbAcademicDiscipline.IsPracticeLessonsAllowed))]
-    [MapperIgnoreSource(nameof(DbAcademicDiscipline.HasExam))]
-    [MapperIgnoreSource(nameof(DbAcademicDiscipline.HasTest))]
+    [MapperIgnoreSource(nameof(DbAcademicDiscipline.IsExamLessonsAllowed))]
+    [MapperIgnoreSource(nameof(DbAcademicDiscipline.IsTestLessonsAllowed))]
     [MapperIgnoreSource(nameof(DbAcademicDiscipline.LectureTotalHoursCount))]
     [MapperIgnoreSource(nameof(DbAcademicDiscipline.AcademicDisciplineLectureLessonBatchInfos))]
     [MapperIgnoreSource(nameof(DbAcademicDiscipline.LabTotalHoursCount))]
     [MapperIgnoreSource(nameof(DbAcademicDiscipline.AcademicDisciplineLabLessonBatchInfos))]
     [MapperIgnoreSource(nameof(DbAcademicDiscipline.PracticeTotalHoursCount))]
     [MapperIgnoreSource(nameof(DbAcademicDiscipline.AcademicDisciplinePracticeLessonBatchInfos))]
+    [MapperIgnoreSource(nameof(DbAcademicDiscipline.AcademicDisciplineExamLessonBatchInfos))]
+    [MapperIgnoreSource(nameof(DbAcademicDiscipline.AcademicDisciplineTestLessonBatchInfos))]
     [MapperIgnoreTarget(nameof(AcademicDiscipline.AllowedLessonTypes))]
     [MapperIgnoreTarget(nameof(AcademicDiscipline.LecturePayload))]
     [MapperIgnoreTarget(nameof(AcademicDiscipline.LabPayload))]
     [MapperIgnoreTarget(nameof(AcademicDiscipline.PracticePayload))]
+    [MapperIgnoreTarget(nameof(AcademicDiscipline.ExamPayload))]
+    [MapperIgnoreTarget(nameof(AcademicDiscipline.TestPayload))]
     private static partial AcademicDiscipline? MapDbToModel(DbAcademicDiscipline? academicDiscipline);
 
     [MapperIgnoreSource(nameof(AcademicDiscipline.AllowedLessonTypes))]
     [MapperIgnoreTarget(nameof(DbAcademicDiscipline.IsLectureLessonsAllowed))]
     [MapperIgnoreTarget(nameof(DbAcademicDiscipline.IsLabLessonsAllowed))]
     [MapperIgnoreTarget(nameof(DbAcademicDiscipline.IsPracticeLessonsAllowed))]
-    [MapperIgnoreTarget(nameof(DbAcademicDiscipline.HasExam))]
-    [MapperIgnoreTarget(nameof(DbAcademicDiscipline.HasTest))]
+    [MapperIgnoreTarget(nameof(DbAcademicDiscipline.IsExamLessonsAllowed))]
+    [MapperIgnoreTarget(nameof(DbAcademicDiscipline.IsTestLessonsAllowed))]
     [MapProperty($"{nameof(AcademicDiscipline.LecturePayload)}.{nameof(AcademicDiscipline.LecturePayload.TotalHoursCount)}", nameof(DbAcademicDiscipline.LectureTotalHoursCount))]
     [MapProperty($"{nameof(AcademicDiscipline.LecturePayload)}.{nameof(AcademicDiscipline.LecturePayload.LessonBatchInfos)}", nameof(DbAcademicDiscipline.AcademicDisciplineLectureLessonBatchInfos))]
     [MapProperty($"{nameof(AcademicDiscipline.LabPayload)}.{nameof(AcademicDiscipline.LabPayload.TotalHoursCount)}", nameof(DbAcademicDiscipline.LabTotalHoursCount))]
     [MapProperty($"{nameof(AcademicDiscipline.LabPayload)}.{nameof(AcademicDiscipline.LabPayload.LessonBatchInfos)}", nameof(DbAcademicDiscipline.AcademicDisciplineLabLessonBatchInfos))]
     [MapProperty($"{nameof(AcademicDiscipline.PracticePayload)}.{nameof(AcademicDiscipline.PracticePayload.TotalHoursCount)}", nameof(DbAcademicDiscipline.PracticeTotalHoursCount))]
     [MapProperty($"{nameof(AcademicDiscipline.PracticePayload)}.{nameof(AcademicDiscipline.PracticePayload.LessonBatchInfos)}", nameof(DbAcademicDiscipline.AcademicDisciplinePracticeLessonBatchInfos))]
+    [MapProperty($"{nameof(AcademicDiscipline.ExamPayload)}.{nameof(AcademicDiscipline.ExamPayload.LessonBatchInfos)}", nameof(DbAcademicDiscipline.AcademicDisciplineExamLessonBatchInfos))]
+    [MapProperty($"{nameof(AcademicDiscipline.TestPayload)}.{nameof(AcademicDiscipline.TestPayload.LessonBatchInfos)}", nameof(DbAcademicDiscipline.AcademicDisciplineTestLessonBatchInfos))]
     private static partial DbAcademicDiscipline? MapModelToDb(AcademicDiscipline? academicDiscipline);
 
     [MapperIgnoreSource(nameof(AcademicDiscipline.AllowedLessonTypes))]
     [MapperIgnoreTarget(nameof(DbAcademicDiscipline.IsLectureLessonsAllowed))]
     [MapperIgnoreTarget(nameof(DbAcademicDiscipline.IsLabLessonsAllowed))]
     [MapperIgnoreTarget(nameof(DbAcademicDiscipline.IsPracticeLessonsAllowed))]
-    [MapperIgnoreTarget(nameof(DbAcademicDiscipline.HasExam))]
-    [MapperIgnoreTarget(nameof(DbAcademicDiscipline.HasTest))]
+    [MapperIgnoreTarget(nameof(DbAcademicDiscipline.IsExamLessonsAllowed))]
+    [MapperIgnoreTarget(nameof(DbAcademicDiscipline.IsTestLessonsAllowed))]
     [MapProperty($"{nameof(AcademicDiscipline.LecturePayload)}.{nameof(AcademicDiscipline.LecturePayload.TotalHoursCount)}", nameof(DbAcademicDiscipline.LectureTotalHoursCount))]
     [MapProperty($"{nameof(AcademicDiscipline.LecturePayload)}.{nameof(AcademicDiscipline.LecturePayload.LessonBatchInfos)}", nameof(DbAcademicDiscipline.AcademicDisciplineLectureLessonBatchInfos))]
     [MapProperty($"{nameof(AcademicDiscipline.LabPayload)}.{nameof(AcademicDiscipline.LabPayload.TotalHoursCount)}", nameof(DbAcademicDiscipline.LabTotalHoursCount))]
     [MapProperty($"{nameof(AcademicDiscipline.LabPayload)}.{nameof(AcademicDiscipline.LabPayload.LessonBatchInfos)}", nameof(DbAcademicDiscipline.AcademicDisciplineLabLessonBatchInfos))]
     [MapProperty($"{nameof(AcademicDiscipline.PracticePayload)}.{nameof(AcademicDiscipline.PracticePayload.TotalHoursCount)}", nameof(DbAcademicDiscipline.PracticeTotalHoursCount))]
     [MapProperty($"{nameof(AcademicDiscipline.PracticePayload)}.{nameof(AcademicDiscipline.PracticePayload.LessonBatchInfos)}", nameof(DbAcademicDiscipline.AcademicDisciplinePracticeLessonBatchInfos))]
+    [MapProperty($"{nameof(AcademicDiscipline.ExamPayload)}.{nameof(AcademicDiscipline.ExamPayload.LessonBatchInfos)}", nameof(DbAcademicDiscipline.AcademicDisciplineExamLessonBatchInfos))]
+    [MapProperty($"{nameof(AcademicDiscipline.TestPayload)}.{nameof(AcademicDiscipline.TestPayload.LessonBatchInfos)}", nameof(DbAcademicDiscipline.AcademicDisciplineTestLessonBatchInfos))]
     private static partial void UpdateModelToDb(AcademicDiscipline academicDiscipline, DbAcademicDiscipline dbAcademicDiscipline);
 
     [MapperIgnoreSource(nameof(DbAcademicDiscipline.ScheduleId))]
@@ -373,8 +394,8 @@ public static partial class MappingRegister
     [MapperIgnoreSource(nameof(DbAcademicDiscipline.IsLectureLessonsAllowed))]
     [MapperIgnoreSource(nameof(DbAcademicDiscipline.IsLabLessonsAllowed))]
     [MapperIgnoreSource(nameof(DbAcademicDiscipline.IsPracticeLessonsAllowed))]
-    [MapperIgnoreSource(nameof(DbAcademicDiscipline.HasExam))]
-    [MapperIgnoreSource(nameof(DbAcademicDiscipline.HasTest))]
+    [MapperIgnoreSource(nameof(DbAcademicDiscipline.IsExamLessonsAllowed))]
+    [MapperIgnoreSource(nameof(DbAcademicDiscipline.IsTestLessonsAllowed))]
     [MapperIgnoreTarget(nameof(AcademicDiscipline.AllowedLessonTypes))]
     [MapProperty(nameof(DbAcademicDiscipline.LectureTotalHoursCount), $"{nameof(AcademicDisciplineRegistryItem.LecturePayload)}.{nameof(AcademicDisciplineRegistryItem.LecturePayload.TotalHoursCount)}")]
     [MapProperty(nameof(DbAcademicDiscipline.AcademicDisciplineLectureLessonBatchInfos), $"{nameof(AcademicDisciplineRegistryItem.LecturePayload)}.{nameof(AcademicDisciplineRegistryItem.LecturePayload.LessonBatchInfos)}")]
@@ -382,6 +403,10 @@ public static partial class MappingRegister
     [MapProperty(nameof(DbAcademicDiscipline.AcademicDisciplineLabLessonBatchInfos), $"{nameof(AcademicDisciplineRegistryItem.LabPayload)}.{nameof(AcademicDisciplineRegistryItem.LabPayload.LessonBatchInfos)}")]
     [MapProperty(nameof(DbAcademicDiscipline.PracticeTotalHoursCount), $"{nameof(AcademicDisciplineRegistryItem.PracticePayload)}.{nameof(AcademicDisciplineRegistryItem.PracticePayload.TotalHoursCount)}")]
     [MapProperty(nameof(DbAcademicDiscipline.AcademicDisciplinePracticeLessonBatchInfos), $"{nameof(AcademicDisciplineRegistryItem.PracticePayload)}.{nameof(AcademicDisciplineRegistryItem.PracticePayload.LessonBatchInfos)}")]
+    [MapValue($"{nameof(AcademicDisciplineRegistryItem.ExamPayload)}.{nameof(AcademicDisciplineRegistryItem.ExamPayload.TotalHoursCount)}", null)]
+    [MapProperty(nameof(DbAcademicDiscipline.AcademicDisciplineExamLessonBatchInfos), $"{nameof(AcademicDisciplineRegistryItem.ExamPayload)}.{nameof(AcademicDisciplineRegistryItem.ExamPayload.LessonBatchInfos)}")]
+    [MapValue($"{nameof(AcademicDisciplineRegistryItem.TestPayload)}.{nameof(AcademicDisciplineRegistryItem.TestPayload.TotalHoursCount)}", null)]
+    [MapProperty(nameof(DbAcademicDiscipline.AcademicDisciplineTestLessonBatchInfos), $"{nameof(AcademicDisciplineRegistryItem.TestPayload)}.{nameof(AcademicDisciplineRegistryItem.TestPayload.LessonBatchInfos)}")]
     private static partial AcademicDisciplineRegistryItem? MapDbToRegistryItem(DbAcademicDiscipline? entity);
 
     #endregion

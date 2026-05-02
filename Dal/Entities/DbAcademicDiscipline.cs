@@ -87,14 +87,24 @@ public class DbAcademicDiscipline : IDbEntityWithId
     public ICollection<DbLessonBatchInfo> AcademicDisciplineLabLessonBatchInfos { get; set; } = [];
 
     /// <summary>
-    /// Дисциплина предусматривает проведение экзамена
+    /// Поддерживает назначение экзаменов
     /// </summary>
-    public bool HasExam { get; set; }
+    public bool IsExamLessonsAllowed { get; set; }
 
     /// <summary>
-    /// Дисциплина предусматривает проведение зачета
+    /// Сведения о созданных через академическую дисциплину экзаменах
     /// </summary>
-    public bool HasTest { get; set; }
+    public ICollection<DbLessonBatchInfo> AcademicDisciplineExamLessonBatchInfos { get; set; } = [];
+
+    /// <summary>
+    /// Поддерживает назначение зачетов
+    /// </summary>
+    public bool IsTestLessonsAllowed { get; set; }
+
+    /// <summary>
+    /// Сведения о созданных через академическую дисциплину зачетах
+    /// </summary>
+    public ICollection<DbLessonBatchInfo> AcademicDisciplineTestLessonBatchInfos { get; set; } = [];
 
     /// <summary>
     /// Комментарий

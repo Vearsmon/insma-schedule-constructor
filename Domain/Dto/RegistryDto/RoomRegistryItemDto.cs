@@ -7,6 +7,7 @@ public class RoomRegistryItemDto : IModelWithId
 {
     public Guid? Id { get; set; }
     public string Name { get; set; } = null!;
+    public Guid CampusId { get; set; }
     public string CampusName { get; set; } = null!;
     public RoomType? RoomType { get; set; }
     public int? Capacity { get; set; }

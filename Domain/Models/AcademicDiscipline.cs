@@ -61,6 +61,16 @@ public class AcademicDiscipline : IModelWithId
     public AcademicDisciplinePayload? LabPayload { get; set; }
 
     /// <summary>
+    /// Нагрузка по экзаменам
+    /// </summary>
+    public AcademicDisciplinePayload? ExamPayload { get; set; }
+
+    /// <summary>
+    /// Нагрузка по зачетам
+    /// </summary>
+    public AcademicDisciplinePayload? TestPayload { get; set; }
+
+    /// <summary>
     /// Комментарий
     /// </summary>
     public string? Comment { get; set; }
@@ -76,7 +86,9 @@ public class AcademicDiscipline : IModelWithId
             case AcademicDisciplineType.Lab:
                 return LabPayload;
             case AcademicDisciplineType.Exam:
+                return ExamPayload;
             case AcademicDisciplineType.Test:
+                return TestPayload;
             default:
                 throw new ArgumentOutOfRangeException(nameof(type), type, null);
         }

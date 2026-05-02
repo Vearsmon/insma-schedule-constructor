@@ -295,6 +295,7 @@ namespace Dal.Mapping
             var target = new global::Domain.Models.RegistryItemModels.RoomRegistryItem();
             target.Id = room.Id;
             target.Name = room.Name;
+            target.CampusId = room.CampusId;
             target.CampusName = room.Campus.Name;
             target.RoomType = room.RoomType;
             target.Capacity = room.Capacity;
@@ -417,6 +418,7 @@ namespace Dal.Mapping
             target.Schedule = MapDbToModel(studentGroup.Schedule);
             target.Name = studentGroup.Name;
             target.SemesterNumber = studentGroup.SemesterNumber;
+            target.StudentsCount = studentGroup.StudentsCount;
             target.StudentGroupType = studentGroup.StudentGroupType;
             target.Parents = MapChildrenCollection(studentGroup.Parents);
             target.Children = MapChildrenCollection(studentGroup.Children);
@@ -438,6 +440,7 @@ namespace Dal.Mapping
             target.Schedule = Map(studentGroup.Schedule);
             target.Name = studentGroup.Name;
             target.SemesterNumber = studentGroup.SemesterNumber;
+            target.StudentsCount = studentGroup.StudentsCount;
             target.StudentGroupType = studentGroup.StudentGroupType;
             target.Parents = MapToListOfDbStudentGroup(studentGroup.Parents);
             target.Children = MapToListOfDbStudentGroup(studentGroup.Children);
@@ -455,6 +458,7 @@ namespace Dal.Mapping
             dbStudentGroup.Schedule = Map(studentGroup.Schedule);
             dbStudentGroup.Name = studentGroup.Name;
             dbStudentGroup.SemesterNumber = studentGroup.SemesterNumber;
+            dbStudentGroup.StudentsCount = studentGroup.StudentsCount;
             dbStudentGroup.StudentGroupType = studentGroup.StudentGroupType;
             dbStudentGroup.Parents = MapToListOfDbStudentGroup(studentGroup.Parents);
             dbStudentGroup.Children = MapToListOfDbStudentGroup(studentGroup.Children);
@@ -470,6 +474,7 @@ namespace Dal.Mapping
             target.Id = entity.Id;
             target.Name = entity.Name;
             target.SemesterNumber = entity.SemesterNumber;
+            target.StudentsCount = entity.StudentsCount;
             target.StudentGroupType = entity.StudentGroupType;
             return target;
         }
@@ -524,6 +529,14 @@ namespace Dal.Mapping
             {
                 target.AcademicDisciplineLabLessonBatchInfos = MapToListOfDbLessonBatchInfo(academicDiscipline.LabPayload.LessonBatchInfos);
             }
+            if (academicDiscipline.ExamPayload != null)
+            {
+                target.AcademicDisciplineExamLessonBatchInfos = MapToListOfDbLessonBatchInfo(academicDiscipline.ExamPayload.LessonBatchInfos);
+            }
+            if (academicDiscipline.TestPayload != null)
+            {
+                target.AcademicDisciplineTestLessonBatchInfos = MapToListOfDbLessonBatchInfo(academicDiscipline.TestPayload.LessonBatchInfos);
+            }
             target.Comment = academicDiscipline.Comment;
             return target;
         }
@@ -556,6 +569,14 @@ namespace Dal.Mapping
             {
                 dbAcademicDiscipline.AcademicDisciplineLabLessonBatchInfos = MapToListOfDbLessonBatchInfo(academicDiscipline.LabPayload.LessonBatchInfos);
             }
+            if (academicDiscipline.ExamPayload != null)
+            {
+                dbAcademicDiscipline.AcademicDisciplineExamLessonBatchInfos = MapToListOfDbLessonBatchInfo(academicDiscipline.ExamPayload.LessonBatchInfos);
+            }
+            if (academicDiscipline.TestPayload != null)
+            {
+                dbAcademicDiscipline.AcademicDisciplineTestLessonBatchInfos = MapToListOfDbLessonBatchInfo(academicDiscipline.TestPayload.LessonBatchInfos);
+            }
             dbAcademicDiscipline.Comment = academicDiscipline.Comment;
         }
 
@@ -580,6 +601,12 @@ namespace Dal.Mapping
             target.LabPayload ??= new global::Domain.Models.AcademicDisciplinePayload();
             target.LabPayload.TotalHoursCount = entity.LabTotalHoursCount;
             target.LabPayload.LessonBatchInfos = MapToLessonBatchInfoArray(entity.AcademicDisciplineLabLessonBatchInfos);
+            target.ExamPayload ??= new global::Domain.Models.AcademicDisciplinePayload();
+            target.ExamPayload.TotalHoursCount = null;
+            target.ExamPayload.LessonBatchInfos = MapToLessonBatchInfoArray(entity.AcademicDisciplineExamLessonBatchInfos);
+            target.TestPayload ??= new global::Domain.Models.AcademicDisciplinePayload();
+            target.TestPayload.TotalHoursCount = null;
+            target.TestPayload.LessonBatchInfos = MapToLessonBatchInfoArray(entity.AcademicDisciplineTestLessonBatchInfos);
             target.Comment = entity.Comment;
             return target;
         }

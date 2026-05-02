@@ -8,5 +8,6 @@ public class StudentGroupRegistryItem : IModelWithId
     public Guid? Id { get; set; }
     public string Name { get; set; } = null!;
     public int? SemesterNumber { get; set; }
+    public int? StudentsCount { get; set; }
     public StudentGroupType StudentGroupType { get; set; }
 }
