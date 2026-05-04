@@ -296,7 +296,11 @@ public class LessonValidationService(
                         DayOfWeek = lesson.DateWithTimeInterval!.Date.DayOfWeek,
                         TimeInterval = lesson.DateWithTimeInterval.TimeInterval,
                     },
-                    Messages = [message],
+                    Messages = [new LessonSeriesConflictMessageDto
+                    {
+                        TimeInterval = lesson.DateWithTimeInterval!.TimeInterval,
+                        Message = message,
+                    }],
                     ErrorType = validationMessage.ErrorType,
                 });
             }

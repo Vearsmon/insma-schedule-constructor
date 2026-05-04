@@ -19,6 +19,7 @@ public class InsmaScheduleContext(DbContextOptions options) : DbContextBase(opti
         builder.Entity<DbTeacher>(TeacherConfigure);
         builder.Entity<DbTeacherPreference>(TeacherPreferenceConfigure);
         builder.Entity<DbStudentGroup>(StudentGroupConfigure);
+        builder.Entity<DbStudentGroupLink>(StudentGroupLinkConfigure);
         builder.Entity<DbStudent>(StudentConfigure);
         builder.Entity<DbAcademicDiscipline>(AcademicDisciplineConfigure);
         builder.Entity<DbLessonBatchInfo>(LessonBatchInfoConfigure);
@@ -310,21 +311,36 @@ public class InsmaScheduleContext(DbContextOptions options) : DbContextBase(opti
         builder.Property(x => x.StudentGroupType)
             .HasConversion(new EnumToStringConverter<StudentGroupType>());
 
-        builder.HasMany(x => x.Parents)
-            .WithMany()
-            .UsingEntity(
-                "student_group_hierarchy",
-                r => r.HasOne(typeof(DbStudentGroup)).WithMany().HasForeignKey("parent_id").HasPrincipalKey(nameof(DbStudentGroup.Id)).HasConstraintName("fk_student_group_hierarchy_parent"),
-                l => l.HasOne(typeof(DbStudentGroup)).WithMany().HasForeignKey("child_id").HasPrincipalKey(nameof(DbStudentGroup.Id)).HasConstraintName("fk_student_group_hierarchy_child"),
-                j => j.HasKey("parent_id", "child_id"));
+        // builder.HasMany(x => x.Parents)
+        //     .WithMany()
+        //     .UsingEntity(
+        //         "student_group_hierarchy",
+        //         r => r.HasOne(typeof(DbStudentGroup)).WithMany().HasForeignKey("parent_id").HasPrincipalKey(nameof(DbStudentGroup.Id)).HasConstraintName("fk_student_group_hierarchy_parent"),
+        //         l => l.HasOne(typeof(DbStudentGroup)).WithMany().HasForeignKey("child_id").HasPrincipalKey(nameof(DbStudentGroup.Id)).HasConstraintName("fk_student_group_hierarchy_child"),
+        //         j => j.HasKey("parent_id", "child_id"));
+        //
+        // builder.HasMany(x => x.Children)
+        //     .WithMany()
+        //     .UsingEntity(
+        //         "student_group_hierarchy",
+        //         r => r.HasOne(typeof(DbStudentGroup)).WithMany().HasForeignKey("child_id").HasPrincipalKey(nameof(DbStudentGroup.Id)).HasConstraintName("fk_student_group_hierarchy_child"),
+        //         l => l.HasOne(typeof(DbStudentGroup)).WithMany().HasForeignKey("parent_id").HasPrincipalKey(nameof(DbStudentGroup.Id)).HasConstraintName("fk_student_group_hierarchy_parent"),
+        //         j => j.HasKey("parent_id", "child_id"));
+    }
 
-        builder.HasMany(x => x.Children)
-            .WithMany()
-            .UsingEntity(
-                "student_group_hierarchy",
-                r => r.HasOne(typeof(DbStudentGroup)).WithMany().HasForeignKey("child_id").HasPrincipalKey(nameof(DbStudentGroup.Id)).HasConstraintName("fk_student_group_hierarchy_child"),
-                l => l.HasOne(typeof(DbStudentGroup)).WithMany().HasForeignKey("parent_id").HasPrincipalKey(nameof(DbStudentGroup.Id)).HasConstraintName("fk_student_group_hierarchy_parent"),
-                j => j.HasKey("parent_id", "child_id"));
+    private void StudentGroupLinkConfigure(EntityTypeBuilder<DbStudentGroupLink> builder)
+    {
+        builder.HasKey(x => new { x.ChildStudentGroupId, x.ParentStudentGroupId });
+
+        builder.HasOne(x => x.ParentStudentGroup)
+            .WithMany(g => g.Children)
+            .HasForeignKey(x => x.ParentStudentGroupId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(x => x.ChildStudentGroup)
+            .WithMany(g => g.Parents)
+            .HasForeignKey(x => x.ChildStudentGroupId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 
     private void TeacherConfigure(EntityTypeBuilder<DbTeacher> builder)

@@ -20,9 +20,9 @@ public class StudentGroupRepository(
         var entity = await Query().AsNoTracking()
             .AsNoTracking()
             .Include(x => x.Parents)
-            .ThenInclude(x => x!.Parents)
+            .ThenInclude(x => x!.ParentStudentGroup)
             .Include(x => x.Children)
-            .ThenInclude(x => x!.Children)
+            .ThenInclude(x => x!.ChildStudentGroup)
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
         var foundEntity = entity ?? throw new ServiceException(ServiceExceptionTypes.EntityNotFound);
@@ -36,9 +36,9 @@ public class StudentGroupRepository(
         var entities = await Query()
             .AsNoTracking()
             .Include(x => x.Parents)
-            .ThenInclude(x => x!.Parents)
+            .ThenInclude(x => x!.ParentStudentGroup)
             .Include(x => x.Children)
-            .ThenInclude(x => x!.Children)
+            .ThenInclude(x => x!.ChildStudentGroup)
             .Where(predicate)
             .ToArrayAsync();
 
@@ -55,9 +55,9 @@ public class StudentGroupRepository(
         var studentGroupTrees = await Query()
             .AsNoTracking()
             .Include(x => x.Parents)
-            .ThenInclude(x => x!.Parents)
+            .ThenInclude(x => x!.ParentStudentGroup)
             .Include(x => x.Children)
-            .ThenInclude(x => x!.Children)
+            .ThenInclude(x => x!.ChildStudentGroup)
             .Where(x => studentGroupIds.Contains(x.Id))
             .ToArrayAsync();
 
@@ -65,8 +65,8 @@ public class StudentGroupRepository(
         foreach (var studentGroup in studentGroupTrees)
         {
             result[studentGroup.Id] = [studentGroup.Id];
-            result[studentGroup.Id].AddRange(studentGroup.Parents.Select(x => x.Id));
-            result[studentGroup.Id].AddRange(studentGroup.Children.Select(x => x.Id));
+            result[studentGroup.Id].AddRange(studentGroup.Parents.Select(x => x.ParentStudentGroupId));
+            result[studentGroup.Id].AddRange(studentGroup.Children.Select(x => x.ChildStudentGroupId));
         }
         return result;
     }

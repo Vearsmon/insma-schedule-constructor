@@ -590,6 +590,25 @@ namespace Dal.Migrations
                     b.ToTable("student_group", (string)null);
                 });
 
+            modelBuilder.Entity("Dal.Entities.DbStudentGroupLink", b =>
+                {
+                    b.Property<Guid>("ChildStudentGroupId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("child_student_group_id");
+
+                    b.Property<Guid>("ParentStudentGroupId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("parent_student_group_id");
+
+                    b.HasKey("ChildStudentGroupId", "ParentStudentGroupId")
+                        .HasName("pk_student_group_link");
+
+                    b.HasIndex("ParentStudentGroupId")
+                        .HasDatabaseName("ix_student_group_link_parent_student_group_id");
+
+                    b.ToTable("student_group_link", (string)null);
+                });
+
             modelBuilder.Entity("Dal.Entities.DbTeacher", b =>
                 {
                     b.Property<Guid>("Id")
@@ -694,25 +713,6 @@ namespace Dal.Migrations
                         .HasName("pk_user");
 
                     b.ToTable("user", (string)null);
-                });
-
-            modelBuilder.Entity("student_group_hierarchy", b =>
-                {
-                    b.Property<Guid>("parent_id")
-                        .HasColumnType("uuid")
-                        .HasColumnName("parent_id");
-
-                    b.Property<Guid>("child_id")
-                        .HasColumnType("uuid")
-                        .HasColumnName("child_id");
-
-                    b.HasKey("parent_id", "child_id")
-                        .HasName("pk_student_group_hierarchy_dictionary_string_object");
-
-                    b.HasIndex("child_id")
-                        .HasDatabaseName("ix_student_group_hierarchy_dictionary_string_object_child");
-
-                    b.ToTable("student_group_hierarchy (_dictionary<string, object>)", (string)null);
                 });
 
             modelBuilder.Entity("Dal.Entities.DbAcademicDiscipline", b =>
@@ -1003,6 +1003,27 @@ namespace Dal.Migrations
                     b.Navigation("Schedule");
                 });
 
+            modelBuilder.Entity("Dal.Entities.DbStudentGroupLink", b =>
+                {
+                    b.HasOne("Dal.Entities.DbStudentGroup", "ChildStudentGroup")
+                        .WithMany("Parents")
+                        .HasForeignKey("ChildStudentGroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_student_group_link_student_group_child_student_group_id");
+
+                    b.HasOne("Dal.Entities.DbStudentGroup", "ParentStudentGroup")
+                        .WithMany("Children")
+                        .HasForeignKey("ParentStudentGroupId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_student_group_link_student_group_parent_student_group_id");
+
+                    b.Navigation("ChildStudentGroup");
+
+                    b.Navigation("ParentStudentGroup");
+                });
+
             modelBuilder.Entity("Dal.Entities.DbTeacherPreference", b =>
                 {
                     b.HasOne("Dal.Entities.DbRoom", "Room")
@@ -1030,23 +1051,6 @@ namespace Dal.Migrations
                     b.Navigation("Schedule");
 
                     b.Navigation("Teacher");
-                });
-
-            modelBuilder.Entity("student_group_hierarchy", b =>
-                {
-                    b.HasOne("Dal.Entities.DbStudentGroup", null)
-                        .WithMany()
-                        .HasForeignKey("child_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_student_group_hierarchy_child");
-
-                    b.HasOne("Dal.Entities.DbStudentGroup", null)
-                        .WithMany()
-                        .HasForeignKey("parent_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_student_group_hierarchy_parent");
                 });
 
             modelBuilder.Entity("Dal.Entities.DbAcademicDiscipline", b =>
@@ -1080,6 +1084,13 @@ namespace Dal.Migrations
                     b.Navigation("StudentGroups");
 
                     b.Navigation("Teachers");
+                });
+
+            modelBuilder.Entity("Dal.Entities.DbStudentGroup", b =>
+                {
+                    b.Navigation("Children");
+
+                    b.Navigation("Parents");
                 });
 #pragma warning restore 612, 618
         }

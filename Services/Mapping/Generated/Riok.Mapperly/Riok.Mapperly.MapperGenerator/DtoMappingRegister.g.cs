@@ -515,6 +515,20 @@ namespace Services.Mapping
         }
 
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        public static partial void Update(global::Domain.Dto.SaveDto.SaveStudentGroupDto? dto, global::Domain.Models.StudentGroup? model)
+        {
+            if (dto == null || model == null)
+                return;
+            model.Id = dto.Id;
+            model.ScheduleId = dto.ScheduleId;
+            model.Name = dto.Name;
+            model.SemesterNumber = dto.SemesterNumber;
+            model.StudentsCount = dto.StudentsCount;
+            model.StudentGroupType = dto.StudentGroupType;
+            model.Children = MapChildren(dto.ChildIds);
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
         [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(item))]
         public static partial global::Domain.Dto.RegistryDto.StudentGroupRegistryItemDto? Map(global::Domain.Models.RegistryItemModels.StudentGroupRegistryItem? item)
         {

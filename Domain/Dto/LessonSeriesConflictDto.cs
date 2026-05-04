@@ -6,6 +6,6 @@ namespace Domain.Dto;
 public class LessonSeriesConflictDto
 {
     public DayOfWeekTimeInterval DayOfWeekTimeInterval { get; set; } = null!;
-    public string[] Messages { get; set; } = [];
+    public LessonSeriesConflictMessageDto[] Messages { get; set; } = [];
     public LessonValidationErrorType ErrorType { get; set; }
 }

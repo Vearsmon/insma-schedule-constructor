@@ -290,27 +290,27 @@ namespace Dal.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "student_group_hierarchy (_dictionary<string, object>)",
+                name: "student_group_link",
                 columns: table => new
                 {
-                    parent_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    child_id = table.Column<Guid>(type: "uuid", nullable: false)
+                    child_student_group_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    parent_student_group_id = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_student_group_hierarchy_dictionary_string_object", x => new { x.parent_id, x.child_id });
+                    table.PrimaryKey("pk_student_group_link", x => new { x.child_student_group_id, x.parent_student_group_id });
                     table.ForeignKey(
-                        name: "fk_student_group_hierarchy_child",
-                        column: x => x.child_id,
+                        name: "fk_student_group_link_student_group_child_student_group_id",
+                        column: x => x.child_student_group_id,
                         principalTable: "student_group",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "fk_student_group_hierarchy_parent",
-                        column: x => x.parent_id,
+                        name: "fk_student_group_link_student_group_parent_student_group_id",
+                        column: x => x.parent_student_group_id,
                         principalTable: "student_group",
                         principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -644,9 +644,9 @@ namespace Dal.Migrations
                 column: "schedule_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_student_group_hierarchy_dictionary_string_object_child",
-                table: "student_group_hierarchy (_dictionary<string, object>)",
-                column: "child_id");
+                name: "ix_student_group_link_parent_student_group_id",
+                table: "student_group_link",
+                column: "parent_student_group_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_teacher_preference_room_id",
@@ -692,7 +692,7 @@ namespace Dal.Migrations
                 name: "student");
 
             migrationBuilder.DropTable(
-                name: "student_group_hierarchy (_dictionary<string, object>)");
+                name: "student_group_link");
 
             migrationBuilder.DropTable(
                 name: "lesson_batch_info");

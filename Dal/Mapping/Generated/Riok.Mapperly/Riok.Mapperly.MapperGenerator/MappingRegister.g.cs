@@ -433,8 +433,8 @@ namespace Dal.Mapping
             target.SemesterNumber = studentGroup.SemesterNumber;
             target.StudentsCount = studentGroup.StudentsCount;
             target.StudentGroupType = studentGroup.StudentGroupType;
-            target.Parents = MapChildrenCollection(studentGroup.Parents);
-            target.Children = MapChildrenCollection(studentGroup.Children);
+            target.Parents = MapToStudentGroupArray1(studentGroup.Parents);
+            target.Children = MapChildrenCollection(MapToListOfDbStudentGroup1(studentGroup.Children));
             return target;
         }
 
@@ -455,8 +455,8 @@ namespace Dal.Mapping
             target.SemesterNumber = studentGroup.SemesterNumber;
             target.StudentsCount = studentGroup.StudentsCount;
             target.StudentGroupType = studentGroup.StudentGroupType;
-            target.Parents = MapToListOfDbStudentGroup1(studentGroup.Parents);
-            target.Children = MapToListOfDbStudentGroup1(studentGroup.Children);
+            target.Parents = MapToListOfDbStudentGroupLink(studentGroup.Parents);
+            target.Children = MapToListOfDbStudentGroupLink(studentGroup.Children);
             return target;
         }
 
@@ -473,8 +473,8 @@ namespace Dal.Mapping
             dbStudentGroup.SemesterNumber = studentGroup.SemesterNumber;
             dbStudentGroup.StudentsCount = studentGroup.StudentsCount;
             dbStudentGroup.StudentGroupType = studentGroup.StudentGroupType;
-            dbStudentGroup.Parents = MapToListOfDbStudentGroup1(studentGroup.Parents);
-            dbStudentGroup.Children = MapToListOfDbStudentGroup1(studentGroup.Children);
+            dbStudentGroup.Parents = MapToListOfDbStudentGroupLink(studentGroup.Parents);
+            dbStudentGroup.Children = MapToListOfDbStudentGroupLink(studentGroup.Children);
         }
 
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
@@ -1034,12 +1034,57 @@ namespace Dal.Mapping
         }
 
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        private static global::System.Collections.Generic.List<global::Dal.Entities.DbStudentGroup> MapToListOfDbStudentGroup1(global::System.Collections.Generic.IReadOnlyCollection<global::Domain.Models.StudentGroup> source)
+        private static global::Domain.Models.StudentGroup MapToStudentGroup1(global::Dal.Entities.DbStudentGroupLink source)
+        {
+            var target = new global::Domain.Models.StudentGroup();
+            return target;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        private static global::Domain.Models.StudentGroup[] MapToStudentGroupArray1(global::System.Collections.Generic.ICollection<global::Dal.Entities.DbStudentGroupLink> source)
+        {
+            var target = new global::Domain.Models.StudentGroup[source.Count];
+            var i = 0;
+            foreach (var item in source)
+            {
+                target[i] = MapToStudentGroup1(item);
+                i++;
+            }
+            return target;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        private static global::Dal.Entities.DbStudentGroup MapToDbStudentGroup1(global::Dal.Entities.DbStudentGroupLink source)
+        {
+            var target = new global::Dal.Entities.DbStudentGroup();
+            return target;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        private static global::System.Collections.Generic.List<global::Dal.Entities.DbStudentGroup> MapToListOfDbStudentGroup1(global::System.Collections.Generic.ICollection<global::Dal.Entities.DbStudentGroupLink> source)
         {
             var target = new global::System.Collections.Generic.List<global::Dal.Entities.DbStudentGroup>(source.Count);
             foreach (var item in source)
             {
-                target.Add(Map(item));
+                target.Add(MapToDbStudentGroup1(item));
+            }
+            return target;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        private static global::Dal.Entities.DbStudentGroupLink MapToDbStudentGroupLink(global::Domain.Models.StudentGroup source)
+        {
+            var target = new global::Dal.Entities.DbStudentGroupLink();
+            return target;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        private static global::System.Collections.Generic.List<global::Dal.Entities.DbStudentGroupLink> MapToListOfDbStudentGroupLink(global::System.Collections.Generic.IReadOnlyCollection<global::Domain.Models.StudentGroup> source)
+        {
+            var target = new global::System.Collections.Generic.List<global::Dal.Entities.DbStudentGroupLink>(source.Count);
+            foreach (var item in source)
+            {
+                target.Add(MapToDbStudentGroupLink(item));
             }
             return target;
         }

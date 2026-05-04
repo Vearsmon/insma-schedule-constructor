@@ -16,5 +16,7 @@ public class StudentGroupMapper : IRepositoryMapper<DbStudentGroup, StudentGroup
     public void Update(DbStudentGroup entity, StudentGroup model)
     {
         MappingRegister.Update(model, entity);
+        entity.Parents = model.Parents.Select(x => new DbStudentGroupLink { ParentStudentGroupId = x.Id ?? Guid.Empty, ChildStudentGroupId = model.Id ?? Guid.Empty }).ToList();
+        entity.Children = model.Children.Select(x => new DbStudentGroupLink { ParentStudentGroupId = model.Id ?? Guid.Empty, ChildStudentGroupId = x.Id ?? Guid.Empty }).ToList();
     }
 }

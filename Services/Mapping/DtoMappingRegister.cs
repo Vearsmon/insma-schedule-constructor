@@ -202,7 +202,14 @@ public static partial class DtoMappingRegister
     [MapperIgnoreTarget(nameof(StudentGroup.Children))]
     public static partial StudentGroup? Map(SaveStudentGroupDto? dto);
 
+    [MapperIgnoreSource(nameof(SaveStudentGroupDto.ParentIds))]
+    [MapperIgnoreTarget(nameof(StudentGroup.Parents))]
+    [MapProperty(nameof(SaveStudentGroupDto.ChildIds), nameof(StudentGroup.Children), Use = nameof(MapChildren))]
+    public static partial void Update(SaveStudentGroupDto? dto, StudentGroup? model);
+
     public static partial StudentGroupRegistryItemDto? Map(StudentGroupRegistryItem? item);
+
+    private static StudentGroup[] MapChildren(Guid[] ids) => ids.Select(x => new StudentGroup { Id = x }).ToArray();
 
     #endregion
 

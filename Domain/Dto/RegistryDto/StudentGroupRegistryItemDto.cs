@@ -10,4 +10,6 @@ public class StudentGroupRegistryItemDto : IModelWithId
     public int? SemesterNumber { get; set; }
     public int? StudentsCount { get; set; }
     public StudentGroupType StudentGroupType { get; set; }
+    public string[] ParentNames { get; set; } = [];
+    public string[] ChildNames { get; set; } = [];
 }

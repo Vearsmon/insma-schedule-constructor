@@ -2,6 +2,7 @@ using Dal.Entities;
 using Dal.Repositories;
 using Domain.Models.RegistryItemModels;
 using Domain.Models.RegistrySearchModels;
+using Microsoft.EntityFrameworkCore;
 
 namespace Dal.RegistryRepositories.StudentGroup;
 
@@ -14,4 +15,8 @@ internal class StudentGroupRegistryRepository(
             StudentGroupRegistryInternalSearchModel>(context, mapper, orderer, predicateBuilder),
         IStudentGroupRegistryRepository
 {
+    protected override IQueryable<DbStudentGroup> Query => Context.Set<DbStudentGroup>()
+        .AsNoTracking()
+        .Include(x => x.Children)
+        .Include(x => x.Parents);
 }

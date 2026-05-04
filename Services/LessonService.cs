@@ -706,7 +706,13 @@ public class LessonService(
                         TimeInterval = validationMessage.Payload.DateWithTimeInterval.TimeInterval,
                     }
                     : validationMessage.Payload.DayOfWeekTimeInterval!,
-                Messages = [message],
+                Messages = [new LessonSeriesConflictMessageDto
+                {
+                    TimeInterval = validationMessage.Payload.DateWithTimeInterval != null
+                        ? validationMessage.Payload.DateWithTimeInterval?.TimeInterval
+                        : validationMessage.Payload.DayOfWeekTimeInterval?.TimeInterval,
+                    Message = message,
+                }],
                 ErrorType = validationMessage.ErrorType,
             });
         }
