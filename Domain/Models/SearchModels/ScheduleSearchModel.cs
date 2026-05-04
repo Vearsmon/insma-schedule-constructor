@@ -2,4 +2,5 @@
 
 public class ScheduleSearchModel
 {
+    public Guid? Id { get; set; }
 }

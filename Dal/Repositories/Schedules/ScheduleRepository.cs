@@ -19,6 +19,6 @@ public class ScheduleRepository(
 
     public async Task<bool> ExistsAsync(Guid id)
     {
-        return (await base.SelectAsync([id])).Length == 1;
+        return await ExistAsync(predicateBuilder, new ScheduleSearchModel { Id = id });
     }
 }

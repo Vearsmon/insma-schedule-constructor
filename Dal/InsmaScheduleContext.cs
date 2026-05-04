@@ -22,7 +22,13 @@ public class InsmaScheduleContext(DbContextOptions options) : DbContextBase(opti
         builder.Entity<DbStudent>(StudentConfigure);
         builder.Entity<DbAcademicDiscipline>(AcademicDisciplineConfigure);
         builder.Entity<DbLessonBatchInfo>(LessonBatchInfoConfigure);
+        builder.Entity<DbLessonBatchInfoStudentGroup>(LessonBatchInfoStudentGroupConfigure);
+        builder.Entity<DbLessonBatchInfoTeacher>(LessonBatchInfoTeacherConfigure);
+        builder.Entity<DbLessonBatchInfoRoom>(LessonBatchInfoRoomConfigure);
         builder.Entity<DbLesson>(LessonConfigure);
+        builder.Entity<DbLessonStudentGroup>(LessonStudentGroupConfigure);
+        builder.Entity<DbLessonTeacher>(LessonTeacherConfigure);
+        builder.Entity<DbLessonRoom>(LessonRoomConfigure);
         builder.Entity<DbLessonValidationMessage>(LessonValidationMessageConfigure);
 
         base.OnModelCreating(builder);
@@ -66,29 +72,29 @@ public class InsmaScheduleContext(DbContextOptions options) : DbContextBase(opti
 
     private void LessonBatchInfoConfigure(EntityTypeBuilder<DbLessonBatchInfo> builder)
     {
-        builder.HasMany(x => x.StudentGroups)
-            .WithMany()
-            .UsingEntity(
-                "lesson_batch_info_student_group",
-                r => r.HasOne(typeof(DbStudentGroup)).WithMany().HasForeignKey("student_group_id").HasPrincipalKey(nameof(DbStudentGroup.Id)).HasConstraintName("fk_lesson_batch_info_student_group_student_group"),
-                l => l.HasOne(typeof(DbLessonBatchInfo)).WithMany().HasForeignKey("lesson_batch_info_id").HasPrincipalKey(nameof(DbLessonBatchInfo.Id)).HasConstraintName("fk_lesson_batch_info_student_group_lesson_batch_info"),
-                j => j.HasKey("student_group_id", "lesson_batch_info_id"));
-
-        builder.HasMany(x => x.Teachers)
-            .WithMany()
-            .UsingEntity(
-                "lesson_batch_info_teacher",
-                r => r.HasOne(typeof(DbTeacher)).WithMany().HasForeignKey("teacher_id").HasPrincipalKey(nameof(DbTeacher.Id)).HasConstraintName("fk_lesson_batch_info_teacher_teacher"),
-                l => l.HasOne(typeof(DbLessonBatchInfo)).WithMany().HasForeignKey("lesson_batch_info_id").HasPrincipalKey(nameof(DbLessonBatchInfo.Id)).HasConstraintName("fk_lesson_batch_info_teacher_lesson_batch_info"),
-                j => j.HasKey("teacher_id", "lesson_batch_info_id"));
-
-        builder.HasMany(x => x.Rooms)
-            .WithMany()
-            .UsingEntity(
-                "lesson_batch_info_room",
-                r => r.HasOne(typeof(DbRoom)).WithMany().HasForeignKey("room_id").HasPrincipalKey(nameof(DbRoom.Id)).HasConstraintName("fk_lesson_batch_info_room_room"),
-                l => l.HasOne(typeof(DbLessonBatchInfo)).WithMany().HasForeignKey("lesson_batch_info_id").HasPrincipalKey(nameof(DbLessonBatchInfo.Id)).HasConstraintName("fk_lesson_batch_info_room_lesson_batch_info"),
-                j => j.HasKey("room_id", "lesson_batch_info_id"));
+        // builder.HasMany(x => x.StudentGroups)
+        //     .WithMany()
+        //     .UsingEntity(
+        //         "lesson_batch_info_student_group",
+        //         r => r.HasOne(typeof(DbStudentGroup)).WithMany().HasForeignKey("student_group_id").HasPrincipalKey(nameof(DbStudentGroup.Id)).HasConstraintName("fk_lesson_batch_info_student_group_student_group"),
+        //         l => l.HasOne(typeof(DbLessonBatchInfo)).WithMany().HasForeignKey("lesson_batch_info_id").HasPrincipalKey(nameof(DbLessonBatchInfo.Id)).HasConstraintName("fk_lesson_batch_info_student_group_lesson_batch_info"),
+        //         j => j.HasKey("student_group_id", "lesson_batch_info_id"));
+        //
+        // builder.HasMany(x => x.Teachers)
+        //     .WithMany()
+        //     .UsingEntity(
+        //         "lesson_batch_info_teacher",
+        //         r => r.HasOne(typeof(DbTeacher)).WithMany().HasForeignKey("teacher_id").HasPrincipalKey(nameof(DbTeacher.Id)).HasConstraintName("fk_lesson_batch_info_teacher_teacher"),
+        //         l => l.HasOne(typeof(DbLessonBatchInfo)).WithMany().HasForeignKey("lesson_batch_info_id").HasPrincipalKey(nameof(DbLessonBatchInfo.Id)).HasConstraintName("fk_lesson_batch_info_teacher_lesson_batch_info"),
+        //         j => j.HasKey("teacher_id", "lesson_batch_info_id"));
+        //
+        // builder.HasMany(x => x.Rooms)
+        //     .WithMany()
+        //     .UsingEntity(
+        //         "lesson_batch_info_room",
+        //         r => r.HasOne(typeof(DbRoom)).WithMany().HasForeignKey("room_id").HasPrincipalKey(nameof(DbRoom.Id)).HasConstraintName("fk_lesson_batch_info_room_room"),
+        //         l => l.HasOne(typeof(DbLessonBatchInfo)).WithMany().HasForeignKey("lesson_batch_info_id").HasPrincipalKey(nameof(DbLessonBatchInfo.Id)).HasConstraintName("fk_lesson_batch_info_room_lesson_batch_info"),
+        //         j => j.HasKey("room_id", "lesson_batch_info_id"));
 
         builder.Property(e => e.DayOfWeekTimeIntervals)
             .HasConversion(
@@ -100,21 +106,43 @@ public class InsmaScheduleContext(DbContextOptions options) : DbContextBase(opti
             .HasConversion(new EnumToStringConverter<DisciplineLessonRepeatType>());
     }
 
-    private void CampusConfigure(EntityTypeBuilder<DbCampus> builder)
+    private void LessonBatchInfoStudentGroupConfigure(EntityTypeBuilder<DbLessonBatchInfoStudentGroup> builder)
     {
-        builder.HasData(new List<DbCampus>
-        {
-            new()
-            {
-                Id = new Guid("f68b22ca-dc97-4aed-ab4f-db709e670d36"),
-                Name = "Куйбышева",
-            },
-            new()
-            {
-                Id = new Guid("453addd1-7fc7-4028-9e1c-bf042c2164a3"),
-                Name = "Тургенева",
-            },
-        });
+        builder.HasKey(x => new { x.LessonBatchInfoId, x.StudentGroupId });
+
+        builder.HasOne(lr => lr.LessonBatchInfo)
+            .WithMany(l => l.StudentGroups)
+            .HasForeignKey(lr => lr.LessonBatchInfoId);
+
+        builder.HasOne(lr => lr.StudentGroup)
+            .WithMany()
+            .HasForeignKey(lr => lr.StudentGroupId);
+    }
+
+    private void LessonBatchInfoTeacherConfigure(EntityTypeBuilder<DbLessonBatchInfoTeacher> builder)
+    {
+        builder.HasKey(x => new { x.LessonBatchInfoId, x.TeacherId });
+
+        builder.HasOne(lr => lr.LessonBatchInfo)
+            .WithMany(l => l.Teachers)
+            .HasForeignKey(lr => lr.LessonBatchInfoId);
+
+        builder.HasOne(lr => lr.Teacher)
+            .WithMany()
+            .HasForeignKey(lr => lr.TeacherId);
+    }
+
+    private void LessonBatchInfoRoomConfigure(EntityTypeBuilder<DbLessonBatchInfoRoom> builder)
+    {
+        builder.HasKey(x => new { x.LessonBatchInfoId, x.RoomId });
+
+        builder.HasOne(lr => lr.LessonBatchInfo)
+            .WithMany(l => l.Rooms)
+            .HasForeignKey(lr => lr.LessonBatchInfoId);
+
+        builder.HasOne(lr => lr.Room)
+            .WithMany()
+            .HasForeignKey(lr => lr.RoomId);
     }
 
     private void LessonConfigure(EntityTypeBuilder<DbLesson> builder)
@@ -122,39 +150,39 @@ public class InsmaScheduleContext(DbContextOptions options) : DbContextBase(opti
         builder.HasOne(x => x.Schedule)
             .WithMany()
             .HasForeignKey(x => x.ScheduleId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(x => x.AcademicDiscipline)
             .WithMany()
             .HasForeignKey(x => x.AcademicDisciplineId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.Property(x => x.AcademicDisciplineType)
             .HasConversion(new EnumToStringConverter<AcademicDisciplineType>());
 
-        builder.HasMany(x => x.StudentGroups)
-            .WithMany()
-            .UsingEntity(
-                "lesson_student_group",
-                r => r.HasOne(typeof(DbStudentGroup)).WithMany().HasForeignKey("student_group_id").HasPrincipalKey(nameof(DbStudentGroup.Id)).HasConstraintName("fk_lesson_student_group_student_group"),
-                l => l.HasOne(typeof(DbLesson)).WithMany().HasForeignKey("lesson_id").HasPrincipalKey(nameof(DbLesson.Id)).HasConstraintName("fk_lesson_student_group_lesson"),
-                j => j.HasKey("student_group_id", "lesson_id"));
-
-        builder.HasMany(x => x.Teachers)
-            .WithMany()
-            .UsingEntity(
-                "lesson_teacher",
-                r => r.HasOne(typeof(DbTeacher)).WithMany().HasForeignKey("teacher_id").HasPrincipalKey(nameof(DbTeacher.Id)).HasConstraintName("fk_lesson_teacher_teacher"),
-                l => l.HasOne(typeof(DbLesson)).WithMany().HasForeignKey("lesson_id").HasPrincipalKey(nameof(DbLesson.Id)).HasConstraintName("fk_lesson_teacher_lesson"),
-                j => j.HasKey("teacher_id", "lesson_id"));
-
-        builder.HasMany(x => x.Rooms)
-            .WithMany()
-            .UsingEntity(
-                "lesson_room",
-                r => r.HasOne(typeof(DbRoom)).WithMany().HasForeignKey("room_id").HasPrincipalKey(nameof(DbRoom.Id)).HasConstraintName("fk_lesson_room_room"),
-                l => l.HasOne(typeof(DbLesson)).WithMany().HasForeignKey("lesson_id").HasPrincipalKey(nameof(DbLesson.Id)).HasConstraintName("fk_lesson_room_lesson"),
-                j => j.HasKey("room_id", "lesson_id"));
+        // builder.HasMany(x => x.StudentGroups)
+        //     .WithMany()
+        //     .UsingEntity(
+        //         "lesson_student_group",
+        //         r => r.HasOne(typeof(DbStudentGroup)).WithMany().HasForeignKey("student_group_id").HasPrincipalKey(nameof(DbStudentGroup.Id)).HasConstraintName("fk_lesson_student_group_student_group"),
+        //         l => l.HasOne(typeof(DbLesson)).WithMany().HasForeignKey("lesson_id").HasPrincipalKey(nameof(DbLesson.Id)).HasConstraintName("fk_lesson_student_group_lesson"),
+        //         j => j.HasKey("student_group_id", "lesson_id"));
+        //
+        // builder.HasMany(x => x.Teachers)
+        //     .WithMany()
+        //     .UsingEntity(
+        //         "lesson_teacher",
+        //         r => r.HasOne(typeof(DbTeacher)).WithMany().HasForeignKey("teacher_id").HasPrincipalKey(nameof(DbTeacher.Id)).HasConstraintName("fk_lesson_teacher_teacher"),
+        //         l => l.HasOne(typeof(DbLesson)).WithMany().HasForeignKey("lesson_id").HasPrincipalKey(nameof(DbLesson.Id)).HasConstraintName("fk_lesson_teacher_lesson"),
+        //         j => j.HasKey("teacher_id", "lesson_id"));
+        //
+        // builder.HasMany(x => x.Rooms)
+        //     .WithMany()
+        //     .UsingEntity(
+        //         "lesson_room",
+        //         r => r.HasOne(typeof(DbRoom)).WithMany().HasForeignKey("room_id").HasPrincipalKey(nameof(DbRoom.Id)).HasConstraintName("fk_lesson_room_room"),
+        //         l => l.HasOne(typeof(DbLesson)).WithMany().HasForeignKey("lesson_id").HasPrincipalKey(nameof(DbLesson.Id)).HasConstraintName("fk_lesson_room_lesson"),
+        //         j => j.HasKey("room_id", "lesson_id"));
 
         builder.Property(x => x.FlexibilityType)
             .HasConversion(new EnumToStringConverter<LessonFlexibilityType>());
@@ -163,6 +191,45 @@ public class InsmaScheduleContext(DbContextOptions options) : DbContextBase(opti
             .WithOne(x => x.Lesson)
             .HasForeignKey(x => x.LessonId)
             .OnDelete(DeleteBehavior.Cascade);
+    }
+
+    private void LessonStudentGroupConfigure(EntityTypeBuilder<DbLessonStudentGroup> builder)
+    {
+        builder.HasKey(x => new { x.LessonId, x.StudentGroupId });
+
+        builder.HasOne(lr => lr.Lesson)
+            .WithMany(l => l.StudentGroups)
+            .HasForeignKey(lr => lr.LessonId);
+
+        builder.HasOne(lr => lr.StudentGroup)
+            .WithMany()
+            .HasForeignKey(lr => lr.StudentGroupId);
+    }
+
+    private void LessonTeacherConfigure(EntityTypeBuilder<DbLessonTeacher> builder)
+    {
+        builder.HasKey(x => new { x.LessonId, x.TeacherId });
+
+        builder.HasOne(lr => lr.Lesson)
+            .WithMany(l => l.Teachers)
+            .HasForeignKey(lr => lr.LessonId);
+
+        builder.HasOne(lr => lr.Teacher)
+            .WithMany()
+            .HasForeignKey(lr => lr.TeacherId);
+    }
+
+    private void LessonRoomConfigure(EntityTypeBuilder<DbLessonRoom> builder)
+    {
+        builder.HasKey(x => new { x.LessonId, x.RoomId });
+
+        builder.HasOne(lr => lr.Lesson)
+            .WithMany(l => l.Rooms)
+            .HasForeignKey(lr => lr.LessonId);
+
+        builder.HasOne(lr => lr.Room)
+            .WithMany()
+            .HasForeignKey(lr => lr.RoomId);
     }
 
     private void LessonValidationMessageConfigure(EntityTypeBuilder<DbLessonValidationMessage> builder)
@@ -294,5 +361,22 @@ public class InsmaScheduleContext(DbContextOptions options) : DbContextBase(opti
 
     private void UserConfigure(EntityTypeBuilder<DbUser> builder)
     {
+    }
+
+    private void CampusConfigure(EntityTypeBuilder<DbCampus> builder)
+    {
+        builder.HasData(new List<DbCampus>
+        {
+            new()
+            {
+                Id = new Guid("f68b22ca-dc97-4aed-ab4f-db709e670d36"),
+                Name = "Куйбышева",
+            },
+            new()
+            {
+                Id = new Guid("453addd1-7fc7-4028-9e1c-bf042c2164a3"),
+                Name = "Тургенева",
+            },
+        });
     }
 }

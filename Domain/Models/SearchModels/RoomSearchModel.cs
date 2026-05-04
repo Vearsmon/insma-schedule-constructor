@@ -2,4 +2,5 @@
 
 public class RoomSearchModel
 {
+    public Guid? Id { get; set; }
 }

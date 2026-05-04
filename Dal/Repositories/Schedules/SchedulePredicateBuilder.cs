@@ -11,6 +11,8 @@ public class SchedulePredicateBuilder : IPredicateBuilder<DbSchedule, ScheduleSe
 
     public Expression<Func<DbSchedule, bool>> Build(ScheduleSearchModel searchModel)
     {
-        return Predicate;
+        return Predicate
+                .AndIf(searchModel.Id.HasValue, f => f.Id == searchModel.Id)
+            ;
     }
 }

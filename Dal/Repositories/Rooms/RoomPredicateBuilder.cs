@@ -11,6 +11,8 @@ public class RoomPredicateBuilder : IPredicateBuilder<DbRoom, RoomSearchModel>
 
     public Expression<Func<DbRoom, bool>> Build(RoomSearchModel searchModel)
     {
-        return Predicate;
+        return Predicate
+                .AndIf(searchModel.Id.HasValue, f => f.Id == searchModel.Id)
+            ;
     }
 }

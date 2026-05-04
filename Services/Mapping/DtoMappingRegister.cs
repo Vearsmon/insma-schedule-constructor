@@ -156,8 +156,9 @@ public static partial class DtoMappingRegister
     [MapperIgnoreSource(nameof(Room.CampusId))]
     public static partial RoomViewDto? Map(Room? model);
 
-    [MapperIgnoreTarget(nameof(Room.Campus))]
     public static partial Room? Map(SaveRoomDto? dto);
+
+    public static partial void Update(SaveRoomDto? dto, Room? model);
 
     public static partial RoomRegistryItemDto? Map(RoomRegistryItem? item);
 

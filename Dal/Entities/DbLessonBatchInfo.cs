@@ -14,17 +14,17 @@ public class DbLessonBatchInfo : IDbEntityWithId
     /// <summary>
     /// Академические группы
     /// </summary>
-    public ICollection<DbStudentGroup> StudentGroups { get; set; } = [];
+    public ICollection<DbLessonBatchInfoStudentGroup> StudentGroups { get; set; } = [];
 
     /// <summary>
     /// Преподаватели
     /// </summary>
-    public ICollection<DbTeacher> Teachers { get; set; } = [];
+    public ICollection<DbLessonBatchInfoTeacher> Teachers { get; set; } = [];
 
     /// <summary>
     /// Аудитории
     /// </summary>
-    public ICollection<DbRoom> Rooms { get; set; } = [];
+    public ICollection<DbLessonBatchInfoRoom> Rooms { get; set; } = [];
 
     /// <summary>
     /// Отрезки времени занятий по дням недели

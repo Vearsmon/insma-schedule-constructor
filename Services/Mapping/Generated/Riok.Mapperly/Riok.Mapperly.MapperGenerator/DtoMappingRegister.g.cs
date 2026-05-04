@@ -347,11 +347,6 @@ namespace Services.Mapping
                 target.Id = model.Id.Value;
             }
             target.Name = model.Name;
-            if (model.Campus.Id != null)
-            {
-                target.CampusId = model.Campus.Id.Value;
-            }
-            target.CampusName = model.Campus.Name;
             target.RoomType = model.RoomType;
             target.Capacity = model.Capacity;
             target.RoomBoardType = model.RoomBoardType;
@@ -374,6 +369,20 @@ namespace Services.Mapping
             target.RoomBoardType = dto.RoomBoardType;
             target.HasProjector = dto.HasProjector;
             return target;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        public static partial void Update(global::Domain.Dto.SaveDto.SaveRoomDto? dto, global::Domain.Models.Room? model)
+        {
+            if (dto == null || model == null)
+                return;
+            model.Id = dto.Id;
+            model.Name = dto.Name;
+            model.CampusId = dto.CampusId;
+            model.RoomType = dto.RoomType;
+            model.Capacity = dto.Capacity;
+            model.RoomBoardType = dto.RoomBoardType;
+            model.HasProjector = dto.HasProjector;
         }
 
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
@@ -406,11 +415,6 @@ namespace Services.Mapping
                 target.Id = model.Id.Value;
             }
             target.Name = model.Name;
-            if (model.Campus.Id != null)
-            {
-                target.CampusId = model.Campus.Id.Value;
-            }
-            target.CampusName = model.Campus.Name;
             target.RoomType = model.RoomType;
             target.Capacity = model.Capacity;
             target.RoomBoardType = model.RoomBoardType;

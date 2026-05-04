@@ -145,9 +145,12 @@ public static partial class MappingRegister
 
     #region Room
 
-    public static partial Room? Map(DbRoom? room);
-    public static partial DbRoom? Map(Room? room);
-    public static partial void Update(Room room, DbRoom dbRoom);
+    public static partial Room? Map(DbRoom? entity);
+
+    [MapperIgnoreTarget(nameof(DbRoom.Campus))]
+    public static partial DbRoom? Map(Room? model);
+    public static partial void Update(Room? model, DbRoom? entity);
+    public static partial void Update(DbRoom? entity, Room? model);
 
     [MapProperty($"{nameof(DbRoom.Campus)}.{nameof(DbRoom.Campus.Name)}", nameof(RoomRegistryItem.CampusName))]
     public static partial RoomRegistryItem? MapRegistryItem(DbRoom? room);
@@ -427,6 +430,9 @@ public static partial class MappingRegister
 
     [MapProperty($"{nameof(LessonBatchInfo.DateInterval)}.{nameof(LessonBatchInfo.DateInterval.DateFrom)}", nameof(DbLessonBatchInfo.DateFrom))]
     [MapProperty($"{nameof(LessonBatchInfo.DateInterval)}.{nameof(LessonBatchInfo.DateInterval.DateTo)}", nameof(DbLessonBatchInfo.DateTo))]
+    [MapProperty(nameof(LessonBatchInfo.StudentGroups), nameof(DbLessonBatchInfo.StudentGroups), Use = nameof(MapStudentGroups))]
+    [MapProperty(nameof(LessonBatchInfo.Teachers), nameof(DbLessonBatchInfo.Teachers), Use = nameof(MapTeachers))]
+    [MapProperty(nameof(LessonBatchInfo.Rooms), nameof(DbLessonBatchInfo.Rooms), Use = nameof(MapRooms))]
     public static partial DbLessonBatchInfo? Map(LessonBatchInfo? lessonBatchInfo);
 
     [MapProperty($"{nameof(LessonBatchInfo.DateInterval)}.{nameof(LessonBatchInfo.DateInterval.DateFrom)}", nameof(DbLessonBatchInfo.DateFrom))]
@@ -436,7 +442,17 @@ public static partial class MappingRegister
     [MapperIgnoreSource(nameof(DbLessonBatchInfo.DateFrom))]
     [MapperIgnoreSource(nameof(DbLessonBatchInfo.DateTo))]
     [MapperIgnoreTarget(nameof(LessonBatchInfo.DateInterval))]
+    [MapProperty(nameof(DbLessonBatchInfo.StudentGroups), nameof(LessonBatchInfo.StudentGroups), Use = nameof(MapStudentGroupsBatchCollection))]
+    [MapProperty(nameof(DbLessonBatchInfo.Teachers), nameof(LessonBatchInfo.Teachers), Use = nameof(MapTeachersBatchCollection))]
+    [MapProperty(nameof(DbLessonBatchInfo.Rooms), nameof(LessonBatchInfo.Rooms), Use = nameof(MapRoomsBatchCollection))]
     private static partial LessonBatchInfo? MapDbToModel(DbLessonBatchInfo? lessonBatchInfo);
+
+    private static ICollection<DbLessonBatchInfoStudentGroup> MapStudentGroups(StudentGroup[] collection) => collection.Select(x => new DbLessonBatchInfoStudentGroup { StudentGroupId = x.Id!.Value }).ToList();
+    private static ICollection<DbLessonBatchInfoTeacher> MapTeachers(Teacher[] collection) => collection.Select(x => new DbLessonBatchInfoTeacher { TeacherId = x.Id!.Value }).ToList();
+    private static ICollection<DbLessonBatchInfoRoom> MapRooms(Room[] collection) => collection.Select(x => new DbLessonBatchInfoRoom { RoomId = x.Id!.Value }).ToList();
+    private static StudentGroup[] MapStudentGroupsBatchCollection(ICollection<DbLessonBatchInfoStudentGroup> collection) => collection.Select(x => new StudentGroup { Id = x.StudentGroupId }).ToArray();
+    private static Teacher[] MapTeachersBatchCollection(ICollection<DbLessonBatchInfoTeacher> collection) => collection.Select(x => new Teacher { Id = x.TeacherId }).ToArray();
+    private static Room[] MapRoomsBatchCollection(ICollection<DbLessonBatchInfoRoom> collection) => collection.Select(x => new Room { Id = x.RoomId }).ToArray();
 
     #endregion
 

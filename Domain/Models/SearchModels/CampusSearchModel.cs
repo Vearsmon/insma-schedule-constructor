@@ -2,4 +2,5 @@
 
 public class CampusSearchModel
 {
+    public Guid? Id { get; set; }
 }

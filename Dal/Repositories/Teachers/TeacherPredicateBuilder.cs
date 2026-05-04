@@ -11,6 +11,8 @@ public class TeacherPredicateBuilder : IPredicateBuilder<DbTeacher, TeacherSearc
 
     public Expression<Func<DbTeacher, bool>> Build(TeacherSearchModel searchModel)
     {
-        return Predicate;
+        return Predicate
+                .AndIf(searchModel.Id.HasValue, f => f.Id == searchModel.Id)
+            ;
     }
 }

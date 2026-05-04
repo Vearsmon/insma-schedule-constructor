@@ -69,9 +69,9 @@ namespace Dal.Mapping
             target.AcademicDisciplineId = lesson.AcademicDisciplineId;
             target.AcademicDiscipline = Map(lesson.AcademicDiscipline);
             target.AcademicDisciplineType = lesson.AcademicDisciplineType;
-            target.StudentGroups = MapToListOfDbStudentGroup(lesson.StudentGroups);
-            target.Teachers = MapToListOfDbTeacher(lesson.Teachers);
-            target.Rooms = MapToListOfDbRoom(lesson.Rooms);
+            target.StudentGroups = MapToListOfDbLessonStudentGroup(lesson.StudentGroups);
+            target.Teachers = MapToListOfDbLessonTeacher(lesson.Teachers);
+            target.Rooms = MapToListOfDbLessonRoom(lesson.Rooms);
             target.Date = lesson.DateWithTimeInterval?.Date;
             target.TimeFrom = lesson.DateWithTimeInterval?.TimeInterval.TimeFrom;
             target.TimeTo = lesson.DateWithTimeInterval?.TimeInterval.TimeTo;
@@ -94,9 +94,9 @@ namespace Dal.Mapping
             dbLesson.AcademicDisciplineId = lesson.AcademicDisciplineId;
             dbLesson.AcademicDiscipline = Map(lesson.AcademicDiscipline);
             dbLesson.AcademicDisciplineType = lesson.AcademicDisciplineType;
-            dbLesson.StudentGroups = MapToListOfDbStudentGroup(lesson.StudentGroups);
-            dbLesson.Teachers = MapToListOfDbTeacher(lesson.Teachers);
-            dbLesson.Rooms = MapToListOfDbRoom(lesson.Rooms);
+            dbLesson.StudentGroups = MapToListOfDbLessonStudentGroup(lesson.StudentGroups);
+            dbLesson.Teachers = MapToListOfDbLessonTeacher(lesson.Teachers);
+            dbLesson.Rooms = MapToListOfDbLessonRoom(lesson.Rooms);
             dbLesson.Date = lesson.DateWithTimeInterval?.Date;
             dbLesson.TimeFrom = lesson.DateWithTimeInterval?.TimeInterval.TimeFrom;
             dbLesson.TimeTo = lesson.DateWithTimeInterval?.TimeInterval.TimeTo;
@@ -119,7 +119,7 @@ namespace Dal.Mapping
             target.AcademicDisciplineId = lesson.AcademicDisciplineId;
             target.AcademicDiscipline = Map(lesson.AcademicDiscipline);
             target.AcademicDisciplineType = lesson.AcademicDisciplineType;
-            target.StudentGroups = MapChildrenCollection(lesson.StudentGroups);
+            target.StudentGroups = MapToStudentGroupArray(lesson.StudentGroups);
             target.Teachers = MapToTeacherArray(lesson.Teachers);
             target.Rooms = MapToRoomArray(lesson.Rooms);
             target.FlexibilityType = lesson.FlexibilityType;
@@ -139,9 +139,9 @@ namespace Dal.Mapping
             target.Id = entity.Id;
             target.AcademicDisciplineId = entity.AcademicDisciplineId;
             target.AcademicDisciplineType = entity.AcademicDisciplineType;
-            target.StudentGroupIds = MapStudentGroupsCollection(entity.StudentGroups);
-            target.TeacherIds = MapTeachersCollection(entity.Teachers);
-            target.RoomIds = MapRoomsCollection(entity.Rooms);
+            target.StudentGroupIds = MapStudentGroupsCollection(MapToListOfDbStudentGroup(entity.StudentGroups));
+            target.TeacherIds = MapTeachersCollection(MapToListOfDbTeacher(entity.Teachers));
+            target.RoomIds = MapRoomsCollection(MapToListOfDbRoom(entity.Rooms));
             target.FlexibilityType = entity.FlexibilityType;
             target.AllowCombining = entity.AllowCombining;
             target.HoursCost = entity.HoursCost;
@@ -232,58 +232,71 @@ namespace Dal.Mapping
         }
 
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(room))]
-        public static partial global::Domain.Models.Room? Map(global::Dal.Entities.DbRoom? room)
+        [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(entity))]
+        public static partial global::Domain.Models.Room? Map(global::Dal.Entities.DbRoom? entity)
         {
-            if (room == null)
+            if (entity == null)
                 return default;
             var target = new global::Domain.Models.Room();
-            target.Id = room.Id;
-            target.Name = room.Name;
-            target.CampusId = room.CampusId;
-            target.Campus = Map(room.Campus);
-            target.RoomType = room.RoomType;
-            target.Capacity = room.Capacity;
-            target.RoomBoardType = room.RoomBoardType;
-            target.HasProjector = room.HasProjector;
+            target.Id = entity.Id;
+            target.Name = entity.Name;
+            target.CampusId = entity.CampusId;
+            target.RoomType = entity.RoomType;
+            target.Capacity = entity.Capacity;
+            target.RoomBoardType = entity.RoomBoardType;
+            target.HasProjector = entity.HasProjector;
             return target;
         }
 
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(room))]
-        public static partial global::Dal.Entities.DbRoom? Map(global::Domain.Models.Room? room)
+        [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(model))]
+        public static partial global::Dal.Entities.DbRoom? Map(global::Domain.Models.Room? model)
         {
-            if (room == null)
+            if (model == null)
                 return default;
             var target = new global::Dal.Entities.DbRoom();
-            if (room.Id != null)
+            if (model.Id != null)
             {
-                target.Id = room.Id.Value;
+                target.Id = model.Id.Value;
             }
-            target.Name = room.Name;
-            target.CampusId = room.CampusId;
-            target.Campus = Map(room.Campus);
-            target.RoomType = room.RoomType;
-            target.Capacity = room.Capacity;
-            target.RoomBoardType = room.RoomBoardType;
-            target.HasProjector = room.HasProjector;
+            target.Name = model.Name;
+            target.CampusId = model.CampusId;
+            target.RoomType = model.RoomType;
+            target.Capacity = model.Capacity;
+            target.RoomBoardType = model.RoomBoardType;
+            target.HasProjector = model.HasProjector;
             return target;
         }
 
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        public static partial void Update(global::Domain.Models.Room room, global::Dal.Entities.DbRoom dbRoom)
+        public static partial void Update(global::Domain.Models.Room? model, global::Dal.Entities.DbRoom? entity)
         {
-            if (room.Id != null)
+            if (model == null || entity == null)
+                return;
+            if (model.Id != null)
             {
-                dbRoom.Id = room.Id.Value;
+                entity.Id = model.Id.Value;
             }
-            dbRoom.Name = room.Name;
-            dbRoom.CampusId = room.CampusId;
-            dbRoom.Campus = Map(room.Campus);
-            dbRoom.RoomType = room.RoomType;
-            dbRoom.Capacity = room.Capacity;
-            dbRoom.RoomBoardType = room.RoomBoardType;
-            dbRoom.HasProjector = room.HasProjector;
+            entity.Name = model.Name;
+            entity.CampusId = model.CampusId;
+            entity.RoomType = model.RoomType;
+            entity.Capacity = model.Capacity;
+            entity.RoomBoardType = model.RoomBoardType;
+            entity.HasProjector = model.HasProjector;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        public static partial void Update(global::Dal.Entities.DbRoom? entity, global::Domain.Models.Room? model)
+        {
+            if (entity == null || model == null)
+                return;
+            model.Id = entity.Id;
+            model.Name = entity.Name;
+            model.CampusId = entity.CampusId;
+            model.RoomType = entity.RoomType;
+            model.Capacity = entity.Capacity;
+            model.RoomBoardType = entity.RoomBoardType;
+            model.HasProjector = entity.HasProjector;
         }
 
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
@@ -442,8 +455,8 @@ namespace Dal.Mapping
             target.SemesterNumber = studentGroup.SemesterNumber;
             target.StudentsCount = studentGroup.StudentsCount;
             target.StudentGroupType = studentGroup.StudentGroupType;
-            target.Parents = MapToListOfDbStudentGroup(studentGroup.Parents);
-            target.Children = MapToListOfDbStudentGroup(studentGroup.Children);
+            target.Parents = MapToListOfDbStudentGroup1(studentGroup.Parents);
+            target.Children = MapToListOfDbStudentGroup1(studentGroup.Children);
             return target;
         }
 
@@ -460,8 +473,8 @@ namespace Dal.Mapping
             dbStudentGroup.SemesterNumber = studentGroup.SemesterNumber;
             dbStudentGroup.StudentsCount = studentGroup.StudentsCount;
             dbStudentGroup.StudentGroupType = studentGroup.StudentGroupType;
-            dbStudentGroup.Parents = MapToListOfDbStudentGroup(studentGroup.Parents);
-            dbStudentGroup.Children = MapToListOfDbStudentGroup(studentGroup.Children);
+            dbStudentGroup.Parents = MapToListOfDbStudentGroup1(studentGroup.Parents);
+            dbStudentGroup.Children = MapToListOfDbStudentGroup1(studentGroup.Children);
         }
 
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
@@ -622,9 +635,9 @@ namespace Dal.Mapping
             {
                 target.Id = lessonBatchInfo.Id.Value;
             }
-            target.StudentGroups = MapToListOfDbStudentGroup(lessonBatchInfo.StudentGroups);
-            target.Teachers = MapToListOfDbTeacher(lessonBatchInfo.Teachers);
-            target.Rooms = MapToListOfDbRoom(lessonBatchInfo.Rooms);
+            target.StudentGroups = MapStudentGroups(lessonBatchInfo.StudentGroups);
+            target.Teachers = MapTeachers(lessonBatchInfo.Teachers);
+            target.Rooms = MapRooms(lessonBatchInfo.Rooms);
             target.DayOfWeekTimeIntervals = lessonBatchInfo.DayOfWeekTimeIntervals;
             target.RepeatType = lessonBatchInfo.RepeatType;
             target.DateFrom = lessonBatchInfo.DateInterval.DateFrom;
@@ -641,9 +654,9 @@ namespace Dal.Mapping
             {
                 dbLessonBatchInfo.Id = lessonBatchInfo.Id.Value;
             }
-            dbLessonBatchInfo.StudentGroups = MapToListOfDbStudentGroup(lessonBatchInfo.StudentGroups);
-            dbLessonBatchInfo.Teachers = MapToListOfDbTeacher(lessonBatchInfo.Teachers);
-            dbLessonBatchInfo.Rooms = MapToListOfDbRoom(lessonBatchInfo.Rooms);
+            dbLessonBatchInfo.StudentGroups = MapStudentGroups(lessonBatchInfo.StudentGroups);
+            dbLessonBatchInfo.Teachers = MapTeachers(lessonBatchInfo.Teachers);
+            dbLessonBatchInfo.Rooms = MapRooms(lessonBatchInfo.Rooms);
             dbLessonBatchInfo.DayOfWeekTimeIntervals = lessonBatchInfo.DayOfWeekTimeIntervals;
             dbLessonBatchInfo.RepeatType = lessonBatchInfo.RepeatType;
             dbLessonBatchInfo.DateFrom = lessonBatchInfo.DateInterval.DateFrom;
@@ -660,9 +673,9 @@ namespace Dal.Mapping
                 return default;
             var target = new global::Domain.Models.LessonBatchInfo();
             target.Id = lessonBatchInfo.Id;
-            target.StudentGroups = MapChildrenCollection(lessonBatchInfo.StudentGroups);
-            target.Teachers = MapToTeacherArray(lessonBatchInfo.Teachers);
-            target.Rooms = MapToRoomArray(lessonBatchInfo.Rooms);
+            target.StudentGroups = MapStudentGroupsBatchCollection(lessonBatchInfo.StudentGroups);
+            target.Teachers = MapTeachersBatchCollection(lessonBatchInfo.Teachers);
+            target.Rooms = MapRoomsBatchCollection(lessonBatchInfo.Rooms);
             target.DayOfWeekTimeIntervals = lessonBatchInfo.DayOfWeekTimeIntervals;
             target.RepeatType = lessonBatchInfo.RepeatType;
             target.AllowCombining = lessonBatchInfo.AllowCombining;
@@ -842,34 +855,55 @@ namespace Dal.Mapping
         }
 
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        private static global::System.Collections.Generic.List<global::Dal.Entities.DbStudentGroup> MapToListOfDbStudentGroup(global::System.Collections.Generic.IReadOnlyCollection<global::Domain.Models.StudentGroup> source)
+        private static global::Dal.Entities.DbLessonStudentGroup MapToDbLessonStudentGroup(global::Domain.Models.StudentGroup source)
         {
-            var target = new global::System.Collections.Generic.List<global::Dal.Entities.DbStudentGroup>(source.Count);
+            var target = new global::Dal.Entities.DbLessonStudentGroup();
+            return target;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        private static global::System.Collections.Generic.List<global::Dal.Entities.DbLessonStudentGroup> MapToListOfDbLessonStudentGroup(global::System.Collections.Generic.IReadOnlyCollection<global::Domain.Models.StudentGroup> source)
+        {
+            var target = new global::System.Collections.Generic.List<global::Dal.Entities.DbLessonStudentGroup>(source.Count);
             foreach (var item in source)
             {
-                target.Add(Map(item));
+                target.Add(MapToDbLessonStudentGroup(item));
             }
             return target;
         }
 
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        private static global::System.Collections.Generic.List<global::Dal.Entities.DbTeacher> MapToListOfDbTeacher(global::System.Collections.Generic.IReadOnlyCollection<global::Domain.Models.Teacher> source)
+        private static global::Dal.Entities.DbLessonTeacher MapToDbLessonTeacher(global::Domain.Models.Teacher source)
         {
-            var target = new global::System.Collections.Generic.List<global::Dal.Entities.DbTeacher>(source.Count);
+            var target = new global::Dal.Entities.DbLessonTeacher();
+            return target;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        private static global::System.Collections.Generic.List<global::Dal.Entities.DbLessonTeacher> MapToListOfDbLessonTeacher(global::System.Collections.Generic.IReadOnlyCollection<global::Domain.Models.Teacher> source)
+        {
+            var target = new global::System.Collections.Generic.List<global::Dal.Entities.DbLessonTeacher>(source.Count);
             foreach (var item in source)
             {
-                target.Add(Map(item));
+                target.Add(MapToDbLessonTeacher(item));
             }
             return target;
         }
 
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        private static global::System.Collections.Generic.List<global::Dal.Entities.DbRoom> MapToListOfDbRoom(global::System.Collections.Generic.IReadOnlyCollection<global::Domain.Models.Room> source)
+        private static global::Dal.Entities.DbLessonRoom MapToDbLessonRoom(global::Domain.Models.Room source)
         {
-            var target = new global::System.Collections.Generic.List<global::Dal.Entities.DbRoom>(source.Count);
+            var target = new global::Dal.Entities.DbLessonRoom();
+            return target;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        private static global::System.Collections.Generic.List<global::Dal.Entities.DbLessonRoom> MapToListOfDbLessonRoom(global::System.Collections.Generic.IReadOnlyCollection<global::Domain.Models.Room> source)
+        {
+            var target = new global::System.Collections.Generic.List<global::Dal.Entities.DbLessonRoom>(source.Count);
             foreach (var item in source)
             {
-                target.Add(Map(item));
+                target.Add(MapToDbLessonRoom(item));
             }
             return target;
         }
@@ -886,27 +920,126 @@ namespace Dal.Mapping
         }
 
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        private static global::Domain.Models.Teacher[] MapToTeacherArray(global::System.Collections.Generic.ICollection<global::Dal.Entities.DbTeacher> source)
+        private static global::Domain.Models.StudentGroup MapToStudentGroup(global::Dal.Entities.DbLessonStudentGroup source)
         {
-            var target = new global::Domain.Models.Teacher?[source.Count];
+            var target = new global::Domain.Models.StudentGroup();
+            return target;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        private static global::Domain.Models.StudentGroup[] MapToStudentGroupArray(global::System.Collections.Generic.ICollection<global::Dal.Entities.DbLessonStudentGroup> source)
+        {
+            var target = new global::Domain.Models.StudentGroup[source.Count];
             var i = 0;
             foreach (var item in source)
             {
-                target[i] = Map(item);
+                target[i] = MapToStudentGroup(item);
                 i++;
             }
             return target;
         }
 
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        private static global::Domain.Models.Room[] MapToRoomArray(global::System.Collections.Generic.ICollection<global::Dal.Entities.DbRoom> source)
+        private static global::Domain.Models.Teacher MapToTeacher(global::Dal.Entities.DbLessonTeacher source)
         {
-            var target = new global::Domain.Models.Room?[source.Count];
+            var target = new global::Domain.Models.Teacher();
+            return target;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        private static global::Domain.Models.Teacher[] MapToTeacherArray(global::System.Collections.Generic.ICollection<global::Dal.Entities.DbLessonTeacher> source)
+        {
+            var target = new global::Domain.Models.Teacher[source.Count];
             var i = 0;
             foreach (var item in source)
             {
-                target[i] = Map(item);
+                target[i] = MapToTeacher(item);
                 i++;
+            }
+            return target;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        private static global::Domain.Models.Room MapToRoom(global::Dal.Entities.DbLessonRoom source)
+        {
+            var target = new global::Domain.Models.Room();
+            return target;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        private static global::Domain.Models.Room[] MapToRoomArray(global::System.Collections.Generic.ICollection<global::Dal.Entities.DbLessonRoom> source)
+        {
+            var target = new global::Domain.Models.Room[source.Count];
+            var i = 0;
+            foreach (var item in source)
+            {
+                target[i] = MapToRoom(item);
+                i++;
+            }
+            return target;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        private static global::Dal.Entities.DbStudentGroup MapToDbStudentGroup(global::Dal.Entities.DbLessonStudentGroup source)
+        {
+            var target = new global::Dal.Entities.DbStudentGroup();
+            return target;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        private static global::System.Collections.Generic.List<global::Dal.Entities.DbStudentGroup> MapToListOfDbStudentGroup(global::System.Collections.Generic.ICollection<global::Dal.Entities.DbLessonStudentGroup> source)
+        {
+            var target = new global::System.Collections.Generic.List<global::Dal.Entities.DbStudentGroup>(source.Count);
+            foreach (var item in source)
+            {
+                target.Add(MapToDbStudentGroup(item));
+            }
+            return target;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        private static global::Dal.Entities.DbTeacher MapToDbTeacher(global::Dal.Entities.DbLessonTeacher source)
+        {
+            var target = new global::Dal.Entities.DbTeacher();
+            return target;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        private static global::System.Collections.Generic.List<global::Dal.Entities.DbTeacher> MapToListOfDbTeacher(global::System.Collections.Generic.ICollection<global::Dal.Entities.DbLessonTeacher> source)
+        {
+            var target = new global::System.Collections.Generic.List<global::Dal.Entities.DbTeacher>(source.Count);
+            foreach (var item in source)
+            {
+                target.Add(MapToDbTeacher(item));
+            }
+            return target;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        private static global::Dal.Entities.DbRoom MapToDbRoom(global::Dal.Entities.DbLessonRoom source)
+        {
+            var target = new global::Dal.Entities.DbRoom();
+            return target;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        private static global::System.Collections.Generic.List<global::Dal.Entities.DbRoom> MapToListOfDbRoom(global::System.Collections.Generic.ICollection<global::Dal.Entities.DbLessonRoom> source)
+        {
+            var target = new global::System.Collections.Generic.List<global::Dal.Entities.DbRoom>(source.Count);
+            foreach (var item in source)
+            {
+                target.Add(MapToDbRoom(item));
+            }
+            return target;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        private static global::System.Collections.Generic.List<global::Dal.Entities.DbStudentGroup> MapToListOfDbStudentGroup1(global::System.Collections.Generic.IReadOnlyCollection<global::Domain.Models.StudentGroup> source)
+        {
+            var target = new global::System.Collections.Generic.List<global::Dal.Entities.DbStudentGroup>(source.Count);
+            foreach (var item in source)
+            {
+                target.Add(Map(item));
             }
             return target;
         }

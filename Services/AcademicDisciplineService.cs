@@ -84,19 +84,29 @@ public class AcademicDisciplineService(
             .ToArray();
         var specifiedPayloads = new[]
         {
-            (IsSpecified: saveAcademicDisciplineDto.LecturePayload != null,
+            (IsSpecified: saveAcademicDisciplineDto.LecturePayload != null
+                          && (saveAcademicDisciplineDto.LecturePayload.LessonBatchInfos.Length > 0
+                          || saveAcademicDisciplineDto.LecturePayload.TotalHoursCount != 0),
                 IsNotAllowed: notAllowedLessonTypes.Contains(AcademicDisciplineType.Lecture),
                 Type: AcademicDisciplineType.Lecture),
-            (IsSpecified: saveAcademicDisciplineDto.PracticePayload != null,
+            (IsSpecified: saveAcademicDisciplineDto.PracticePayload != null
+                          && (saveAcademicDisciplineDto.PracticePayload.LessonBatchInfos.Length > 0
+                          || saveAcademicDisciplineDto.PracticePayload.TotalHoursCount != 0),
                 IsNotAllowed: notAllowedLessonTypes.Contains(AcademicDisciplineType.Practice),
                 Type: AcademicDisciplineType.Practice),
-            (IsSpecified: saveAcademicDisciplineDto.LabPayload != null,
+            (IsSpecified: saveAcademicDisciplineDto.LabPayload != null
+                          && (saveAcademicDisciplineDto.LabPayload.LessonBatchInfos.Length > 0
+                          || saveAcademicDisciplineDto.LabPayload.TotalHoursCount != 0),
                 IsNotAllowed: notAllowedLessonTypes.Contains(AcademicDisciplineType.Lab),
                 Type: AcademicDisciplineType.Lab),
-            (IsSpecified: saveAcademicDisciplineDto.ExamPayload != null,
+            (IsSpecified: saveAcademicDisciplineDto.ExamPayload != null
+                          && (saveAcademicDisciplineDto.ExamPayload.LessonBatchInfos.Length > 0
+                          || saveAcademicDisciplineDto.ExamPayload.TotalHoursCount != 0),
                 IsNotAllowed: notAllowedLessonTypes.Contains(AcademicDisciplineType.Exam),
                 Type: AcademicDisciplineType.Exam),
-            (IsSpecified: saveAcademicDisciplineDto.TestPayload != null,
+            (IsSpecified: saveAcademicDisciplineDto.TestPayload != null
+                          && (saveAcademicDisciplineDto.TestPayload.LessonBatchInfos.Length > 0
+                          || saveAcademicDisciplineDto.TestPayload.TotalHoursCount != 0),
                 IsNotAllowed: notAllowedLessonTypes.Contains(AcademicDisciplineType.Test),
                 Type: AcademicDisciplineType.Test),
         };

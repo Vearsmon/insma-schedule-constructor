@@ -109,7 +109,9 @@ public class LessonService(
                 }
 
                 affectedLessonValidationMessages!
-                    .AddErrorIf(studentGroup.SemesterNumber != academicDiscipline.SemesterNumber,
+                    .AddErrorIf(studentGroup.SemesterNumber != null
+                                && academicDiscipline.SemesterNumber != null
+                                && studentGroup.SemesterNumber != academicDiscipline.SemesterNumber,
                         payload, LessonValidationCode.MismatchedSemesterNumber);
                 affectedLessonValidationMessages!
                     .AddErrorIf(
@@ -167,24 +169,34 @@ public class LessonService(
         {
             switch (lessonTypeToSave)
             {
-                case AcademicDisciplineType.Lecture when academicDiscipline.LecturePayload != null:
-                    lessonsToSave.AddRange(GetBatchLessonsToAdd(academicDiscipline.LecturePayload.LessonBatchInfos,
+                case AcademicDisciplineType.Lecture when academicDiscipline.LecturePayload != null
+                                                         && (academicDiscipline.LecturePayload.LessonBatchInfos.Length > 0
+                                                             || academicDiscipline.LecturePayload.TotalHoursCount != 0):
+                    lessonsToSave.AddRange(await GetBatchLessonsToAdd(academicDiscipline.LecturePayload.LessonBatchInfos,
                         AcademicDisciplineType.Lecture));
                     break;
-                case AcademicDisciplineType.Lab when academicDiscipline.LabPayload != null:
-                    lessonsToSave.AddRange(GetBatchLessonsToAdd(academicDiscipline.LabPayload.LessonBatchInfos,
+                case AcademicDisciplineType.Lab when academicDiscipline.LabPayload != null
+                                                     && (academicDiscipline.LabPayload.LessonBatchInfos.Length > 0
+                                                         || academicDiscipline.LabPayload.TotalHoursCount != 0):
+                    lessonsToSave.AddRange(await GetBatchLessonsToAdd(academicDiscipline.LabPayload.LessonBatchInfos,
                         AcademicDisciplineType.Lab));
                     break;
-                case AcademicDisciplineType.Practice when academicDiscipline.PracticePayload != null:
-                    lessonsToSave.AddRange(GetBatchLessonsToAdd(academicDiscipline.PracticePayload.LessonBatchInfos,
+                case AcademicDisciplineType.Practice when academicDiscipline.PracticePayload != null
+                                                          && (academicDiscipline.PracticePayload.LessonBatchInfos.Length > 0
+                                                              || academicDiscipline.PracticePayload.TotalHoursCount != 0):
+                    lessonsToSave.AddRange(await GetBatchLessonsToAdd(academicDiscipline.PracticePayload.LessonBatchInfos,
                         AcademicDisciplineType.Practice));
                     break;
-                case AcademicDisciplineType.Exam when academicDiscipline.ExamPayload != null:
-                    lessonsToSave.AddRange(GetBatchLessonsToAdd(academicDiscipline.ExamPayload.LessonBatchInfos,
+                case AcademicDisciplineType.Exam when academicDiscipline.ExamPayload != null
+                                                      && (academicDiscipline.ExamPayload.LessonBatchInfos.Length > 0
+                                                          || academicDiscipline.ExamPayload.TotalHoursCount != 0):
+                    lessonsToSave.AddRange(await GetBatchLessonsToAdd(academicDiscipline.ExamPayload.LessonBatchInfos,
                         AcademicDisciplineType.Exam));
                     break;
-                case AcademicDisciplineType.Test when academicDiscipline.TestPayload != null:
-                    lessonsToSave.AddRange(GetBatchLessonsToAdd(academicDiscipline.TestPayload.LessonBatchInfos,
+                case AcademicDisciplineType.Test when academicDiscipline.TestPayload != null
+                                                      && (academicDiscipline.TestPayload.LessonBatchInfos.Length > 0
+                                                          || academicDiscipline.TestPayload.TotalHoursCount != 0):
+                    lessonsToSave.AddRange(await GetBatchLessonsToAdd(academicDiscipline.TestPayload.LessonBatchInfos,
                         AcademicDisciplineType.Test));
                     break;
             }
@@ -194,7 +206,7 @@ public class LessonService(
 
         return;
 
-        Lesson[] GetBatchLessonsToAdd(LessonBatchInfo[] lessonBatchInfos, AcademicDisciplineType type)
+        async Task<Lesson[]> GetBatchLessonsToAdd(LessonBatchInfo[] lessonBatchInfos, AcademicDisciplineType type)
         {
             if (lessonBatchInfos.Length == 0)
             {
@@ -204,6 +216,9 @@ public class LessonService(
             var result = new List<Lesson>();
             foreach (var lessonBatchInfo in lessonBatchInfos)
             {
+                var groups = await studentGroupRepository.SelectAsync(lessonBatchInfo.StudentGroups.Select(x => x.Id!.Value).ToArray());
+                var teachers = await teacherRepository.SelectAsync(lessonBatchInfo.Teachers.Select(x => x.Id!.Value).ToArray());
+                var rooms = await roomRepository.SelectAsync(lessonBatchInfo.Rooms.Select(x => x.Id!.Value).ToArray());
                 var dates = DateOnlyHelper.GetDatesInIntervalByDaysOfWeek(
                     lessonBatchInfo.DateInterval,
                     lessonBatchInfo.DayOfWeekTimeIntervals.Select(x => x.DayOfWeek).ToArray(),
@@ -217,9 +232,9 @@ public class LessonService(
                         ScheduleId = academicDiscipline.ScheduleId,
                         AcademicDisciplineId = academicDiscipline.Id,
                         AcademicDisciplineType = type,
-                        StudentGroups = lessonBatchInfo.StudentGroups,
-                        Teachers = lessonBatchInfo.Teachers,
-                        Rooms = lessonBatchInfo.Rooms,
+                        StudentGroups = groups,
+                        Teachers = teachers,
+                        Rooms = rooms,
                         DateWithTimeInterval = new DateWithTimeInterval
                         {
                             Date = date,
@@ -368,7 +383,9 @@ public class LessonService(
             }
 
             affectedLessonValidationMessages!
-                .AddErrorIf(mismatchedDisciplineLesson.AcademicDiscipline.SemesterNumber != studentGroup.SemesterNumber,
+                .AddErrorIf(mismatchedDisciplineLesson.AcademicDiscipline.SemesterNumber != null
+                            && studentGroup.SemesterNumber != null
+                            && mismatchedDisciplineLesson.AcademicDiscipline.SemesterNumber != studentGroup.SemesterNumber,
                     payload, LessonValidationCode.MismatchedSemesterNumber);
         }
 

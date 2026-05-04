@@ -38,17 +38,17 @@ public class DbLesson : IDbEntityWithId
     /// <summary>
     /// Академические группы
     /// </summary>
-    public ICollection<DbStudentGroup> StudentGroups { get; set; } = [];
+    public ICollection<DbLessonStudentGroup> StudentGroups { get; set; } = [];
 
     /// <summary>
     /// Преподаватели
     /// </summary>
-    public ICollection<DbTeacher> Teachers { get; set; } = [];
+    public ICollection<DbLessonTeacher> Teachers { get; set; } = [];
 
     /// <summary>
     /// Аудитории
     /// </summary>
-    public ICollection<DbRoom> Rooms { get; set; } = [];
+    public ICollection<DbLessonRoom> Rooms { get; set; } = [];
 
     /// <summary>
     /// Дата проведения занятия

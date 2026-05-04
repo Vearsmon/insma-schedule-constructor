@@ -6,4 +6,5 @@ public class TeacherRoomPreferenceDto
 {
     public TeacherPreferenceType TeacherPreferenceType { get; set; }
     public Guid RoomId { get; set; }
+    public string RoomName { get; set; } = null!;
 }

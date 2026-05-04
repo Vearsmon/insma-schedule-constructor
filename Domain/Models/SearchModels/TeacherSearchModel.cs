@@ -2,4 +2,5 @@
 
 public class TeacherSearchModel
 {
+    public Guid? Id { get; set; }
 }

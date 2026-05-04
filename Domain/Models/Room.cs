@@ -21,11 +21,6 @@ public class Room : IModelWithId
     public Guid CampusId { get; set; }
 
     /// <summary>
-    /// Учебный корпус
-    /// </summary>
-    public Campus Campus { get; set; } = null!;
-
-    /// <summary>
     /// Тип аудитории
     /// </summary>
     public RoomType? RoomType { get; set; }

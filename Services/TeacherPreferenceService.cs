@@ -63,6 +63,7 @@ public class TeacherPreferenceService(
                 .Select(x => new TeacherRoomPreferenceDto
                 {
                     RoomId = x.RoomId!.Value,
+                    RoomName = x.Room!.Name,
                     TeacherPreferenceType = x.TeacherPreferenceType!.Value,
                 })
                 .ToArray(),

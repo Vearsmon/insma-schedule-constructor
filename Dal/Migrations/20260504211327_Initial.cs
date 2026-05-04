@@ -202,13 +202,13 @@ namespace Dal.Migrations
                         column: x => x.academic_discipline_id,
                         principalTable: "academic_discipline",
                         principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "fk_lesson_db_schedule_schedule_id",
                         column: x => x.schedule_id,
                         principalTable: "schedule",
                         principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -314,73 +314,73 @@ namespace Dal.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "lesson_room (_dictionary<string, object>)",
+                name: "lesson_room",
                 columns: table => new
                 {
-                    room_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    lesson_id = table.Column<Guid>(type: "uuid", nullable: false)
+                    lesson_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    room_id = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_lesson_room_dictionary_string_object", x => new { x.room_id, x.lesson_id });
+                    table.PrimaryKey("pk_lesson_room", x => new { x.lesson_id, x.room_id });
                     table.ForeignKey(
-                        name: "fk_lesson_room_lesson",
-                        column: x => x.lesson_id,
-                        principalTable: "lesson",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "fk_lesson_room_room",
+                        name: "fk_lesson_room_db_room_room_id",
                         column: x => x.room_id,
                         principalTable: "room",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "lesson_student_group (_dictionary<string, object>)",
-                columns: table => new
-                {
-                    student_group_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    lesson_id = table.Column<Guid>(type: "uuid", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("pk_lesson_student_group_dictionary_string_object", x => new { x.student_group_id, x.lesson_id });
                     table.ForeignKey(
-                        name: "fk_lesson_student_group_lesson",
+                        name: "fk_lesson_room_lesson_lesson_id",
                         column: x => x.lesson_id,
                         principalTable: "lesson",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "lesson_student_group",
+                columns: table => new
+                {
+                    lesson_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    student_group_id = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_lesson_student_group", x => new { x.lesson_id, x.student_group_id });
                     table.ForeignKey(
-                        name: "fk_lesson_student_group_student_group",
+                        name: "fk_lesson_student_group_db_student_group_student_group_id",
                         column: x => x.student_group_id,
                         principalTable: "student_group",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "lesson_teacher (_dictionary<string, object>)",
-                columns: table => new
-                {
-                    teacher_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    lesson_id = table.Column<Guid>(type: "uuid", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("pk_lesson_teacher_dictionary_string_object", x => new { x.teacher_id, x.lesson_id });
                     table.ForeignKey(
-                        name: "fk_lesson_teacher_lesson",
+                        name: "fk_lesson_student_group_lesson_lesson_id",
                         column: x => x.lesson_id,
                         principalTable: "lesson",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "lesson_teacher",
+                columns: table => new
+                {
+                    lesson_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    teacher_id = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_lesson_teacher", x => new { x.lesson_id, x.teacher_id });
                     table.ForeignKey(
-                        name: "fk_lesson_teacher_teacher",
+                        name: "fk_lesson_teacher_db_teacher_teacher_id",
                         column: x => x.teacher_id,
                         principalTable: "teacher",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_lesson_teacher_lesson_lesson_id",
+                        column: x => x.lesson_id,
+                        principalTable: "lesson",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -443,73 +443,73 @@ namespace Dal.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "lesson_batch_info_room (_dictionary<string, object>)",
+                name: "lesson_batch_info_room",
                 columns: table => new
                 {
-                    room_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    lesson_batch_info_id = table.Column<Guid>(type: "uuid", nullable: false)
+                    lesson_batch_info_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    room_id = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_lesson_batch_info_room_dictionary_string_object", x => new { x.room_id, x.lesson_batch_info_id });
+                    table.PrimaryKey("pk_lesson_batch_info_room", x => new { x.lesson_batch_info_id, x.room_id });
                     table.ForeignKey(
-                        name: "fk_lesson_batch_info_room_lesson_batch_info",
-                        column: x => x.lesson_batch_info_id,
-                        principalTable: "lesson_batch_info",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "fk_lesson_batch_info_room_room",
+                        name: "fk_lesson_batch_info_room_db_room_room_id",
                         column: x => x.room_id,
                         principalTable: "room",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "lesson_batch_info_student_group (_dictionary<string, object>)",
-                columns: table => new
-                {
-                    student_group_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    lesson_batch_info_id = table.Column<Guid>(type: "uuid", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("pk_lesson_batch_info_student_group_dictionary_string_object", x => new { x.student_group_id, x.lesson_batch_info_id });
                     table.ForeignKey(
-                        name: "fk_lesson_batch_info_student_group_lesson_batch_info",
+                        name: "fk_lesson_batch_info_room_lesson_batch_info_lesson_batch_info_",
                         column: x => x.lesson_batch_info_id,
                         principalTable: "lesson_batch_info",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "lesson_batch_info_student_group",
+                columns: table => new
+                {
+                    lesson_batch_info_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    student_group_id = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_lesson_batch_info_student_group", x => new { x.lesson_batch_info_id, x.student_group_id });
                     table.ForeignKey(
-                        name: "fk_lesson_batch_info_student_group_student_group",
+                        name: "fk_lesson_batch_info_student_group_db_student_group_student_gr",
                         column: x => x.student_group_id,
                         principalTable: "student_group",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "lesson_batch_info_teacher (_dictionary<string, object>)",
-                columns: table => new
-                {
-                    teacher_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    lesson_batch_info_id = table.Column<Guid>(type: "uuid", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("pk_lesson_batch_info_teacher_dictionary_string_object", x => new { x.teacher_id, x.lesson_batch_info_id });
                     table.ForeignKey(
-                        name: "fk_lesson_batch_info_teacher_lesson_batch_info",
+                        name: "fk_lesson_batch_info_student_group_lesson_batch_info_lesson_ba",
                         column: x => x.lesson_batch_info_id,
                         principalTable: "lesson_batch_info",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "lesson_batch_info_teacher",
+                columns: table => new
+                {
+                    lesson_batch_info_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    teacher_id = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_lesson_batch_info_teacher", x => new { x.lesson_batch_info_id, x.teacher_id });
                     table.ForeignKey(
-                        name: "fk_lesson_batch_info_teacher_teacher",
+                        name: "fk_lesson_batch_info_teacher_db_teacher_teacher_id",
                         column: x => x.teacher_id,
                         principalTable: "teacher",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_lesson_batch_info_teacher_lesson_batch_info_lesson_batch_in",
+                        column: x => x.lesson_batch_info_id,
+                        principalTable: "lesson_batch_info",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -564,34 +564,34 @@ namespace Dal.Migrations
                 column: "academic_discipline_id4");
 
             migrationBuilder.CreateIndex(
-                name: "ix_lesson_batch_info_room_dictionary_string_object_lesson",
-                table: "lesson_batch_info_room (_dictionary<string, object>)",
-                column: "lesson_batch_info_id");
+                name: "ix_lesson_batch_info_room_room_id",
+                table: "lesson_batch_info_room",
+                column: "room_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_lesson_batch_info_student_group_dictionary_string_object",
-                table: "lesson_batch_info_student_group (_dictionary<string, object>)",
-                column: "lesson_batch_info_id");
+                name: "ix_lesson_batch_info_student_group_student_group_id",
+                table: "lesson_batch_info_student_group",
+                column: "student_group_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_lesson_batch_info_teacher_dictionary_string_object_les",
-                table: "lesson_batch_info_teacher (_dictionary<string, object>)",
-                column: "lesson_batch_info_id");
+                name: "ix_lesson_batch_info_teacher_teacher_id",
+                table: "lesson_batch_info_teacher",
+                column: "teacher_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_lesson_room_dictionary_string_object_lesson_id",
-                table: "lesson_room (_dictionary<string, object>)",
-                column: "lesson_id");
+                name: "ix_lesson_room_room_id",
+                table: "lesson_room",
+                column: "room_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_lesson_student_group_dictionary_string_object_lesson_id",
-                table: "lesson_student_group (_dictionary<string, object>)",
-                column: "lesson_id");
+                name: "ix_lesson_student_group_student_group_id",
+                table: "lesson_student_group",
+                column: "student_group_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_lesson_teacher_dictionary_string_object_lesson_id",
-                table: "lesson_teacher (_dictionary<string, object>)",
-                column: "lesson_id");
+                name: "ix_lesson_teacher_teacher_id",
+                table: "lesson_teacher",
+                column: "teacher_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_lesson_validation_message_affected_by_academic_discipline_id",
@@ -668,22 +668,22 @@ namespace Dal.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "lesson_batch_info_room (_dictionary<string, object>)");
+                name: "lesson_batch_info_room");
 
             migrationBuilder.DropTable(
-                name: "lesson_batch_info_student_group (_dictionary<string, object>)");
+                name: "lesson_batch_info_student_group");
 
             migrationBuilder.DropTable(
-                name: "lesson_batch_info_teacher (_dictionary<string, object>)");
+                name: "lesson_batch_info_teacher");
 
             migrationBuilder.DropTable(
-                name: "lesson_room (_dictionary<string, object>)");
+                name: "lesson_room");
 
             migrationBuilder.DropTable(
-                name: "lesson_student_group (_dictionary<string, object>)");
+                name: "lesson_student_group");
 
             migrationBuilder.DropTable(
-                name: "lesson_teacher (_dictionary<string, object>)");
+                name: "lesson_teacher");
 
             migrationBuilder.DropTable(
                 name: "lesson_validation_message");

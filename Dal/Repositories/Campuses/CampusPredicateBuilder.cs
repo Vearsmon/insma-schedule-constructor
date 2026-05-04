@@ -12,6 +12,7 @@ public class CampusPredicateBuilder : IPredicateBuilder<DbCampus, CampusSearchMo
     public Expression<Func<DbCampus, bool>> Build(CampusSearchModel searchModel)
     {
         return Predicate
+                .AndIf(searchModel.Id.HasValue, f => f.Id == searchModel.Id)
             ;
     }
 }

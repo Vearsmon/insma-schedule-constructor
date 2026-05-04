@@ -337,7 +337,9 @@ public class LessonValidationService(
                 AffectedByStudentGroupId = saveDtoStudentGroup.Id,
             };
             validationMessages
-                .AddErrorIf(saveDtoAcademicDiscipline.SemesterNumber != saveDtoStudentGroup.SemesterNumber,
+                .AddErrorIf(saveDtoAcademicDiscipline.SemesterNumber != null
+                            && saveDtoStudentGroup.SemesterNumber != null
+                            && saveDtoAcademicDiscipline.SemesterNumber != saveDtoStudentGroup.SemesterNumber,
                     payload, LessonValidationCode.MismatchedSemesterNumber);
         }
     }

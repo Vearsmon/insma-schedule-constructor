@@ -24,11 +24,12 @@ public class RoomService(
     public async Task<RoomTreeDto[]> SearchTreeAsync()
     {
         var items = await roomRepository.SelectAllAsync();
+        var campuses = (await campusRepository.SelectAllAsync()).ToDictionary(x => x.Id!.Value);
         return items.GroupBy(x => x.CampusId)
             .Select(x => new RoomTreeDto
             {
                 CampusId = x.Key,
-                CampusName = x.First().Campus.Name,
+                CampusName = campuses[x.Key].Name,
                 ChildRooms = x.Select(y => new RoomShortDto
                 {
                     Id = y.Id!.Value,
@@ -92,8 +93,17 @@ public class RoomService(
             throw new ServiceException(validationMessages.ToArray());
         }
 
-        var room = DtoMappingRegister.Map(saveRoomDto)!;
-        await roomRepository.SaveAsync(room);
+        if (saveRoomDto.Id.HasValue)
+        {
+            var room = await roomRepository.GetAsync(saveRoomDto.Id!.Value);
+            DtoMappingRegister.Update(saveRoomDto, room);
+            await roomRepository.SaveAsync(room);
+        }
+        else
+        {
+            var room = DtoMappingRegister.Map(saveRoomDto)!;
+            await roomRepository.SaveAsync(room);
+        }
     }
 
     public async Task DeleteAsync(Guid roomId)

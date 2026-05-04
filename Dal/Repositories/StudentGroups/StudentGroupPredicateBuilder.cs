@@ -12,7 +12,8 @@ public class StudentGroupPredicateBuilder : IPredicateBuilder<DbStudentGroup, St
     public Expression<Func<DbStudentGroup, bool>> Build(StudentGroupSearchModel searchModel)
     {
         return Predicate
-                .And(f => f.ScheduleId == searchModel.ScheduleId)
+                .AndIf(searchModel.Id.HasValue, f => f.Id == searchModel.Id)
+                .AndIf(searchModel.ScheduleId.HasValue, f => f.ScheduleId == searchModel.ScheduleId)
                 .AndIf(searchModel.StudentGroupTypes.Length > 0, f => searchModel.StudentGroupTypes.Contains(f.StudentGroupType))
             ;
     }
