@@ -31,7 +31,7 @@ public class CampusController(ICampusService campusService) : ApiController
     /// <summary>
     /// Сохранить данные учебного корпуса
     /// </summary>
-    /// <param name="saveCampusDto">Модель сохранения данных учебного корпуса</param>
+    /// <param name="campusSaveDto">Модель сохранения данных учебного корпуса</param>
     /// <response code="200">Сохранение данных выполнилось успешно</response>
     /// <response code="400">Сохранение данных завершилось с ошибкой валидации входных данных</response>
     /// <response code="401">Не удалось выполнить авторизацию</response>
@@ -44,8 +44,8 @@ public class CampusController(ICampusService campusService) : ApiController
     [ProducesResponseType(typeof(ErrorDto), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ErrorDto), StatusCodes.Status500InternalServerError)]
     [HttpPost("save")]
-    public async Task Save([FromBody] SaveCampusDto saveCampusDto)
+    public async Task Save([FromBody] CampusSaveDto campusSaveDto)
     {
-        await campusService.SaveAsync(saveCampusDto);
+        await campusService.SaveAsync(campusSaveDto);
     }
 }

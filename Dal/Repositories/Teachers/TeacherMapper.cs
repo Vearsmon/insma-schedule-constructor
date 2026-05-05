@@ -8,13 +8,10 @@ namespace Dal.Repositories.Teachers;
 public class TeacherMapper : IRepositoryMapper<DbTeacher, Teacher>
 {
     [return: NotNullIfNotNull("entity")]
-    public Teacher? Map(DbTeacher? entity)
-    {
-        return MappingRegister.Map(entity);
-    }
+    public Teacher? Map(DbTeacher? entity) => TeacherMappingRegister.MapEntityToModel(entity);
 
     public void Update(DbTeacher entity, Teacher model)
     {
-        MappingRegister.Update(model, entity);
+        TeacherMappingRegister.UpdateEntityWithModel(model, entity);
     }
 }

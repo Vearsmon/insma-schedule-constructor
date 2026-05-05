@@ -9,5 +9,5 @@ namespace Dal.RegistryRepositories.Room;
 public class RoomRegistryMapper : IReadonlyRepositoryMapper<DbRoom, RoomRegistryItem>
 {
     [return: NotNullIfNotNull("entity")]
-    public RoomRegistryItem? Map(DbRoom? entity) => MappingRegister.MapRegistryItem(entity);
+    public RoomRegistryItem? Map(DbRoom? entity) => RoomMappingRegister.MapEntityToRegistryItem(entity);
 }

@@ -1,6 +1,6 @@
 ﻿namespace Domain.Dto.SaveDto;
 
-public class SaveTeacherDto
+public class TeacherSaveDto
 {
     public Guid? Id { get; set; }
     public string Fullname { get; set; } = null!;

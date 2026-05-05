@@ -53,7 +53,7 @@ public class ScheduleController(IScheduleService scheduleService) : ApiControlle
     /// <summary>
     /// Сохранить данные проекта расписания
     /// </summary>
-    /// <param name="saveScheduleDto">Модель сохранения данных проекта расписания</param>
+    /// <param name="scheduleSaveDto">Модель сохранения данных проекта расписания</param>
     /// <response code="200">Сохранение данных выполнилось успешно</response>
     /// <response code="400">Сохранение данных завершилось с ошибкой валидации входных данных</response>
     /// <response code="401">Не удалось выполнить авторизацию</response>
@@ -66,9 +66,9 @@ public class ScheduleController(IScheduleService scheduleService) : ApiControlle
     [ProducesResponseType(typeof(ErrorDto), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ErrorDto), StatusCodes.Status500InternalServerError)]
     [HttpPost("save")]
-    public async Task Save([FromBody] SaveScheduleDto saveScheduleDto)
+    public async Task Save([FromBody] ScheduleSaveDto scheduleSaveDto)
     {
-        await scheduleService.SaveAsync(saveScheduleDto);
+        await scheduleService.SaveAsync(scheduleSaveDto);
     }
 
     /// <summary>

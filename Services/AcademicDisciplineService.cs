@@ -28,7 +28,7 @@ public class AcademicDisciplineService(
     {
         var items = await academicDisciplineRepository.SearchAsync(
             new AcademicDisciplineSearchModel { ScheduleId = scheduleId });
-        return items.Select(DtoMappingRegister.MapToRootDto).ToArray()!;
+        return items.Select(AcademicDisciplineDtoMappingRegister.MapToRootDto).ToArray()!;
     }
 
     public async Task<RegistryDto<AcademicDisciplineRegistryItemDto>> SearchAsync(
@@ -38,7 +38,7 @@ public class AcademicDisciplineService(
             await academicDisciplineRegistryRepository.SearchAsync(RegistrySearchModelMappingRegister.Map(searchModel));
         return new RegistryDto<AcademicDisciplineRegistryItemDto>
         {
-            Items = registryEntries.Items.Select(DtoMappingRegister.Map).ToArray()!,
+            Items = registryEntries.Items.Select(AcademicDisciplineDtoMappingRegister.Map).ToArray()!,
             ItemsCount = registryEntries.ItemsCount,
         };
     }
@@ -46,32 +46,31 @@ public class AcademicDisciplineService(
     public async Task<AcademicDisciplineViewDto> GetViewAsync(Guid academicDisciplineId)
     {
         var academicDiscipline = await academicDisciplineRepository.GetAsync(academicDisciplineId);
-        return DtoMappingRegister.Map(academicDiscipline)!;
+        return AcademicDisciplineDtoMappingRegister.MapModelToViewDto(academicDiscipline)!;
     }
 
-    public async Task SaveAsync(SaveAcademicDisciplineDto saveAcademicDisciplineDto)
+    public async Task SaveAsync(AcademicDisciplineSaveDto academicDisciplineSaveDto)
     {
-        // todo: провалидировать, что все указанные группы находятся на одном уровне
         var validationMessages = new List<ValidationMessage>();
-        if (saveAcademicDisciplineDto.Name == null!)
+        if (academicDisciplineSaveDto.Name == null!)
         {
             validationMessages.Add(new ValidationMessage("Не допускается отсутствие названия"));
         }
 
-        if (saveAcademicDisciplineDto.Id.HasValue
-            && !(await academicDisciplineRepository.ExistsAsync(saveAcademicDisciplineDto.Id!.Value)))
+        if (academicDisciplineSaveDto.Id.HasValue
+            && !(await academicDisciplineRepository.ExistsAsync(academicDisciplineSaveDto.Id!.Value)))
         {
             validationMessages.Add(new ValidationMessage("Не найдена академическая дисциплина для обновления"));
         }
 
-        if (!(await scheduleRepository.ExistsAsync(saveAcademicDisciplineDto.ScheduleId)))
+        if (!(await scheduleRepository.ExistsAsync(academicDisciplineSaveDto.ScheduleId)))
         {
             validationMessages.Add(
                 new ValidationMessage("Не найден проект расписания для сохранения академической дисциплины"));
         }
 
-        saveAcademicDisciplineDto.AllowedLessonTypes =
-            saveAcademicDisciplineDto.AllowedLessonTypes.Distinct().ToArray();
+        academicDisciplineSaveDto.AllowedLessonTypes =
+            academicDisciplineSaveDto.AllowedLessonTypes.Distinct().ToArray();
         var notAllowedLessonTypes = new[]
             {
                 AcademicDisciplineType.Lecture,
@@ -80,33 +79,24 @@ public class AcademicDisciplineService(
                 AcademicDisciplineType.Exam,
                 AcademicDisciplineType.Test,
             }
-            .Except(saveAcademicDisciplineDto.AllowedLessonTypes)
+            .Except(academicDisciplineSaveDto.AllowedLessonTypes)
             .ToArray();
+
         var specifiedPayloads = new[]
         {
-            (IsSpecified: saveAcademicDisciplineDto.LecturePayload != null
-                          && (saveAcademicDisciplineDto.LecturePayload.LessonBatchInfos.Length > 0
-                          || saveAcademicDisciplineDto.LecturePayload.TotalHoursCount != 0),
+            (IsSpecified: IsSpecified(academicDisciplineSaveDto.LecturePayload),
                 IsNotAllowed: notAllowedLessonTypes.Contains(AcademicDisciplineType.Lecture),
                 Type: AcademicDisciplineType.Lecture),
-            (IsSpecified: saveAcademicDisciplineDto.PracticePayload != null
-                          && (saveAcademicDisciplineDto.PracticePayload.LessonBatchInfos.Length > 0
-                          || saveAcademicDisciplineDto.PracticePayload.TotalHoursCount != 0),
+            (IsSpecified: IsSpecified(academicDisciplineSaveDto.PracticePayload),
                 IsNotAllowed: notAllowedLessonTypes.Contains(AcademicDisciplineType.Practice),
                 Type: AcademicDisciplineType.Practice),
-            (IsSpecified: saveAcademicDisciplineDto.LabPayload != null
-                          && (saveAcademicDisciplineDto.LabPayload.LessonBatchInfos.Length > 0
-                          || saveAcademicDisciplineDto.LabPayload.TotalHoursCount != 0),
+            (IsSpecified: IsSpecified(academicDisciplineSaveDto.LabPayload),
                 IsNotAllowed: notAllowedLessonTypes.Contains(AcademicDisciplineType.Lab),
                 Type: AcademicDisciplineType.Lab),
-            (IsSpecified: saveAcademicDisciplineDto.ExamPayload != null
-                          && (saveAcademicDisciplineDto.ExamPayload.LessonBatchInfos.Length > 0
-                          || saveAcademicDisciplineDto.ExamPayload.TotalHoursCount != 0),
+            (IsSpecified: IsSpecified(academicDisciplineSaveDto.ExamPayload),
                 IsNotAllowed: notAllowedLessonTypes.Contains(AcademicDisciplineType.Exam),
                 Type: AcademicDisciplineType.Exam),
-            (IsSpecified: saveAcademicDisciplineDto.TestPayload != null
-                          && (saveAcademicDisciplineDto.TestPayload.LessonBatchInfos.Length > 0
-                          || saveAcademicDisciplineDto.TestPayload.TotalHoursCount != 0),
+            (IsSpecified: IsSpecified(academicDisciplineSaveDto.TestPayload),
                 IsNotAllowed: notAllowedLessonTypes.Contains(AcademicDisciplineType.Test),
                 Type: AcademicDisciplineType.Test),
         };
@@ -122,14 +112,19 @@ public class AcademicDisciplineService(
             throw new ServiceException(validationMessages.ToArray());
         }
 
-        var academicDiscipline = DtoMappingRegister.Map(saveAcademicDisciplineDto)!;
+        var academicDiscipline = AcademicDisciplineDtoMappingRegister.MapSaveDtoToModel(academicDisciplineSaveDto)!;
         await lessonService.UpdateAcademicDisciplineLessons(academicDiscipline);
 
         await academicDisciplineRepository.SaveAsync(academicDiscipline);
-        if (saveAcademicDisciplineDto.Id.HasValue)
+        if (academicDisciplineSaveDto.Id.HasValue)
         {
             await lessonService.RecalculateConflictsForUpdatedAcademicDiscipline(academicDiscipline);
         }
+
+        return;
+
+        bool IsSpecified(AcademicDisciplinePayloadDto? payload) =>
+            payload != null&& (payload.LessonBatchInfos.Length > 0 || payload.TotalHoursCount != 0);
     }
 
     public async Task<LessonSeriesConflictDto[]> GetLessonSeriesConflictsAsync(Guid academicDisciplineId,

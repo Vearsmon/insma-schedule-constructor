@@ -19,7 +19,7 @@ public class CampusService(
     public async Task<CampusShortDto[]> SearchShortAsync()
     {
         var items = await campusRepository.SelectAllAsync();
-        return items.Select(DtoMappingRegister.MapShort).ToArray()!;
+        return items.Select(CampusDtoMappingRegister.MapModelToShortDto).ToArray()!;
     }
 
     public async Task<RegistryDto<CampusRegistryItemDto>> SearchAsync(CampusRegistrySearchModel searchModel)
@@ -27,19 +27,19 @@ public class CampusService(
         var registryEntries = await campusRegistryRepository.SearchAsync(RegistrySearchModelMappingRegister.Map(searchModel));
         return new RegistryDto<CampusRegistryItemDto>
         {
-            Items = registryEntries.Items.Select(DtoMappingRegister.Map).ToArray()!,
+            Items = registryEntries.Items.Select(CampusDtoMappingRegister.MapItemToItemDto).ToArray()!,
             ItemsCount = registryEntries.ItemsCount,
         };
     }
 
-    public async Task SaveAsync(SaveCampusDto saveCampusDto)
+    public async Task SaveAsync(CampusSaveDto campusSaveDto)
     {
         var validationMessages = new List<ValidationMessage>();
-        if (saveCampusDto.Name == null!)
+        if (campusSaveDto.Name == null!)
         {
             validationMessages.Add(new ValidationMessage("Не допускается отсутствие названия"));
         }
-        if (saveCampusDto.Id.HasValue && !(await campusRepository.ExistsAsync(saveCampusDto.Id!.Value)))
+        if (campusSaveDto.Id.HasValue && !(await campusRepository.ExistsAsync(campusSaveDto.Id!.Value)))
         {
             validationMessages.Add(new ValidationMessage("Не найден учебный корпус для обновления"));
         }
@@ -49,7 +49,7 @@ public class CampusService(
             throw new ServiceException(validationMessages.ToArray());
         }
 
-        var campus = DtoMappingRegister.Map(saveCampusDto)!;
+        var campus = CampusDtoMappingRegister.MapSaveDtoToModel(campusSaveDto)!;
         await campusRepository.SaveAsync(campus);
     }
 }

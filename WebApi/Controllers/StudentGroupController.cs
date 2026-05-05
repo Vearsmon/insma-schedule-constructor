@@ -76,7 +76,7 @@ public class StudentGroupController(IStudentGroupService studentGroupService) : 
     /// <summary>
     /// Сохранить данные академической группы
     /// </summary>
-    /// <param name="saveStudentGroupDto">Модель сохранения данных академической группы</param>
+    /// <param name="studentGroupSaveDto">Модель сохранения данных академической группы</param>
     /// <response code="200">Сохранение данных выполнилось успешно</response>
     /// <response code="400">Сохранение данных завершилось с ошибкой валидации входных данных</response>
     /// <response code="401">Не удалось выполнить авторизацию</response>
@@ -89,9 +89,9 @@ public class StudentGroupController(IStudentGroupService studentGroupService) : 
     [ProducesResponseType(typeof(ErrorDto), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ErrorDto), StatusCodes.Status500InternalServerError)]
     [HttpPost("save")]
-    public async Task Save([FromBody] SaveStudentGroupDto saveStudentGroupDto)
+    public async Task Save([FromBody] StudentGroupSaveDto studentGroupSaveDto)
     {
-        await studentGroupService.SaveAsync(saveStudentGroupDto);
+        await studentGroupService.SaveAsync(studentGroupSaveDto);
     }
 
     /// <summary>

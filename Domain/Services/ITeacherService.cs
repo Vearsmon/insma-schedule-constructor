@@ -11,6 +11,6 @@ public interface ITeacherService
     Task<TeacherShortDto[]> SearchShortAsync();
     Task<RegistryDto<TeacherRegistryItemDto>> SearchAsync(TeacherRegistrySearchModel searchModel);
     Task<TeacherViewDto> GetViewAsync(Guid teacherId);
-    Task SaveAsync(SaveTeacherDto saveTeacherDto);
+    Task SaveAsync(TeacherSaveDto teacherSaveDto);
     Task DeleteAsync(Guid teacherId);
 }

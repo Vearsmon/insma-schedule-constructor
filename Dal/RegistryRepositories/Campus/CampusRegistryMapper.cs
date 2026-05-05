@@ -9,5 +9,5 @@ namespace Dal.RegistryRepositories.Campus;
 public class CampusRegistryMapper : IReadonlyRepositoryMapper<DbCampus, CampusRegistryItem>
 {
     [return: NotNullIfNotNull("entity")]
-    public CampusRegistryItem? Map(DbCampus? entity) => MappingRegister.MapRegistryItem(entity);
+    public CampusRegistryItem? Map(DbCampus? entity) => CampusMappingRegister.MapEntityToRegistryItem(entity);
 }

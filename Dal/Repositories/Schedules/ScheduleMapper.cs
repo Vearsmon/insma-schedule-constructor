@@ -8,13 +8,10 @@ namespace Dal.Repositories.Schedules;
 public class ScheduleMapper : IRepositoryMapper<DbSchedule, Schedule>
 {
     [return: NotNullIfNotNull("entity")]
-    public Schedule? Map(DbSchedule? entity)
-    {
-        return MappingRegister.Map(entity);
-    }
+    public Schedule? Map(DbSchedule? entity) => ScheduleMappingRegister.MapEntityToModel(entity);
 
     public void Update(DbSchedule entity, Schedule model)
     {
-        MappingRegister.Update(model, entity);
+        ScheduleMappingRegister.UpdateEntityWithModel(model, entity);
     }
 }

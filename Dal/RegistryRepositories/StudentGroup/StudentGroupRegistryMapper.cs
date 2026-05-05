@@ -9,5 +9,5 @@ namespace Dal.RegistryRepositories.StudentGroup;
 public class StudentGroupRegistryMapper : IReadonlyRepositoryMapper<DbStudentGroup, StudentGroupRegistryItem>
 {
     [return: NotNullIfNotNull("entity")]
-    public StudentGroupRegistryItem? Map(DbStudentGroup? entity) => MappingRegister.MapRegistryItem(entity);
+    public StudentGroupRegistryItem? Map(DbStudentGroup? entity) => StudentGroupMappingRegister.MapEntityToRegistryItem(entity);
 }

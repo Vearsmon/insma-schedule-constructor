@@ -9,5 +9,5 @@ namespace Dal.RegistryRepositories.Teacher;
 public class TeacherRegistryMapper : IReadonlyRepositoryMapper<DbTeacher, TeacherRegistryItem>
 {
     [return: NotNullIfNotNull("entity")]
-    public TeacherRegistryItem? Map(DbTeacher? entity) => MappingRegister.MapRegistryItem(entity);
+    public TeacherRegistryItem? Map(DbTeacher? entity) => TeacherMappingRegister.MapEntityToRegistryItem(entity);
 }

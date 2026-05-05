@@ -11,5 +11,5 @@ public class AcademicDisciplineRegistryMapper
 {
     [return: NotNullIfNotNull("entity")]
     public AcademicDisciplineRegistryItem? Map(DbAcademicDiscipline? entity) =>
-        MappingRegister.MapRegistryItem(entity);
+        AcademicDisciplineMappingRegister.MapEntityToRegistryItem(entity);
 }

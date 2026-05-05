@@ -19,7 +19,7 @@ public class ScheduleService(
     public async Task<ScheduleShortDto[]> SearchShortAsync()
     {
         var items = await scheduleRepository.SelectAllAsync();
-        return items.Select(DtoMappingRegister.MapShort).ToArray()!;
+        return items.Select(ScheduleDtoMappingRegister.MapModelToShortDto).ToArray()!;
     }
 
     public async Task<RegistryDto<ScheduleRegistryItemDto>> SearchAsync(ScheduleRegistrySearchModel searchModel)
@@ -27,19 +27,19 @@ public class ScheduleService(
         var registryEntries = await scheduleRegistryRepository.SearchAsync(RegistrySearchModelMappingRegister.Map(searchModel));
         return new RegistryDto<ScheduleRegistryItemDto>
         {
-            Items = registryEntries.Items.Select(DtoMappingRegister.Map).ToArray()!,
+            Items = registryEntries.Items.Select(ScheduleDtoMappingRegister.MapItemToItemDto).ToArray()!,
             ItemsCount = registryEntries.ItemsCount,
         };
     }
 
-    public async Task SaveAsync(SaveScheduleDto saveScheduleDto)
+    public async Task SaveAsync(ScheduleSaveDto scheduleSaveDto)
     {
         var validationMessages = new List<ValidationMessage>();
-        if (saveScheduleDto.Name == null!)
+        if (scheduleSaveDto.Name == null!)
         {
             validationMessages.Add(new ValidationMessage("Не допускается отсутствие названия"));
         }
-        if (saveScheduleDto.Id.HasValue && !(await scheduleRepository.ExistsAsync(saveScheduleDto.Id!.Value)))
+        if (scheduleSaveDto.Id.HasValue && !(await scheduleRepository.ExistsAsync(scheduleSaveDto.Id!.Value)))
         {
             validationMessages.Add(new ValidationMessage("Не найден проект расписания для обновления"));
         }
@@ -49,7 +49,7 @@ public class ScheduleService(
             throw new ServiceException(validationMessages.ToArray());
         }
 
-        var schedule = DtoMappingRegister.Map(saveScheduleDto)!;
+        var schedule = ScheduleDtoMappingRegister.MapSaveDtoToModel(scheduleSaveDto)!;
         await scheduleRepository.SaveAsync(schedule);
     }
 

@@ -11,5 +11,5 @@ public interface ICampusService
 
     Task<RegistryDto<CampusRegistryItemDto>> SearchAsync(CampusRegistrySearchModel searchModel);
 
-    Task SaveAsync(SaveCampusDto saveCampusDto);
+    Task SaveAsync(CampusSaveDto campusSaveDto);
 }

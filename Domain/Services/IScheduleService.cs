@@ -10,6 +10,6 @@ public interface IScheduleService
     Task<ScheduleShortDto[]> SearchShortAsync();
     Task<RegistryDto<ScheduleRegistryItemDto>> SearchAsync(ScheduleRegistrySearchModel searchModel);
 
-    Task SaveAsync(SaveScheduleDto saveScheduleDto);
+    Task SaveAsync(ScheduleSaveDto scheduleSaveDto);
     Task DeleteAsync(Guid scheduleId);
 }

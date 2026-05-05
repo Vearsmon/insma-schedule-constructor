@@ -16,7 +16,7 @@ public interface IAcademicDisciplineService
 
     Task<AcademicDisciplineViewDto> GetViewAsync(Guid academicDisciplineId);
 
-    Task SaveAsync(SaveAcademicDisciplineDto saveAcademicDisciplineDto);
+    Task SaveAsync(AcademicDisciplineSaveDto academicDisciplineSaveDto);
 
     Task<LessonSeriesConflictDto[]> GetLessonSeriesConflictsAsync(Guid academicDisciplineId,
         AcademicDisciplineType academicDisciplineType);

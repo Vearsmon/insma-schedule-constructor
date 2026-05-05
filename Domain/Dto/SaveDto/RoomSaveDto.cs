@@ -2,7 +2,7 @@
 
 namespace Domain.Dto.SaveDto;
 
-public class SaveRoomDto
+public class RoomSaveDto
 {
     public Guid? Id { get; set; }
     public string Name { get; set; } = null!;

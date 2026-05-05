@@ -17,7 +17,7 @@ public interface ILessonService
 
     Task<LessonViewDto> GetViewAsync(Guid lessonId);
 
-    Task SaveAsync(SaveLessonDto saveLessonDto);
+    Task SaveAsync(LessonSaveDto lessonSaveDto);
 
     Task RecalculateConflictsForUpdatedAcademicDiscipline(AcademicDiscipline academicDiscipline);
 

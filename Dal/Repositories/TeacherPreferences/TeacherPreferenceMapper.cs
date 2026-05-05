@@ -8,13 +8,10 @@ namespace Dal.Repositories.TeacherPreferences;
 public class TeacherPreferenceMapper : IRepositoryMapper<DbTeacherPreference, TeacherPreference>
 {
     [return: NotNullIfNotNull("entity")]
-    public TeacherPreference? Map(DbTeacherPreference? entity)
-    {
-        return MappingRegister.Map(entity);
-    }
+    public TeacherPreference? Map(DbTeacherPreference? entity) => TeacherPreferenceMappingRegister.MapEntityToModel(entity);
 
     public void Update(DbTeacherPreference entity, TeacherPreference model)
     {
-        MappingRegister.Update(model, entity);
+        TeacherPreferenceMappingRegister.UpdateEntityWithModel(model, entity);
     }
 }

@@ -78,7 +78,7 @@ public class AcademicDisciplineController(IAcademicDisciplineService academicDis
     /// <summary>
     /// Сохранить данные академической дисциплины
     /// </summary>
-    /// <param name="saveAcademicDisciplineDto">Модель сохранения данных академической дисциплины</param>
+    /// <param name="academicDisciplineSaveDto">Модель сохранения данных академической дисциплины</param>
     /// <response code="200">Сохранение данных выполнилось успешно</response>
     /// <response code="400">Сохранение данных завершилось с ошибкой валидации входных данных</response>
     /// <response code="401">Не удалось выполнить авторизацию</response>
@@ -91,9 +91,9 @@ public class AcademicDisciplineController(IAcademicDisciplineService academicDis
     [ProducesResponseType(typeof(ErrorDto), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ErrorDto), StatusCodes.Status500InternalServerError)]
     [HttpPost("save")]
-    public async Task Save([FromBody] SaveAcademicDisciplineDto saveAcademicDisciplineDto)
+    public async Task Save([FromBody] AcademicDisciplineSaveDto academicDisciplineSaveDto)
     {
-        await academicDisciplineService.SaveAsync(saveAcademicDisciplineDto);
+        await academicDisciplineService.SaveAsync(academicDisciplineSaveDto);
     }
 
     /// <summary>

@@ -36,7 +36,7 @@ public class TeacherPreferenceService(
             await teacherPreferenceRegistryRepository.SearchAsync(RegistrySearchModelMappingRegister.Map(searchModel));
         return new RegistryDto<TeacherPreferenceRegistryItemDto>
         {
-            Items = registryEntries.Items.Select(DtoMappingRegister.Map).ToArray()!,
+            Items = registryEntries.Items.Select(TeacherPreferenceDtoMappingRegister.MapItemToItemDto).ToArray()!,
             ItemsCount = registryEntries.ItemsCount,
         };
     }
@@ -71,16 +71,16 @@ public class TeacherPreferenceService(
         };
     }
 
-    public async Task SaveAsync(SaveTeacherPreferenceDto saveTeacherPreferenceDto)
+    public async Task SaveAsync(TeacherPreferenceSaveDto teacherPreferenceSaveDto)
     {
         var validationMessages = new List<ValidationMessage>();
-        if (!(await scheduleRepository.ExistsAsync(saveTeacherPreferenceDto.ScheduleId)))
+        if (!(await scheduleRepository.ExistsAsync(teacherPreferenceSaveDto.ScheduleId)))
         {
             validationMessages.Add(
                 new ValidationMessage("Не найден проект расписания для сохранения пожеланий преподавателя"));
         }
 
-        if (!(await teacherRepository.ExistsAsync(saveTeacherPreferenceDto.TeacherId)))
+        if (!(await teacherRepository.ExistsAsync(teacherPreferenceSaveDto.TeacherId)))
         {
             validationMessages.Add(
                 new ValidationMessage("Не найден преподаватель для сохранения пожеланий преподавателя"));
@@ -89,7 +89,7 @@ public class TeacherPreferenceService(
         var mergedTimeAvailabilities = new List<TeacherTimeAvailabilityDto>();
         var mergedTimeAvailabilitiesByDayOfWeek =
             new Dictionary<DayOfWeek, List<(TeacherPreferenceType, List<TimeInterval>)>>();
-        var dayOfWeekTimeIntervalsByPreferenceType = saveTeacherPreferenceDto.TeacherTimeAvailabilities
+        var dayOfWeekTimeIntervalsByPreferenceType = teacherPreferenceSaveDto.TeacherTimeAvailabilities
             .GroupBy(x => x.TeacherPreferenceType);
         foreach (var groupByPreferenceType in dayOfWeekTimeIntervalsByPreferenceType)
         {
@@ -148,7 +148,7 @@ public class TeacherPreferenceService(
             }
         }
 
-        var teacherPreferenceRoomIds = saveTeacherPreferenceDto.TeacherRoomPreferences
+        var teacherPreferenceRoomIds = teacherPreferenceSaveDto.TeacherRoomPreferences
             .Select(x => x.RoomId)
             .Distinct()
             .ToArray();
@@ -162,7 +162,7 @@ public class TeacherPreferenceService(
             }
         }
 
-        var teacherRoomPreferencesByType = saveTeacherPreferenceDto.TeacherRoomPreferences
+        var teacherRoomPreferencesByType = teacherPreferenceSaveDto.TeacherRoomPreferences
             .GroupBy(x => x.TeacherPreferenceType)
             .ToDictionary(
                 x => x.Key,
@@ -191,35 +191,35 @@ public class TeacherPreferenceService(
             mergedTimeAvailabilities
                 .Select(x => new TeacherPreference
                 {
-                    ScheduleId = saveTeacherPreferenceDto.ScheduleId,
-                    TeacherId = saveTeacherPreferenceDto.TeacherId,
+                    ScheduleId = teacherPreferenceSaveDto.ScheduleId,
+                    TeacherId = teacherPreferenceSaveDto.TeacherId,
                     DayOfWeekTimeInterval = x.DayOfWeekTimeInterval,
                     TeacherPreferenceType = x.TeacherPreferenceType,
                 })
-                .Concat(saveTeacherPreferenceDto.TeacherRoomPreferences
+                .Concat(teacherPreferenceSaveDto.TeacherRoomPreferences
                     .Select(x => new TeacherPreference
                     {
-                        ScheduleId = saveTeacherPreferenceDto.ScheduleId,
-                        TeacherId = saveTeacherPreferenceDto.TeacherId,
+                        ScheduleId = teacherPreferenceSaveDto.ScheduleId,
+                        TeacherId = teacherPreferenceSaveDto.TeacherId,
                         TeacherPreferenceType = x.TeacherPreferenceType,
                         RoomId = x.RoomId,
                     }));
-        if (!string.IsNullOrEmpty(saveTeacherPreferenceDto.Comment))
+        if (!string.IsNullOrEmpty(teacherPreferenceSaveDto.Comment))
         {
             teacherPreferences = teacherPreferences.Concat([
                 new TeacherPreference
                 {
-                    ScheduleId = saveTeacherPreferenceDto.ScheduleId,
-                    TeacherId = saveTeacherPreferenceDto.TeacherId,
-                    Comment = saveTeacherPreferenceDto.Comment,
+                    ScheduleId = teacherPreferenceSaveDto.ScheduleId,
+                    TeacherId = teacherPreferenceSaveDto.TeacherId,
+                    Comment = teacherPreferenceSaveDto.Comment,
                 }
             ]);
         }
 
         var previousPreferences = await teacherPreferenceRepository.SearchAsync(new TeacherPreferenceSearchModel
         {
-            ScheduleId = saveTeacherPreferenceDto.ScheduleId,
-            TeacherIds = [saveTeacherPreferenceDto.TeacherId],
+            ScheduleId = teacherPreferenceSaveDto.ScheduleId,
+            TeacherIds = [teacherPreferenceSaveDto.TeacherId],
         });
 
         await teacherPreferenceRepository.DeleteAsync(previousPreferences.Select(x => x.Id!.Value).ToArray());

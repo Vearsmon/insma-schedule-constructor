@@ -44,7 +44,7 @@ public class RoomService(
         var registryEntries = await roomRegistryRepository.SearchAsync(RegistrySearchModelMappingRegister.Map(searchModel));
         return new RegistryDto<RoomRegistryItemDto>
         {
-            Items = registryEntries.Items.Select(DtoMappingRegister.Map).ToArray()!,
+            Items = registryEntries.Items.Select(RoomDtoMappingRegister.MapItemToItemDto).ToArray()!,
             ItemsCount = registryEntries.ItemsCount,
         };
     }
@@ -52,7 +52,7 @@ public class RoomService(
     public async Task<RoomViewDto> GetViewAsync(Guid roomId)
     {
         var room = await roomRepository.GetAsync(roomId);
-        return DtoMappingRegister.Map(room)!;
+        return RoomDtoMappingRegister.MapModelToViewDto(room)!;
     }
 
     public async Task<RoomTreeDto[]> GetRoomTreeAsync(RoomSearchModel searchModel)
@@ -72,18 +72,18 @@ public class RoomService(
             }).ToArray();
     }
 
-    public async Task SaveAsync(SaveRoomDto saveRoomDto)
+    public async Task SaveAsync(RoomSaveDto roomSaveDto)
     {
         var validationMessages = new List<ValidationMessage>();
-        if (saveRoomDto.Name == null!)
+        if (roomSaveDto.Name == null!)
         {
             validationMessages.Add(new ValidationMessage("Не допускается отсутствие названия"));
         }
-        if (saveRoomDto.Id.HasValue && !(await roomRepository.ExistsAsync(saveRoomDto.Id!.Value)))
+        if (roomSaveDto.Id.HasValue && !(await roomRepository.ExistsAsync(roomSaveDto.Id!.Value)))
         {
             validationMessages.Add(new ValidationMessage("Не найдена аудитория для обновления"));
         }
-        if (!(await campusRepository.ExistsAsync(saveRoomDto.CampusId)))
+        if (!(await campusRepository.ExistsAsync(roomSaveDto.CampusId)))
         {
             validationMessages.Add(new ValidationMessage("Не найден учебный корпус для сохранения аудитории"));
         }
@@ -93,15 +93,15 @@ public class RoomService(
             throw new ServiceException(validationMessages.ToArray());
         }
 
-        if (saveRoomDto.Id.HasValue)
+        if (roomSaveDto.Id.HasValue)
         {
-            var room = await roomRepository.GetAsync(saveRoomDto.Id!.Value);
-            DtoMappingRegister.Update(saveRoomDto, room);
+            var room = await roomRepository.GetAsync(roomSaveDto.Id!.Value);
+            RoomDtoMappingRegister.UpdateModelWithSaveDto(roomSaveDto, room);
             await roomRepository.SaveAsync(room);
         }
         else
         {
-            var room = DtoMappingRegister.Map(saveRoomDto)!;
+            var room = RoomDtoMappingRegister.MapSaveDtoToModel(roomSaveDto)!;
             await roomRepository.SaveAsync(room);
         }
     }

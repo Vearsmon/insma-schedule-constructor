@@ -56,7 +56,7 @@ public class TeacherPreferenceController(ITeacherPreferenceService teacherPrefer
     /// <summary>
     /// Сохранить данные пожелания преподавателя
     /// </summary>
-    /// <param name="saveTeacherPreferenceDto">Модель сохранения данных пожеланий преподавателя</param>
+    /// <param name="teacherPreferenceSaveDto">Модель сохранения данных пожеланий преподавателя</param>
     /// <response code="200">Сохранение данных выполнилось успешно</response>
     /// <response code="400">Сохранение данных завершилось с ошибкой валидации входных данных</response>
     /// <response code="401">Не удалось выполнить авторизацию</response>
@@ -69,9 +69,9 @@ public class TeacherPreferenceController(ITeacherPreferenceService teacherPrefer
     [ProducesResponseType(typeof(ErrorDto), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ErrorDto), StatusCodes.Status500InternalServerError)]
     [HttpPost("save")]
-    public async Task Save([FromBody] SaveTeacherPreferenceDto saveTeacherPreferenceDto)
+    public async Task Save([FromBody] TeacherPreferenceSaveDto teacherPreferenceSaveDto)
     {
-        await teacherPreferenceService.SaveAsync(saveTeacherPreferenceDto);
+        await teacherPreferenceService.SaveAsync(teacherPreferenceSaveDto);
     }
 
     /// <summary>

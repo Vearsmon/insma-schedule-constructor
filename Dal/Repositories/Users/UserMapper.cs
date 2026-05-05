@@ -8,13 +8,10 @@ namespace Dal.Repositories.Users;
 public class UserMapper : IRepositoryMapper<DbUser, User>
 {
     [return: NotNullIfNotNull("entity")]
-    public User? Map(DbUser? entity)
-    {
-        return MappingRegister.Map(entity);
-    }
+    public User? Map(DbUser? entity) => UserMappingRegister.MapEntityToModel(entity);
 
     public void Update(DbUser entity, User model)
     {
-        MappingRegister.Update(model, entity);
+        UserMappingRegister.UpdateEntityWithModel(model, entity);
     }
 }

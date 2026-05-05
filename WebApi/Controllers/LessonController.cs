@@ -55,7 +55,7 @@ public class LessonController(ILessonService lessonService) : ApiController
     /// <summary>
     /// Сохранить данные занятия
     /// </summary>
-    /// <param name="saveLessonDto">Модель сохранения данных занятия</param>
+    /// <param name="lessonSaveDto">Модель сохранения данных занятия</param>
     /// <response code="200">Сохранение данных выполнилось успешно</response>
     /// <response code="400">Сохранение данных завершилось с ошибкой валидации входных данных</response>
     /// <response code="401">Не удалось выполнить авторизацию</response>
@@ -68,9 +68,9 @@ public class LessonController(ILessonService lessonService) : ApiController
     [ProducesResponseType(typeof(ErrorDto), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ErrorDto), StatusCodes.Status500InternalServerError)]
     [HttpPost("save")]
-    public async Task Save([FromBody] SaveLessonDto saveLessonDto)
+    public async Task Save([FromBody] LessonSaveDto lessonSaveDto)
     {
-        await lessonService.SaveAsync(saveLessonDto);
+        await lessonService.SaveAsync(lessonSaveDto);
     }
 
     /// <summary>

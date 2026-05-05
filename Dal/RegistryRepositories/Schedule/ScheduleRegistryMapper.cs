@@ -9,5 +9,5 @@ namespace Dal.RegistryRepositories.Schedule;
 public class ScheduleRegistryMapper : IReadonlyRepositoryMapper<DbSchedule, ScheduleRegistryItem>
 {
     [return: NotNullIfNotNull("entity")]
-    public ScheduleRegistryItem? Map(DbSchedule? entity) => MappingRegister.MapRegistryItem(entity);
+    public ScheduleRegistryItem? Map(DbSchedule? entity) => ScheduleMappingRegister.MapEntityToRegistryItem(entity);
 }

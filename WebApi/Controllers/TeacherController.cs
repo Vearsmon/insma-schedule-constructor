@@ -73,7 +73,7 @@ public class TeacherController(ITeacherService teacherService) : ApiController
     /// <summary>
     /// Сохранить данные преподавателя
     /// </summary>
-    /// <param name="saveTeacherDto">Модель сохранения данных преподавателя</param>
+    /// <param name="teacherSaveDto">Модель сохранения данных преподавателя</param>
     /// <response code="200">Сохранение данных выполнилось успешно</response>
     /// <response code="400">Сохранение данных завершилось с ошибкой валидации входных данных</response>
     /// <response code="401">Не удалось выполнить авторизацию</response>
@@ -86,9 +86,9 @@ public class TeacherController(ITeacherService teacherService) : ApiController
     [ProducesResponseType(typeof(ErrorDto), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ErrorDto), StatusCodes.Status500InternalServerError)]
     [HttpPost("save")]
-    public async Task Save([FromBody] SaveTeacherDto saveTeacherDto)
+    public async Task Save([FromBody] TeacherSaveDto teacherSaveDto)
     {
-        await teacherService.SaveAsync(saveTeacherDto);
+        await teacherService.SaveAsync(teacherSaveDto);
     }
 
     /// <summary>

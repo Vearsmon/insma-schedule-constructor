@@ -8,13 +8,11 @@ namespace Dal.Repositories.AcademicDisciplines;
 public class AcademicDisciplineMapper : IRepositoryMapper<DbAcademicDiscipline, AcademicDiscipline>
 {
     [return: NotNullIfNotNull("entity")]
-    public AcademicDiscipline? Map(DbAcademicDiscipline? entity)
-    {
-        return MappingRegister.Map(entity);
-    }
+    public AcademicDiscipline? Map(DbAcademicDiscipline? entity) =>
+        AcademicDisciplineMappingRegister.MapEntityToModel(entity);
 
     public void Update(DbAcademicDiscipline entity, AcademicDiscipline model)
     {
-        MappingRegister.Update(model, entity);
+        AcademicDisciplineMappingRegister.UpdateEntityWithModel(model, entity);
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Domain.Dto.SaveDto;
 
-public class SaveTeacherPreferenceDto
+public class TeacherPreferenceSaveDto
 {
     public Guid ScheduleId { get; set; }
     public Guid TeacherId { get; set; }

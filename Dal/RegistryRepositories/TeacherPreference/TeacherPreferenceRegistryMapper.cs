@@ -10,5 +10,5 @@ public class TeacherPreferenceRegistryMapper
     : IReadonlyRepositoryMapper<DbTeacherPreference, TeacherPreferenceRegistryItem>
 {
     [return: NotNullIfNotNull("entity")]
-    public TeacherPreferenceRegistryItem? Map(DbTeacherPreference? entity) => MappingRegister.MapRegistryItem(entity);
+    public TeacherPreferenceRegistryItem? Map(DbTeacherPreference? entity) => TeacherPreferenceMappingRegister.MapEntityToRegistryItem(entity);
 }

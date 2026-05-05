@@ -8,13 +8,10 @@ namespace Dal.Repositories.Campuses;
 public class CampusMapper : IRepositoryMapper<DbCampus, Campus>
 {
     [return: NotNullIfNotNull("entity")]
-    public Campus? Map(DbCampus? entity)
-    {
-        return MappingRegister.Map(entity);
-    }
+    public Campus? Map(DbCampus? entity) => CampusMappingRegister.MapEntityToModel(entity);
 
     public void Update(DbCampus entity, Campus model)
     {
-        MappingRegister.Update(model, entity);
+        CampusMappingRegister.UpdateEntityWithModel(model, entity);
     }
 }

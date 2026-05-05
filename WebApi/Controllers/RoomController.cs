@@ -73,7 +73,7 @@ public class RoomController(IRoomService roomService) : ApiController
     /// <summary>
     /// Сохранить данные аудитории
     /// </summary>
-    /// <param name="saveRoomDto">Модель для сохранения новой аудитории</param>
+    /// <param name="roomSaveDto">Модель для сохранения новой аудитории</param>
     /// <response code="200">Сохранение данных выполнилось успешно</response>
     /// <response code="400">Сохранение данных завершилось с ошибкой валидации входных данных</response>
     /// <response code="401">Не удалось выполнить авторизацию</response>
@@ -86,9 +86,9 @@ public class RoomController(IRoomService roomService) : ApiController
     [ProducesResponseType(typeof(ErrorDto), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ErrorDto), StatusCodes.Status500InternalServerError)]
     [HttpPost("save")]
-    public async Task Save([FromBody] SaveRoomDto saveRoomDto)
+    public async Task Save([FromBody] RoomSaveDto roomSaveDto)
     {
-        await roomService.SaveAsync(saveRoomDto);
+        await roomService.SaveAsync(roomSaveDto);
     }
 
     /// <summary>

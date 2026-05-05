@@ -9,15 +9,15 @@ public class Teacher : IModelWithId
 {
     public Guid? Id { get; set; }
 
-    /// <summary>
-    /// Пользователь
-    /// </summary>
-    public Guid UserId { get; set; }
-
-    /// <summary>
-    /// Пользователь
-    /// </summary>
-    public User User { get; set; } = null!;
+    // /// <summary>
+    // /// Пользователь
+    // /// </summary>
+    // public Guid UserId { get; set; }
+    //
+    // /// <summary>
+    // /// Пользователь
+    // /// </summary>
+    // public User User { get; set; } = null!;
 
     /// <summary>
     /// ФИО преподавателя

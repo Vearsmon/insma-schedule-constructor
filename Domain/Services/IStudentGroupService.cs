@@ -13,6 +13,6 @@ public interface IStudentGroupService
     Task<StudentGroupTreeDto[]> SearchTreeAsync(Guid scheduleId);
     Task<RegistryDto<StudentGroupRegistryItemDto>> SearchAsync(StudentGroupRegistrySearchModel searchModel);
     Task<StudentGroupViewDto> GetViewAsync(Guid studentGroupId);
-    Task SaveAsync(SaveStudentGroupDto saveStudentGroupDto);
+    Task SaveAsync(StudentGroupSaveDto studentGroupSaveDto);
     Task DeleteAsync(Guid studentGroupId);
 }

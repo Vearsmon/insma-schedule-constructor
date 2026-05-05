@@ -3,7 +3,7 @@ using Domain.Models.Enums;
 
 namespace Domain.Dto.SaveDto;
 
-public class SaveLessonDto
+public class LessonSaveDto
 {
     public Guid? Id { get; set; }
     public Guid ScheduleId { get; set; }

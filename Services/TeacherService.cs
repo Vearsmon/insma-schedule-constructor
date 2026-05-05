@@ -20,7 +20,7 @@ public class TeacherService(
     public async Task<TeacherShortDto[]> SearchShortAsync()
     {
         var items = await teacherRepository.SelectAllAsync();
-        return items.Select(DtoMappingRegister.MapShort).ToArray()!;
+        return items.Select(TeacherDtoMappingRegister.MapModelToShortDto).ToArray()!;
     }
 
     public async Task<RegistryDto<TeacherRegistryItemDto>> SearchAsync(TeacherRegistrySearchModel searchModel)
@@ -28,7 +28,7 @@ public class TeacherService(
         var registryEntries = await teacherRegistryRepository.SearchAsync(RegistrySearchModelMappingRegister.Map(searchModel));
         return new RegistryDto<TeacherRegistryItemDto>
         {
-            Items = registryEntries.Items.Select(DtoMappingRegister.Map).ToArray()!,
+            Items = registryEntries.Items.Select(TeacherDtoMappingRegister.MapItemToItemDto).ToArray()!,
             ItemsCount = registryEntries.ItemsCount,
         };
     }
@@ -36,17 +36,17 @@ public class TeacherService(
     public async Task<TeacherViewDto> GetViewAsync(Guid teacherId)
     {
         var teacher = await teacherRepository.GetAsync(teacherId);
-        return DtoMappingRegister.Map(teacher)!;
+        return TeacherDtoMappingRegister.MapModelToViewDto(teacher)!;
     }
 
-    public async Task SaveAsync(SaveTeacherDto saveTeacherDto)
+    public async Task SaveAsync(TeacherSaveDto teacherSaveDto)
     {
         var validationMessages = new List<ValidationMessage>();
-        if (saveTeacherDto.Fullname == null!)
+        if (teacherSaveDto.Fullname == null!)
         {
             validationMessages.Add(new ValidationMessage("Не допускается отсутствие имени"));
         }
-        if (saveTeacherDto.Id.HasValue && !(await teacherRepository.ExistsAsync(saveTeacherDto.Id!.Value)))
+        if (teacherSaveDto.Id.HasValue && !(await teacherRepository.ExistsAsync(teacherSaveDto.Id!.Value)))
         {
             validationMessages.Add(new ValidationMessage("Не найден преподаватель для обновления"));
         }
@@ -56,7 +56,7 @@ public class TeacherService(
             throw new ServiceException(validationMessages.ToArray());
         }
 
-        var teacher = DtoMappingRegister.Map(saveTeacherDto)!;
+        var teacher = TeacherDtoMappingRegister.MapSaveDtoToModel(teacherSaveDto)!;
         await teacherRepository.SaveAsync(teacher);
     }
 

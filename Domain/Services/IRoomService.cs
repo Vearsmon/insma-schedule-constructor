@@ -17,7 +17,7 @@ public interface IRoomService
 
     Task<RoomTreeDto[]> GetRoomTreeAsync(RoomSearchModel searchModel);
 
-    Task SaveAsync(SaveRoomDto saveRoomDto);
+    Task SaveAsync(RoomSaveDto roomSaveDto);
 
     Task DeleteAsync(Guid roomId);
 }

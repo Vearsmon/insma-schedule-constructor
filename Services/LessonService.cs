@@ -45,7 +45,7 @@ public class LessonService(
             DateFrom = dateFrom,
             DateTo = dateTo,
         });
-        return lessons.Select(DtoMappingRegister.MapShort).ToArray()!;
+        return lessons.Select(LessonDtoMappingRegister.MapModelToShortDto).ToArray()!;
     }
 
     public async Task<RegistryDto<LessonRegistryItemDto>> SearchAsync(LessonRegistrySearchModel searchModel)
@@ -54,7 +54,7 @@ public class LessonService(
             await lessonRegistryRepository.SearchAsync(RegistrySearchModelMappingRegister.Map(searchModel));
         return new RegistryDto<LessonRegistryItemDto>
         {
-            Items = registryEntries.Items.Select(DtoMappingRegister.Map).ToArray()!,
+            Items = registryEntries.Items.Select(LessonDtoMappingRegister.MapItemToItemDto).ToArray()!,
             ItemsCount = registryEntries.ItemsCount,
         };
     }
@@ -62,12 +62,12 @@ public class LessonService(
     public async Task<LessonViewDto> GetViewAsync(Guid lessonId)
     {
         var lesson = await lessonRepository.GetAsync(lessonId);
-        return DtoMappingRegister.Map(lesson)!;
+        return LessonDtoMappingRegister.MapModelToViewDto(lesson)!;
     }
 
-    public async Task SaveAsync(SaveLessonDto saveLessonDto)
+    public async Task SaveAsync(LessonSaveDto lessonSaveDto)
     {
-        var lesson = DtoMappingRegister.Map(saveLessonDto)!;
+        var lesson = LessonDtoMappingRegister.MapSaveDtoToModel(lessonSaveDto)!;
         var validationResult = await lessonValidationService.ValidateAsync(lesson);
         lesson.ValidationMessages = validationResult.Messages.ToArray();
 
