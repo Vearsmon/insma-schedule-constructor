@@ -121,7 +121,7 @@ public static class ContextHelper
         });
     }
 
-    public static Task DeleteAllAsync<T>(this DbContext context, params T[] items) where T : class, IDbEntityWithId
+    public static Task DeleteAllAsync<T>(this DbContext context, params T[] items) where T : class
     {
         return SafeCallAsync(() =>
         {
@@ -165,7 +165,7 @@ public static class ContextHelper
         }
     }
 
-    private static void AssertAttached<T>(DbContext context, params T[] items) where T : class, IDbEntityWithId
+    private static void AssertAttached<T>(DbContext context, params T[] items) where T : class
     {
         foreach (var item in items)
         {
@@ -173,7 +173,7 @@ public static class ContextHelper
         }
     }
 
-    private static void AssertAttached<T>(DbContext context, T item) where T : class, IDbEntityWithId
+    private static void AssertAttached<T>(DbContext context, T item) where T : class
     {
         var entityEntry = context.Entry(item);
         if (entityEntry == null || entityEntry.State == EntityState.Detached)
