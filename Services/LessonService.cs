@@ -122,15 +122,20 @@ public class LessonService(
         }
 
         var lessonsWithConflictById = lessons
-            .Where(x => affectedLessonNewValidationMessagesByLessonId.ContainsKey(x.Id!.Value))
+            .Where(x => affectedLessonNewValidationMessagesByLessonId.TryGetValue(x.Id!.Value, out var messages) && messages!.Count > 0)
             .ToDictionary(x => x.Id!.Value);
-        foreach (var (lessonId, affectedLessonValidationMessages) in affectedLessonNewValidationMessagesByLessonId)
+        foreach (var (lessonId, affectedLessonValidationMessages) in affectedLessonNewValidationMessagesByLessonId.Where(x => x.Value!.Count > 0))
         {
             lessonsWithConflictById[lessonId].ValidationMessages = lessonsWithConflictById[lessonId].ValidationMessages
                 .Concat(affectedLessonValidationMessages!).ToArray();
         }
 
-        await lessonRepository.SaveAllAsync(lessonsWithConflictById.Select(x => x.Value).ToArray());
+        var lessonsWithConflict = lessonsWithConflictById.Select(x => x.Value).ToArray();
+        foreach (var lesson in lessonsWithConflict)
+        {
+            lesson.AcademicDiscipline = null;
+        }
+        await lessonRepository.SaveAllAsync(lessonsWithConflict);
     }
 
     public async Task UpdateAcademicDisciplineLessons(AcademicDiscipline academicDiscipline)
@@ -151,7 +156,7 @@ public class LessonService(
                 .ToArray()
             : [];
 
-        if (academicDiscipline.Id.HasValue)
+        if (academicDiscipline.Id.HasValue && (lessonTypesToDelete.Length > 0 || lessonTypesToUpdate.Length > 0))
         {
             var lessonsToDelete = await lessonRepository.SearchAsync(new LessonSearchModel
             {

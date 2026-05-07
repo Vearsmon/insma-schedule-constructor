@@ -15,6 +15,24 @@ public class StudentGroupRepository(
     IPredicateBuilder<DbStudentGroup, StudentGroupSearchModel> predicateBuilder)
     : Repository<InsmaScheduleContext, DbStudentGroup, StudentGroup>(context, mapper, transactionalService), IStudentGroupRepository
 {
+    public override async Task<StudentGroup[]> SelectAsync(Guid[] ids, CancellationToken cancellationToken = default)
+    {
+        if (ids.Length == 0)
+        {
+            return [];
+        }
+        var entities = await Query()
+            .Include(x => x.Parents)
+            .ThenInclude(x => x!.ParentStudentGroup)
+            .Include(x => x.Children)
+            .ThenInclude(x => x!.ChildStudentGroup)
+            .Where(i => ids.Contains(i.Id))
+            .AsNoTracking()
+            .ToArrayAsync(cancellationToken);
+
+        return entities.Select(f => MapperReadonly.Map(f)).ToArray();
+    }
+
     public override async Task<Guid> SaveAsync(StudentGroup model, CancellationToken cancellationToken = default)
     {
         var previousStudentGroup = model.Id.HasValue ? await GetAsync(model.Id!.Value, cancellationToken) : null;

@@ -39,13 +39,13 @@ public static class DateOnlyHelper
         DateInterval scheduleDateInterval)
     {
         var result = new List<DateOnly>();
-        var isIntervalStartIntersectEvenWeek = ((dateInterval.DateFrom.Day - scheduleDateInterval.DateFrom.Day) / 7) % 2 == 0;
+        var isIntervalStartIntersectEvenWeek = ((dateInterval.DateFrom.DayNumber - scheduleDateInterval.DateFrom.DayNumber) / 7) % 2 == 0;
         var skipUntilDate = repeatType == DisciplineLessonRepeatType.OddWeeks && isIntervalStartIntersectEvenWeek
                             || repeatType == DisciplineLessonRepeatType.EvenWeeks && !isIntervalStartIntersectEvenWeek
             ? dateInterval.DateFrom.GetNextWeekStartDate()
             : (DateOnly?)null;
 
-        var dates = Enumerable.Range(0, (dateInterval.DateTo.Day - dateInterval.DateFrom.Day) + 1)
+        var dates = Enumerable.Range(0, (dateInterval.DateTo.DayNumber - dateInterval.DateFrom.DayNumber) + 1)
             .Select(offset => dateInterval.DateFrom.AddDays(offset));
         foreach (var date in dates)
         {

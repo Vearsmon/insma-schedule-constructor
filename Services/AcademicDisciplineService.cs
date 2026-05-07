@@ -113,9 +113,11 @@ public class AcademicDisciplineService(
         }
 
         var academicDiscipline = AcademicDisciplineDtoMappingRegister.MapSaveDtoToModel(academicDisciplineSaveDto)!;
+        var id = await academicDisciplineRepository.SaveAsync(academicDiscipline);
+        academicDiscipline.Id = id;
+
         await lessonService.UpdateAcademicDisciplineLessons(academicDiscipline);
 
-        await academicDisciplineRepository.SaveAsync(academicDiscipline);
         if (academicDisciplineSaveDto.Id.HasValue)
         {
             await lessonService.RecalculateConflictsForUpdatedAcademicDiscipline(academicDiscipline);
