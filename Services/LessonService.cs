@@ -217,6 +217,12 @@ public class LessonService(
             foreach (var lessonBatchInfo in lessonBatchInfos)
             {
                 var groups = await studentGroupRepository.SelectAsync(lessonBatchInfo.StudentGroups.Select(x => x.Id!.Value).ToArray());
+                var rootGroups = groups
+                    .Where(l => groups
+                        .Where(x => x.Id != l.Id)
+                        .All(r => l.Parents
+                            .All(x => x.Id!.Value != r.Id!.Value)))
+                    .ToArray();
                 var teachers = await teacherRepository.SelectAsync(lessonBatchInfo.Teachers.Select(x => x.Id!.Value).ToArray());
                 var rooms = await roomRepository.SelectAsync(lessonBatchInfo.Rooms.Select(x => x.Id!.Value).ToArray());
                 var dates = DateOnlyHelper.GetDatesInIntervalByDaysOfWeek(
@@ -232,7 +238,7 @@ public class LessonService(
                         ScheduleId = academicDiscipline.ScheduleId,
                         AcademicDisciplineId = academicDiscipline.Id,
                         AcademicDisciplineType = type,
-                        StudentGroups = groups,
+                        StudentGroups = rootGroups,
                         Teachers = teachers,
                         Rooms = rooms,
                         DateWithTimeInterval = new DateWithTimeInterval

@@ -335,7 +335,7 @@ public class InsmaScheduleContext(DbContextOptions options) : DbContextBase(opti
         builder.HasOne(x => x.ParentStudentGroup)
             .WithMany(g => g.Children)
             .HasForeignKey(x => x.ParentStudentGroupId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(x => x.ChildStudentGroup)
             .WithMany(g => g.Parents)

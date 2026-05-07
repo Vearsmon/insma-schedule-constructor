@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Dal.Migrations
 {
     [DbContext(typeof(InsmaScheduleContext))]
-    [Migration("20260504220013_Initial")]
+    [Migration("20260507103558_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -1018,7 +1018,7 @@ namespace Dal.Migrations
                     b.HasOne("Dal.Entities.DbStudentGroup", "ParentStudentGroup")
                         .WithMany("Children")
                         .HasForeignKey("ParentStudentGroupId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_student_group_link_student_group_parent_student_group_id");
 

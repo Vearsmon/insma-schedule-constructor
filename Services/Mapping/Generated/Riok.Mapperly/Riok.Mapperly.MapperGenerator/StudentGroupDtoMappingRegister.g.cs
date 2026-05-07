@@ -51,6 +51,7 @@ namespace Services.Mapping
             target.SemesterNumber = dto.SemesterNumber;
             target.StudentsCount = dto.StudentsCount;
             target.StudentGroupType = dto.StudentGroupType;
+            target.Parents = MapReferences(dto.ParentIds);
             return target;
         }
 
@@ -65,7 +66,8 @@ namespace Services.Mapping
             model.SemesterNumber = dto.SemesterNumber;
             model.StudentsCount = dto.StudentsCount;
             model.StudentGroupType = dto.StudentGroupType;
-            model.Children = MapChildren(dto.ChildIds);
+            model.Parents = MapReferences(dto.ParentIds);
+            model.Children = MapReferences(dto.ChildIds);
         }
 
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
@@ -80,6 +82,8 @@ namespace Services.Mapping
             target.SemesterNumber = item.SemesterNumber;
             target.StudentsCount = item.StudentsCount;
             target.StudentGroupType = item.StudentGroupType;
+            target.Parents = MapToStudentGroupShortDtoArray1(item.Parents);
+            target.Children = MapToStudentGroupShortDtoArray1(item.Children);
             return target;
         }
 
@@ -104,6 +108,26 @@ namespace Services.Mapping
             for (var i = 0; i < source.Length; i++)
             {
                 target[i] = MapModelToShortDto(source[i]);
+            }
+            return target;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        private static global::Domain.Dto.ShortDto.StudentGroupShortDto MapToStudentGroupShortDto(global::Domain.Models.RegistryItemModels.StudentGroupShortRegistryItem source)
+        {
+            var target = new global::Domain.Dto.ShortDto.StudentGroupShortDto();
+            target.Id = source.Id;
+            target.Name = source.Name;
+            return target;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        private static global::Domain.Dto.ShortDto.StudentGroupShortDto[] MapToStudentGroupShortDtoArray1(global::Domain.Models.RegistryItemModels.StudentGroupShortRegistryItem[] source)
+        {
+            var target = new global::Domain.Dto.ShortDto.StudentGroupShortDto[source.Length];
+            for (var i = 0; i < source.Length; i++)
+            {
+                target[i] = MapToStudentGroupShortDto(source[i]);
             }
             return target;
         }

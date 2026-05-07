@@ -15,6 +15,31 @@ public class StudentGroupRepository(
     IPredicateBuilder<DbStudentGroup, StudentGroupSearchModel> predicateBuilder)
     : Repository<InsmaScheduleContext, DbStudentGroup, StudentGroup>(context, mapper, transactionalService), IStudentGroupRepository
 {
+    public override async Task<Guid> SaveAsync(StudentGroup model, CancellationToken cancellationToken = default)
+    {
+        var previousStudentGroup = model.Id.HasValue ? await GetAsync(model.Id!.Value, cancellationToken) : null;
+        if (previousStudentGroup != null)
+        {
+            var removedChildIds = previousStudentGroup.Children
+                .Where(x => model.Children.All(y => y.Id != x.Id))
+                .Select(x => x.Id!.Value);
+            var removedParentIds = previousStudentGroup.Parents
+                .Where(x => model.Parents.All(y => y.Id != x.Id))
+                .Select(x => x.Id!.Value);
+            var referencesToDelete = removedChildIds
+                .Select(x => new DbStudentGroupLink { ParentStudentGroupId = model.Id!.Value, ChildStudentGroupId = x })
+                .Concat(removedParentIds
+                    .Select(x => new DbStudentGroupLink { ParentStudentGroupId = x, ChildStudentGroupId = model.Id!.Value }))
+                .ToArray();
+            Context.Set<DbStudentGroupLink>().RemoveRange(referencesToDelete);
+            await Context.SaveChangesAsync(cancellationToken);
+
+            model.Children = model.Children.Where(x => previousStudentGroup.Children.All(y => y.Id != x.Id)).ToArray();
+            model.Parents = model.Parents.Where(x => previousStudentGroup.Parents.All(y => y.Id != x.Id)).ToArray();
+        }
+        return await base.SaveAsync(model, cancellationToken);
+    }
+
     public override async Task<StudentGroup> GetAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var entity = await Query().AsNoTracking()

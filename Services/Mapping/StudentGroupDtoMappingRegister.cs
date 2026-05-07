@@ -29,18 +29,16 @@ public static partial class StudentGroupDtoMappingRegister
     public static partial StudentGroupShortDto? MapModelToShortDto(StudentGroup? model);
 
     [MapperIgnoreSource(nameof(StudentGroupSaveDto.ChildIds))]
-    [MapperIgnoreSource(nameof(StudentGroupSaveDto.ParentIds))]
     [MapperIgnoreSource(nameof(StudentGroupSaveDto.SemiGroupToCreateNames))]
     [MapperIgnoreTarget(nameof(StudentGroup.Schedule))]
-    [MapperIgnoreTarget(nameof(StudentGroup.Parents))]
     [MapperIgnoreTarget(nameof(StudentGroup.Children))]
+    [MapProperty(nameof(StudentGroupSaveDto.ParentIds), nameof(StudentGroup.Parents), Use = nameof(MapReferences))]
     public static partial StudentGroup? MapSaveDtoToModel(StudentGroupSaveDto? dto);
 
-    [MapperIgnoreSource(nameof(StudentGroupSaveDto.ParentIds))]
     [MapperIgnoreSource(nameof(StudentGroupSaveDto.SemiGroupToCreateNames))]
-    [MapperIgnoreTarget(nameof(StudentGroup.Parents))]
     [MapperIgnoreTarget(nameof(StudentGroup.Schedule))]
-    [MapProperty(nameof(StudentGroupSaveDto.ChildIds), nameof(StudentGroup.Children), Use = nameof(MapChildren))]
+    [MapProperty(nameof(StudentGroupSaveDto.ChildIds), nameof(StudentGroup.Children), Use = nameof(MapReferences))]
+    [MapProperty(nameof(StudentGroupSaveDto.ParentIds), nameof(StudentGroup.Parents), Use = nameof(MapReferences))]
     public static partial void UpdateModelWithSaveDto(StudentGroupSaveDto? dto, StudentGroup? model);
 
     public static partial StudentGroupRegistryItemDto? MapItemToItemDto(StudentGroupRegistryItem? item);
@@ -54,5 +52,5 @@ public static partial class StudentGroupDtoMappingRegister
     [MapperIgnoreSource(nameof(StudentGroup.ChildrenFlat))]
     public static partial StudentGroupTreeDto? MapModelToTreeDto(StudentGroup model);
 
-    private static StudentGroup[] MapChildren(Guid[] ids) => ids.Select(x => new StudentGroup { Id = x }).ToArray();
+    private static StudentGroup[] MapReferences(Guid[] ids) => ids.Select(x => new StudentGroup { Id = x }).ToArray();
 }

@@ -106,16 +106,15 @@ public class LessonValidationService(
             Date = lesson.DateWithTimeInterval.Date,
             TimeIntervals = [lesson.DateWithTimeInterval.TimeInterval],
             ExcludeAllowCombining = lesson.AllowCombining,
+            ExcludeLessonIds = lesson.Id.HasValue ? [lesson.Id!.Value] : [],
         });
-        foreach (var studentGroupIdKey in studentGroupHierarchyIdsByStudentGroupId.Keys)
+        foreach (var hierarchyIds in studentGroupHierarchyIdsByStudentGroupId.Values)
         {
-            var hierarchyIds = studentGroupHierarchyIdsByStudentGroupId[studentGroupIdKey]
-                .ToArray();
             var conflictingByGroupHierarchyLessons = conflictingByGroupLessons
                 .Where(x => x.StudentGroups.Any(y => hierarchyIds.Contains(y.Id!.Value)))
                 .ToArray();
             ValidateLessonConflictByGroup(lesson, conflictingByGroupHierarchyLessons, lessonValidationMessages,
-                affectedLessonNewValidationMessagesByLessonId, hierarchyIds);
+                affectedLessonNewValidationMessagesByLessonId, hierarchyIds.ToArray());
         }
 
         if (lesson.Teachers.Length > 0)
@@ -127,6 +126,7 @@ public class LessonValidationService(
                 Date = lesson.DateWithTimeInterval.Date,
                 TimeIntervals = [lesson.DateWithTimeInterval.TimeInterval],
                 ExcludeAllowCombining = lesson.AllowCombining,
+                ExcludeLessonIds = lesson.Id.HasValue ? [lesson.Id!.Value] : [],
             });
             ValidateLessonConflictByTeacher(lesson, conflictingByTeacherLessons, lessonValidationMessages,
                 affectedLessonNewValidationMessagesByLessonId);

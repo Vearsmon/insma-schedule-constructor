@@ -310,7 +310,7 @@ namespace Dal.Migrations
                         column: x => x.parent_student_group_id,
                         principalTable: "student_group",
                         principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(

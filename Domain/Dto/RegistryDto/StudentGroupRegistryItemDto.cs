@@ -1,4 +1,5 @@
-﻿using Domain.Models.Common;
+﻿using Domain.Dto.ShortDto;
+using Domain.Models.Common;
 using Domain.Models.Enums;
 
 namespace Domain.Dto.RegistryDto;
@@ -10,6 +11,6 @@ public class StudentGroupRegistryItemDto : IModelWithId
     public int? SemesterNumber { get; set; }
     public int? StudentsCount { get; set; }
     public StudentGroupType StudentGroupType { get; set; }
-    public string[] ParentNames { get; set; } = [];
-    public string[] ChildNames { get; set; } = [];
+    public StudentGroupShortDto[] Parents { get; set; } = [];
+    public StudentGroupShortDto[] Children { get; set; } = [];
 }

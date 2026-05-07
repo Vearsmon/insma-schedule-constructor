@@ -141,13 +141,11 @@ public class StudentGroupService(
         {
             studentGroup = await studentGroupRepository.GetAsync(studentGroupSaveDto.Id!.Value);
             StudentGroupDtoMappingRegister.UpdateModelWithSaveDto(studentGroupSaveDto, studentGroup);
-            studentGroup.Parents = studentGroupSaveDto.ParentIds.Select(x => new StudentGroup { Id = x }).ToArray();
             await studentGroupRepository.SaveAsync(studentGroup);
         }
         else
         {
             studentGroup = StudentGroupDtoMappingRegister.MapSaveDtoToModel(studentGroupSaveDto)!;
-            studentGroup.Parents = studentGroupSaveDto.ParentIds.Select(x => new StudentGroup { Id = x }).ToArray();
             id = await studentGroupRepository.SaveAsync(studentGroup);
         }
 

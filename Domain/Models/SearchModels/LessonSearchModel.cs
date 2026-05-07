@@ -17,4 +17,5 @@ public class LessonSearchModel
     public TimeInterval[] TimeIntervals { get; set; } = [];
     public DayOfWeekTimeInterval[] DayOfWeekTimeIntervals { get; set; } = [];
     public bool ExcludeAllowCombining { get; set; }
+    public Guid[] ExcludeLessonIds { get; set; } = [];
 }

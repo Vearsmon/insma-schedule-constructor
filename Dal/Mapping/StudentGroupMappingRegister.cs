@@ -37,11 +37,15 @@ public static partial class StudentGroupMappingRegister
         entity.Parents = model.Parents.Select(x =>new DbStudentGroupLink { ParentStudentGroupId = x.Id ?? Guid.Empty, ChildStudentGroupId = model.Id ?? Guid.Empty }).ToArray();
     }
 
-    [MapperIgnoreSource(nameof(DbStudentGroup.ScheduleId))]
-    [MapperIgnoreSource(nameof(DbStudentGroup.Schedule))]
-    [MapperIgnoreSource(nameof(DbStudentGroup.Parents))]
-    [MapperIgnoreSource(nameof(DbStudentGroup.Children))]
-    public static partial StudentGroupRegistryItem? MapEntityToRegistryItem(DbStudentGroup? entity);
+    [UserMapping(Default = true)]
+    public static StudentGroupRegistryItem? MapEntityToRegistryItem(DbStudentGroup? entity)
+    {
+        var item = AutoMapEntityToRegistryItem(entity);
+        if (entity == null) return item;
+        item!.Children = entity.Children.Select(x => new StudentGroupShortRegistryItem { Id = x.ChildStudentGroupId, Name = x.ChildStudentGroup.Name }).ToArray();
+        item.Parents = entity.Parents.Select(x => new StudentGroupShortRegistryItem { Id = x.ParentStudentGroupId, Name = x.ParentStudentGroup.Name }).ToArray();
+        return item;
+    }
 
     [MapperIgnoreSource(nameof(DbStudentGroup.Schedule))]
     [MapperIgnoreSource(nameof(DbStudentGroup.Children))]
@@ -50,7 +54,6 @@ public static partial class StudentGroupMappingRegister
     [MapperIgnoreTarget(nameof(StudentGroup.Children))]
     [MapperIgnoreTarget(nameof(StudentGroup.Parents))]
     [MapperIgnoreTarget(nameof(StudentGroup.ChildrenFlat))]
-    // [MapProperty(nameof(DbStudentGroup.Schedule), nameof(StudentGroup.Schedule), Use = nameof(@ScheduleMappingRegister.MapEntityToModel))]
     private static partial StudentGroup? AutoMapEntityToModel(DbStudentGroup? entity);
 
     [MapperIgnoreSource(nameof(StudentGroup.Children))]
@@ -61,13 +64,22 @@ public static partial class StudentGroupMappingRegister
     [MapProperty(nameof(StudentGroup.Schedule), nameof(DbStudentGroup.Schedule), Use = nameof(@ScheduleMappingRegister.MapModelToEntity))]
     private static partial DbStudentGroup? AutoMapModelToEntity(StudentGroup? model);
 
+    [MapperIgnoreSource(nameof(StudentGroup.Schedule))]
     [MapperIgnoreSource(nameof(StudentGroup.Children))]
     [MapperIgnoreSource(nameof(StudentGroup.Parents))]
     [MapperIgnoreSource(nameof(StudentGroup.ChildrenFlat))]
+    [MapperIgnoreTarget(nameof(DbStudentGroup.Schedule))]
     [MapperIgnoreTarget(nameof(DbStudentGroup.Children))]
     [MapperIgnoreTarget(nameof(DbStudentGroup.Parents))]
-    [MapProperty(nameof(StudentGroup.Schedule), nameof(DbStudentGroup.Schedule), Use = nameof(@ScheduleMappingRegister.MapModelToEntity))]
     private static partial void AutoUpdateEntityWithModel(StudentGroup? model, DbStudentGroup? entity);
+
+    [MapperIgnoreSource(nameof(DbStudentGroup.ScheduleId))]
+    [MapperIgnoreSource(nameof(DbStudentGroup.Schedule))]
+    [MapperIgnoreSource(nameof(DbStudentGroup.Parents))]
+    [MapperIgnoreSource(nameof(DbStudentGroup.Children))]
+    [MapperIgnoreTarget(nameof(StudentGroupRegistryItem.Parents))]
+    [MapperIgnoreTarget(nameof(StudentGroupRegistryItem.Children))]
+    private static partial StudentGroupRegistryItem? AutoMapEntityToRegistryItem(DbStudentGroup? entity);
 
     private static StudentGroup? MapEntityToModelTree(DbStudentGroup? entity, bool isParentMapping)
     {

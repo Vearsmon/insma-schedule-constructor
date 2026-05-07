@@ -6,21 +6,6 @@ namespace Dal.Mapping
     {
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
         [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(entity))]
-        public static partial global::Domain.Models.RegistryItemModels.StudentGroupRegistryItem? MapEntityToRegistryItem(global::Dal.Entities.DbStudentGroup? entity)
-        {
-            if (entity == null)
-                return default;
-            var target = new global::Domain.Models.RegistryItemModels.StudentGroupRegistryItem();
-            target.Id = entity.Id;
-            target.Name = entity.Name;
-            target.SemesterNumber = entity.SemesterNumber;
-            target.StudentsCount = entity.StudentsCount;
-            target.StudentGroupType = entity.StudentGroupType;
-            return target;
-        }
-
-        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(entity))]
         private static partial global::Domain.Models.StudentGroup? AutoMapEntityToModel(global::Dal.Entities.DbStudentGroup? entity)
         {
             if (entity == null)
@@ -65,11 +50,25 @@ namespace Dal.Mapping
                 entity.Id = model.Id.Value;
             }
             entity.ScheduleId = model.ScheduleId;
-            entity.Schedule = global::Dal.Mapping.ScheduleMappingRegister.MapModelToEntity(model.Schedule) ?? throw new global::System.NullReferenceException("global::Dal.Mapping.ScheduleMappingRegister.MapModelToEntity returned null");
             entity.Name = model.Name;
             entity.SemesterNumber = model.SemesterNumber;
             entity.StudentsCount = model.StudentsCount;
             entity.StudentGroupType = model.StudentGroupType;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(entity))]
+        private static partial global::Domain.Models.RegistryItemModels.StudentGroupRegistryItem? AutoMapEntityToRegistryItem(global::Dal.Entities.DbStudentGroup? entity)
+        {
+            if (entity == null)
+                return default;
+            var target = new global::Domain.Models.RegistryItemModels.StudentGroupRegistryItem();
+            target.Id = entity.Id;
+            target.Name = entity.Name;
+            target.SemesterNumber = entity.SemesterNumber;
+            target.StudentsCount = entity.StudentsCount;
+            target.StudentGroupType = entity.StudentGroupType;
+            return target;
         }
     }
 }
