@@ -24,7 +24,7 @@ public class TeacherServiceTests
     public async Task SaveAsync_Should_Throw_When_Invalid_Data()
     {
         // Arrange
-        var teacherToSave = _fixture.Build<SaveTeacherDto>()
+        var teacherToSave = _fixture.Build<TeacherSaveDto>()
             .With(x => x.Id, Guid.NewGuid())
             .Without(x => x.Fullname)
             .Without(x => x.Contacts)

@@ -19,7 +19,7 @@ public interface IAcademicDisciplineService
     Task SaveAsync(AcademicDisciplineSaveDto academicDisciplineSaveDto);
 
     Task<LessonSeriesConflictDto[]> GetLessonSeriesConflictsAsync(Guid academicDisciplineId,
-        AcademicDisciplineType academicDisciplineType);
+        AcademicDisciplineType academicDisciplineType, Guid lessonBatchInfo);
 
     Task DeleteAsync(Guid academicDisciplineId);
 }

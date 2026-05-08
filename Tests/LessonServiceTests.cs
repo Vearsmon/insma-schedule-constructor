@@ -2,6 +2,7 @@
 using Dal.RegistryRepositories.Lesson;
 using Dal.Repositories.AcademicDisciplines;
 using Dal.Repositories.Lessons;
+using Dal.Repositories.Rooms;
 using Dal.Repositories.Schedules;
 using Dal.Repositories.StudentGroups;
 using Dal.Repositories.TeacherPreferences;
@@ -27,6 +28,7 @@ public class LessonServiceTests
     private readonly Mock<IStudentGroupRepository> _studentGroupRepositoryMock = new();
     private readonly Mock<IScheduleRepository> _scheduleRepositoryMock = new();
     private readonly Mock<ITeacherRepository> _teacherRepositoryMock = new();
+    private readonly Mock<IRoomRepository> _roomRepositoryMock = new();
     private readonly Mock<ITeacherPreferenceRepository> _teacherPreferenceRepositoryMock = new();
 
     private LessonService CreateService() => new(
@@ -37,6 +39,7 @@ public class LessonServiceTests
         _studentGroupRepositoryMock.Object,
         _scheduleRepositoryMock.Object,
         _teacherRepositoryMock.Object,
+        _roomRepositoryMock.Object,
         _teacherPreferenceRepositoryMock.Object
     );
 
@@ -49,7 +52,6 @@ public class LessonServiceTests
             .With(x => x.ScheduleId, Guid.NewGuid())
             .Without(x => x.Schedule)
             .Without(x => x.Name)
-            .With(x => x.Cypher, _fixture.Create<string>())
             .With(x => x.SemesterNumber, 5)
             .With(x => x.AcademicDisciplineTargetType, AcademicDisciplineTargetType.ByChoice)
             .With(x => x.AllowedLessonTypes, [AcademicDisciplineType.Lecture])
@@ -67,27 +69,13 @@ public class LessonServiceTests
                 new Lesson
                 {
                     Id = Guid.NewGuid(),
-                    StudentGroups =
-                    [
-                        new StudentGroup
-                        {
-                            Id = Guid.NewGuid(), Cypher = _fixture.Create<string>(), SemesterNumber = 6,
-                        },
-                    ],
+                    StudentGroups = [new StudentGroup { Id = Guid.NewGuid(), SemesterNumber = 6 }],
                     AcademicDisciplineType = AcademicDisciplineType.Lecture,
                 },
                 new Lesson
                 {
                     Id = Guid.NewGuid(),
-                    StudentGroups =
-                    [
-                        new StudentGroup
-                        {
-                            Id = Guid.NewGuid(),
-                            Cypher = academicDiscipline.Cypher,
-                            SemesterNumber = academicDiscipline.SemesterNumber,
-                        },
-                    ],
+                    StudentGroups = [new StudentGroup { Id = Guid.NewGuid(), SemesterNumber = academicDiscipline.SemesterNumber }],
                     AcademicDisciplineType = AcademicDisciplineType.Practice,
                 },
             ]);
@@ -105,8 +93,6 @@ public class LessonServiceTests
         Assert.Equal(2, actualLessons.Count);
         Assert.Equal(2, actualLessons.First().ValidationMessages.Length);
         Assert.Contains(actualLessons.First().ValidationMessages,
-            x => x.Code == LessonValidationCode.MismatchedCyphers);
-        Assert.Contains(actualLessons.First().ValidationMessages,
             x => x.Code == LessonValidationCode.MismatchedSemesterNumber);
         Assert.Single(actualLessons.Last().ValidationMessages);
         Assert.Contains(actualLessons.Last().ValidationMessages,
@@ -117,40 +103,37 @@ public class LessonServiceTests
     public async Task UpdateAcademicDisciplineLessons_Should_Produce_New_Lessons_When_Discipline_Primary_Lessons_Save()
     {
         // Arrange
-        var firstTimeInterval = new TimeInterval(new TimeOnly(9, 0), new TimeOnly(10, 30));
-        var secondTimeInterval = new TimeInterval(new TimeOnly(10, 0), new TimeOnly(11, 30));
+        var firstTimeInterval = new TimeInterval { TimeFrom = new TimeOnly(9, 0), TimeTo = new TimeOnly(10, 30) };
+        var secondTimeInterval = new TimeInterval { TimeFrom = new TimeOnly(10, 0), TimeTo = new TimeOnly(11, 30) };
         var academicDiscipline = _fixture.Build<AcademicDiscipline>()
             .Without(x => x.Id)
             .With(x => x.ScheduleId, Guid.NewGuid())
             .Without(x => x.Schedule)
             .With(x => x.Name, _fixture.Create<string>())
-            .With(x => x.Cypher, _fixture.Create<string>())
             .With(x => x.SemesterNumber, 5)
             .With(x => x.AcademicDisciplineTargetType, AcademicDisciplineTargetType.ByChoice)
             .With(x => x.AllowedLessonTypes, [AcademicDisciplineType.Lecture])
             .With(x => x.LecturePayload, _fixture
                 .Build<AcademicDisciplinePayload>()
                 .With(x => x.TotalHoursCount, _fixture.Create<int>())
-                .With(x => x.LessonBatchInfo, _fixture
-                    .Build<AcademicDisciplineLessonBatchInfo>()
+                .With(x => x.LessonBatchInfos, [_fixture
+                    .Build<LessonBatchInfo>()
                     .Without(x => x.Id)
                     .With(x => x.StudentGroups, [new StudentGroup { Id = Guid.NewGuid() }])
-                    .Without(x => x.TeacherId)
-                    .Without(x => x.Teacher)
-                    .Without(x => x.RoomId)
-                    .Without(x => x.Room)
+                    .Without(x => x.Teachers)
+                    .Without(x => x.Rooms)
                     .With(x => x.DayOfWeekTimeIntervals,
                     [
-                        new DayOfWeekTimeInterval(DayOfWeek.Tuesday, firstTimeInterval),
-                        new DayOfWeekTimeInterval(DayOfWeek.Thursday, secondTimeInterval),
+                        new DayOfWeekTimeInterval { DayOfWeek = DayOfWeek.Tuesday, TimeInterval = firstTimeInterval },
+                        new DayOfWeekTimeInterval { DayOfWeek = DayOfWeek.Thursday, TimeInterval = secondTimeInterval },
                     ])
                     .With(x => x.RepeatType, DisciplineLessonRepeatType.Weekly)
                     .With(x => x.DateInterval,
                         // три недели - с понедельника 07.09 по понедельник 28.09 включительно
-                        new DateInterval(new DateOnly(2026, 9, 7), new DateOnly(2026, 9, 28)))
+                        new DateInterval { DateFrom = new DateOnly(2026, 9, 7), DateTo = new DateOnly(2026, 9, 28) })
                     .Without(x => x.AllowCombining)
                     .With(x => x.HoursCost, _fixture.Create<int>())
-                    .Create()
+                    .Create()]
                 )
                 .Create())
             .Without(x => x.PracticePayload)
@@ -169,7 +152,14 @@ public class LessonServiceTests
         };
 
         _scheduleRepositoryMock.Setup(r => r.GetAsync(academicDiscipline.ScheduleId, CancellationToken.None))
-            .ReturnsAsync(new Schedule { StartsWithEvenWeek = true, StartDate = new DateOnly(2026, 9, 7), EndDate = new DateOnly(2026, 9, 28) });
+            .ReturnsAsync(new Schedule
+            {
+                DateInterval = new DateInterval
+                {
+                    DateFrom = new DateOnly(2026, 9, 7),
+                    DateTo = new DateOnly(2026, 9, 28),
+                }
+            });
 
         _lessonValidationServiceMock.Setup(x => x.ValidateAsync(It.IsAny<Lesson>()))
             .ReturnsAsync(new LessonValidationResult
@@ -191,9 +181,11 @@ public class LessonServiceTests
         Assert.Equal(6, actualLessons.Count);
         for (var i = 0; i < actualLessons.Count; i++)
         {
-            Assert.Equal(new DateWithTimeInterval(expectedLessonDates[i],
-                    i % 2 == 0 ? firstTimeInterval : secondTimeInterval),
-                actualLessons[i].DateWithTimeInterval);
+            Assert.Equal(new DateWithTimeInterval
+                {
+                    Date = expectedLessonDates[i],
+                    TimeInterval = i % 2 == 0 ? firstTimeInterval : secondTimeInterval,
+                }, actualLessons[i].DateWithTimeInterval);
         }
     }
 
@@ -201,31 +193,29 @@ public class LessonServiceTests
     public async Task UpdateAcademicDisciplineLessons_Should_Update_Previous_Academic_Discipline_Version_Lessons()
     {
         // Arrange
-        var firstTimeInterval = new TimeInterval(new TimeOnly(9, 0), new TimeOnly(10, 30));
-        var secondTimeInterval = new TimeInterval(new TimeOnly(10, 0), new TimeOnly(11, 30));
+        var firstTimeInterval = new TimeInterval { TimeFrom = new TimeOnly(9, 0), TimeTo = new TimeOnly(10, 30) };
+        var secondTimeInterval = new TimeInterval { TimeFrom = new TimeOnly(10, 0), TimeTo = new TimeOnly(11, 30) };
         var payloadFixture = _fixture
             .Build<AcademicDisciplinePayload>()
             .With(x => x.TotalHoursCount, _fixture.Create<int>())
-            .With(x => x.LessonBatchInfo, _fixture
-                .Build<AcademicDisciplineLessonBatchInfo>()
+            .With(x => x.LessonBatchInfos, [_fixture
+                .Build<LessonBatchInfo>()
                 .Without(x => x.Id)
                 .With(x => x.StudentGroups, [new StudentGroup { Id = Guid.NewGuid() }])
-                .Without(x => x.TeacherId)
-                .Without(x => x.Teacher)
-                .Without(x => x.RoomId)
-                .Without(x => x.Room)
+                .Without(x => x.Teachers)
+                .Without(x => x.Rooms)
                 .With(x => x.DayOfWeekTimeIntervals,
                 [
-                    new DayOfWeekTimeInterval(DayOfWeek.Tuesday, firstTimeInterval),
-                    new DayOfWeekTimeInterval(DayOfWeek.Thursday, secondTimeInterval),
+                    new DayOfWeekTimeInterval { DayOfWeek = DayOfWeek.Tuesday, TimeInterval = firstTimeInterval },
+                    new DayOfWeekTimeInterval { DayOfWeek = DayOfWeek.Thursday, TimeInterval = secondTimeInterval },
                 ])
                 .With(x => x.RepeatType, DisciplineLessonRepeatType.Weekly)
                 .With(x => x.DateInterval,
                     // три недели - с понедельника 07.09 по понедельник 28.09 включительно
-                    new DateInterval(new DateOnly(2026, 9, 7), new DateOnly(2026, 9, 28)))
+                    new DateInterval { DateFrom = new DateOnly(2026, 9, 7), DateTo = new DateOnly(2026, 9, 28) })
                 .Without(x => x.AllowCombining)
                 .With(x => x.HoursCost, _fixture.Create<int>())
-                .Create()
+                .Create()]
             )
             .Create();
 
@@ -234,7 +224,6 @@ public class LessonServiceTests
             .With(x => x.ScheduleId, Guid.NewGuid())
             .Without(x => x.Schedule)
             .With(x => x.Name, _fixture.Create<string>())
-            .With(x => x.Cypher, _fixture.Create<string>())
             .With(x => x.SemesterNumber, 5)
             .With(x => x.AcademicDisciplineTargetType, AcademicDisciplineTargetType.ByChoice)
             .With(x => x.AllowedLessonTypes, [AcademicDisciplineType.Practice, AcademicDisciplineType.Lab])
@@ -259,7 +248,14 @@ public class LessonServiceTests
             x.DeleteAsync(It.Is<Guid[]>(y => y == existingLessonIds), CancellationToken.None));
 
         _scheduleRepositoryMock.Setup(r => r.GetAsync(academicDiscipline.ScheduleId, CancellationToken.None))
-            .ReturnsAsync(new Schedule { StartsWithEvenWeek = true, StartDate = new DateOnly(2026, 9, 7), EndDate = new DateOnly(2026, 9, 28) });
+            .ReturnsAsync(new Schedule
+                {
+                    DateInterval = new DateInterval
+                    {
+                        DateFrom = new DateOnly(2026, 9, 7),
+                        DateTo = new DateOnly(2026, 9, 28),
+                    },
+                });
 
         _lessonValidationServiceMock.Setup(x => x.ValidateAsync(It.IsAny<Lesson>()))
             .ReturnsAsync(new LessonValidationResult
@@ -300,9 +296,15 @@ public class LessonServiceTests
                 .Without(x => x.Teacher)
                 .Without(x => x.RoomId)
                 .Without(x => x.Room)
-                .With(x => x.DayOfWeekTimeInterval,
-                    new DayOfWeekTimeInterval(DayOfWeek.Monday,
-                        new TimeInterval(new TimeOnly(9, 0), new TimeOnly(10, 30))))
+                .With(x => x.DayOfWeekTimeInterval, new DayOfWeekTimeInterval
+                {
+                    DayOfWeek = DayOfWeek.Monday,
+                    TimeInterval = new TimeInterval
+                    {
+                        TimeFrom = new TimeOnly(9, 0),
+                        TimeTo = new TimeOnly(10, 30),
+                    },
+                })
                 .With(x => x.TeacherPreferenceType, TeacherPreferenceType.Restricted)
                 .Without(x => x.Comment)
                 .Create(),
@@ -326,18 +328,14 @@ public class LessonServiceTests
                 new Lesson
                 {
                     Id = Guid.NewGuid(),
-                    DateWithTimeInterval = new DateWithTimeInterval(
-                        new DateOnly(2026, 9, 7),
-                        teacherPreferences.First().DayOfWeekTimeInterval!.TimeInterval),
+                    DateWithTimeInterval = new DateWithTimeInterval
+                    {
+                        Date = new DateOnly(2026, 9, 7),
+                        TimeInterval = teacherPreferences.First().DayOfWeekTimeInterval!.TimeInterval,
+                    },
                 }
             ])
-            .ReturnsAsync([
-                new Lesson
-                {
-                    Id = Guid.NewGuid(),
-                    RoomId = teacherPreferences.Last().RoomId,
-                }
-            ]);
+            .ReturnsAsync([new Lesson { Id = Guid.NewGuid() }]);
 
         var service = CreateService();
 
@@ -376,9 +374,7 @@ public class LessonServiceTests
             .Without(x => x.Name)
             .With(x => x.SemesterNumber, 5)
             .Without(x => x.StudentGroupType)
-            .With(x => x.Cypher, _fixture.Create<string>())
-            .Without(x => x.ParentId)
-            .Without(x => x.Parent)
+            .Without(x => x.Parents)
             .Without(x => x.Children)
             .Create();
 
@@ -394,24 +390,25 @@ public class LessonServiceTests
                 new Lesson
                 {
                     Id = Guid.NewGuid(),
-                    AcademicDiscipline = new AcademicDiscipline
-                    {
-                        Id = Guid.NewGuid(),
-                        Cypher = _fixture.Create<string>(),
-                        SemesterNumber = 6,
-                    }
+                    AcademicDiscipline = new AcademicDiscipline { Id = Guid.NewGuid(), SemesterNumber = 6 },
                 },
                 new Lesson
                 {
                     Id = firstExpectedLessonId,
                     StudentGroups = [new StudentGroup { Id = firstStudentGroupId }],
-                    DateWithTimeInterval = new DateWithTimeInterval(new DateOnly(2026, 9, 7),
-                        new TimeInterval(new TimeOnly(9, 0), new TimeOnly(10, 30))),
+                    DateWithTimeInterval = new DateWithTimeInterval
+                    {
+                        Date = new DateOnly(2026, 9, 7),
+                        TimeInterval = new TimeInterval
+                        {
+                            TimeFrom = new TimeOnly(9, 0),
+                            TimeTo = new TimeOnly(10, 30),
+                        },
+                    },
                     FlexibilityType = LessonFlexibilityType.Fixed,
                     AcademicDiscipline = new AcademicDiscipline
                     {
                         Id = Guid.NewGuid(),
-                        Cypher = studentGroup.Cypher,
                         SemesterNumber = studentGroup.SemesterNumber,
                     }
                 },
@@ -419,13 +416,19 @@ public class LessonServiceTests
                 {
                     Id = secondExpectedLessonId,
                     StudentGroups = [new StudentGroup { Id = studentGroup.Id!.Value }],
-                    DateWithTimeInterval = new DateWithTimeInterval(new DateOnly(2026, 9, 7),
-                        new TimeInterval(new TimeOnly(10, 0), new TimeOnly(11, 30))),
+                    DateWithTimeInterval = new DateWithTimeInterval
+                    {
+                        Date = new DateOnly(2026, 9, 7),
+                        TimeInterval = new TimeInterval
+                        {
+                            TimeFrom = new TimeOnly(10, 0),
+                            TimeTo = new TimeOnly(11, 30),
+                        },
+                    },
                     FlexibilityType = LessonFlexibilityType.Fixed,
                     AcademicDiscipline = new AcademicDiscipline
                     {
                         Id = Guid.NewGuid(),
-                        Cypher = studentGroup.Cypher,
                         SemesterNumber = studentGroup.SemesterNumber,
                     }
                 },
@@ -433,13 +436,19 @@ public class LessonServiceTests
                 {
                     Id = thirdExpectedLessonId,
                     StudentGroups = [new StudentGroup { Id = secondStudentGroupId }],
-                    DateWithTimeInterval = new DateWithTimeInterval(new DateOnly(2026, 9, 7),
-                        new TimeInterval(new TimeOnly(11, 0), new TimeOnly(12, 30))),
+                    DateWithTimeInterval = new DateWithTimeInterval
+                    {
+                        Date = new DateOnly(2026, 9, 7),
+                        TimeInterval = new TimeInterval
+                        {
+                            TimeFrom = new TimeOnly(11, 0),
+                            TimeTo = new TimeOnly(12, 30),
+                        },
+                    },
                     FlexibilityType = LessonFlexibilityType.Fixed,
                     AcademicDiscipline = new AcademicDiscipline
                     {
                         Id = Guid.NewGuid(),
-                        Cypher = studentGroup.Cypher,
                         SemesterNumber = studentGroup.SemesterNumber,
                     }
                 },
@@ -457,9 +466,7 @@ public class LessonServiceTests
         // Assert
         Assert.Equal(4, actualLessons.Count);
 
-        Assert.Equal(2, actualLessons.First().ValidationMessages.Length);
-        Assert.Contains(actualLessons.First().ValidationMessages,
-            x => x.Code == LessonValidationCode.MismatchedCyphers);
+        Assert.Single(actualLessons.First().ValidationMessages);
         Assert.Contains(actualLessons.First().ValidationMessages,
             x => x.Code == LessonValidationCode.MismatchedSemesterNumber);
 

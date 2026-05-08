@@ -32,13 +32,13 @@ public class LessonValidationService(
     public async Task<LessonValidationResult> ValidateAsync(Lesson lesson)
     {
         var validationMessages = new List<ValidationMessage>();
-        var saveDtoStudentGroups = await studentGroupRepository.SelectAsync(lesson.StudentGroups
-            .Select(x => x.Id!.Value).ToArray());
-        var saveDtoTeachers = await teacherRepository.SelectAsync(lesson.Teachers
-            .Select(x => x.Id!.Value).ToArray());
-        var saveDtoRooms = await roomRepository.SelectAsync(lesson.Rooms
-            .Select(x => x.Id!.Value).ToArray());
-        var saveDtoAcademicDiscipline = lesson.AcademicDisciplineId.HasValue
+        var studentGroupIds = lesson.StudentGroups.Select(x => x.Id!.Value).ToArray();
+        var studentGroups = await studentGroupRepository.SelectAsync(studentGroupIds);
+        var teacherIds = lesson.Teachers.Select(x => x.Id!.Value).ToArray();
+        var teachers = await teacherRepository.SelectAsync(teacherIds);
+        var roomIds = lesson.Rooms.Select(x => x.Id!.Value).ToArray();
+        var rooms = await roomRepository.SelectAsync(roomIds);
+        var academicDiscipline = lesson.AcademicDisciplineId.HasValue
             ? await academicDisciplineRepository.GetAsync(lesson.AcademicDisciplineId!.Value)
             : null;
         var previousLesson = lesson.Id.HasValue
@@ -50,7 +50,7 @@ public class LessonValidationService(
             validationMessages.Add(new ValidationMessage("Не найден проект расписания для сохранения занятия"));
         }
 
-        if (saveDtoStudentGroups.Length != lesson.StudentGroups.Length)
+        if (studentGroups.Length != lesson.StudentGroups.Length)
         {
             validationMessages.Add(new ValidationMessage("Не найдены академические группы для сохранения занятия"));
         }
@@ -76,16 +76,13 @@ public class LessonValidationService(
 
         var lessonValidationMessages = new List<LessonValidationMessage>();
         var affectedLessonNewValidationMessagesByLessonId = new Dictionary<Guid, List<LessonValidationMessage>?>();
-        var lessonsWithConflictById = new Dictionary<Guid, Lesson>();
 
         if (lesson.AcademicDisciplineId.HasValue)
         {
-            ValidateAcademicDisciplineStudentGroupMatch(lessonValidationMessages, saveDtoAcademicDiscipline!,
-                saveDtoStudentGroups);
-            lessonValidationMessages.AddErrorIf(
-                !saveDtoAcademicDiscipline!.AllowedLessonTypes.Contains(lesson.AcademicDisciplineType!.Value),
-                new LessonValidationPayload { AffectedByAcademicDisciplineId = saveDtoAcademicDiscipline.Id! },
-                LessonValidationCode.MismatchedAcademicDisciplineType);
+            ValidateAcademicDisciplineStudentGroupMatch(lessonValidationMessages, academicDiscipline!,
+                studentGroups);
+            ValidateAcademicDisciplineTypeMatch(lessonValidationMessages, academicDiscipline!,
+                lesson.AcademicDisciplineType!.Value);
         }
 
         if (lesson.DateWithTimeInterval == null)
@@ -93,63 +90,42 @@ public class LessonValidationService(
             return new LessonValidationResult
             {
                 Messages = lessonValidationMessages.ToArray(),
-                LessonsWithConflictById = lessonsWithConflictById,
+                LessonsWithConflictById = new Dictionary<Guid, Lesson>(),
             };
         }
 
         var studentGroupHierarchyIdsByStudentGroupId =
-            await studentGroupRepository.GetStudentGroupTreeIdsAsync(lesson.StudentGroups.Select(x => x.Id!.Value).ToArray());
-        var conflictingByGroupLessons = await lessonRepository.SearchAsync(new LessonSearchModel
+            await studentGroupRepository.GetStudentGroupTreeIdsAsync(studentGroupIds);
+        var hierarchyIdsFlat = studentGroupHierarchyIdsByStudentGroupId.SelectMany(x => x.Value).ToArray();
+
+        var conflictingLessons = await lessonRepository.SearchAsync(new LessonSearchModel
         {
             ScheduleId = lesson.ScheduleId,
-            StudentGroupIds = studentGroupHierarchyIdsByStudentGroupId.SelectMany(x => x.Value).ToArray(),
+            StudentGroupIds = hierarchyIdsFlat,
+            TeacherIds = teacherIds,
+            RoomIds = roomIds,
             Date = lesson.DateWithTimeInterval.Date,
             TimeIntervals = [lesson.DateWithTimeInterval.TimeInterval],
             ExcludeAllowCombining = lesson.AllowCombining,
             ExcludeLessonIds = lesson.Id.HasValue ? [lesson.Id!.Value] : [],
+            SearchForConflicts = true,
         });
-        foreach (var hierarchyIds in studentGroupHierarchyIdsByStudentGroupId.Values)
-        {
-            var conflictingByGroupHierarchyLessons = conflictingByGroupLessons
-                .Where(x => x.StudentGroups.Any(y => hierarchyIds.Contains(y.Id!.Value)))
-                .ToArray();
-            ValidateLessonConflictByGroup(lesson, conflictingByGroupHierarchyLessons, lessonValidationMessages,
-                affectedLessonNewValidationMessagesByLessonId, hierarchyIds.ToArray());
-        }
 
-        if (lesson.Teachers.Length > 0)
+        var conflictingTeacherPreferences = await teacherPreferenceRepository.SearchAsync(new TeacherPreferenceSearchModel
         {
-            var conflictingByTeacherLessons = await lessonRepository.SearchAsync(new LessonSearchModel
-            {
-                ScheduleId = lesson.ScheduleId,
-                TeacherIds = lesson.Teachers.Select(x => x.Id!.Value).ToArray(),
-                Date = lesson.DateWithTimeInterval.Date,
-                TimeIntervals = [lesson.DateWithTimeInterval.TimeInterval],
-                ExcludeAllowCombining = lesson.AllowCombining,
-                ExcludeLessonIds = lesson.Id.HasValue ? [lesson.Id!.Value] : [],
-            });
-            ValidateLessonConflictByTeacher(lesson, conflictingByTeacherLessons, lessonValidationMessages,
-                affectedLessonNewValidationMessagesByLessonId);
-            await ValidateTeacherPreferenceConflict(lesson, lessonValidationMessages);
-        }
+            ScheduleId = lesson.ScheduleId,
+            TeacherIds = teacherIds,
+            RoomIds = roomIds,
+            DaysOfWeek = [lesson.DateWithTimeInterval.Date.DayOfWeek],
+            TimeInterval = lesson.DateWithTimeInterval.TimeInterval,
+            TeacherPreferenceTypes = [TeacherPreferenceType.Restricted, TeacherPreferenceType.Undesirable],
+        });
 
-        var conflictingByRoomLessons = Array.Empty<Lesson>();
-        if (lesson.Rooms.Length > 0)
-        {
-            conflictingByRoomLessons = await lessonRepository.SearchAsync(new LessonSearchModel
-            {
-                ScheduleId = lesson.ScheduleId,
-                RoomIds = lesson.Rooms.Select(x => x.Id!.Value).ToArray(),
-                Date = lesson.DateWithTimeInterval.Date,
-                TimeIntervals = [lesson.DateWithTimeInterval.TimeInterval],
-                ExcludeAllowCombining = lesson.AllowCombining,
-            });
-            ValidateLessonConflictByRoom(lesson, conflictingByRoomLessons, lessonValidationMessages,
-                affectedLessonNewValidationMessagesByLessonId);
-        }
+        BuildValidationMessages(lessonValidationMessages, studentGroupHierarchyIdsByStudentGroupId,
+            conflictingLessons, lesson, teacherIds, roomIds, conflictingTeacherPreferences,
+            affectedLessonNewValidationMessagesByLessonId);
 
-        lessonsWithConflictById = conflictingByGroupLessons.Concat(conflictingByRoomLessons).DistinctBy(x => x.Id)
-            .ToDictionary(x => x.Id!.Value);
+        var lessonsWithConflictById = conflictingLessons.DistinctBy(x => x.Id).ToDictionary(x => x.Id!.Value);
         foreach (var (lessonId, affectedLessonValidationMessages) in affectedLessonNewValidationMessagesByLessonId)
         {
             lessonsWithConflictById[lessonId].ValidationMessages = lessonsWithConflictById[lessonId].ValidationMessages
@@ -163,132 +139,85 @@ public class LessonValidationService(
         };
     }
 
+    public void BuildValidationMessages(List<LessonValidationMessage> lessonValidationMessages,
+        Dictionary<Guid,List<Guid>> studentGroupHierarchyIdsByStudentGroupId,
+        Lesson[] conflictingLessons,
+        Lesson? lesson,
+        Guid[] teacherIds,
+        Guid[] roomIds,
+        TeacherPreference[] conflictingTeacherPreferences,
+        Dictionary<Guid,List<LessonValidationMessage>?>? affectedLessonNewValidationMessagesByLessonId,
+        bool includeTiming = false)
+    {
+        foreach (var hierarchyIds in studentGroupHierarchyIdsByStudentGroupId.Values)
+        {
+            var conflictingByGroupHierarchyLessons = conflictingLessons
+                .Where(x => x.StudentGroups.Any(y => hierarchyIds.Contains(y.Id!.Value)))
+                .ToArray();
+            ValidateLessonConflictByGroup(lesson, conflictingByGroupHierarchyLessons, lessonValidationMessages,
+                affectedLessonNewValidationMessagesByLessonId, hierarchyIds.ToArray(), includeTiming);
+        }
+
+        var conflictingByTeacherLessons = conflictingLessons
+            .Where(x => x.Teachers.Any(y => teacherIds.Contains(y.Id!.Value)))
+            .ToArray();
+        ValidateLessonConflictByTeacher(lesson?.Id, lesson?.FlexibilityType, teacherIds, conflictingByTeacherLessons,
+            lessonValidationMessages, affectedLessonNewValidationMessagesByLessonId, includeTiming);
+
+        ValidateTeacherPreferenceConflict(conflictingTeacherPreferences, lessonValidationMessages, includeTiming);
+
+        var conflictingByRoomLessons = conflictingLessons
+            .Where(x => x.Rooms.Any(y => roomIds.Contains(y.Id!.Value)))
+            .ToArray();
+        ValidateLessonConflictByRoom(lesson, roomIds, conflictingByRoomLessons, lessonValidationMessages,
+            affectedLessonNewValidationMessagesByLessonId, includeTiming);
+    }
+
     public async Task<LessonSeriesConflictDto[]> FillValidationMessages(Lesson[] lessons)
     {
         var lessonConflicts = new List<LessonSeriesConflictDto>();
         var studentGroupAcademicDisciplineLessonsCache = new Dictionary<(Guid, Guid, Guid), List<Lesson>>();
         foreach (var lesson in lessons)
         {
-            var nonCachedStudentGroupIds = lesson.StudentGroups
-                .Where(x => !studentGroupAcademicDisciplineLessonsCache.ContainsKey((lesson.ScheduleId,
-                    lesson.AcademicDisciplineId!.Value, x.Id!.Value)))
-                .Select(x => x.Id!.Value)
-                .ToArray();
-            if (lesson.AcademicDisciplineId != null && nonCachedStudentGroupIds.Length > 0)
+            if (lesson.AcademicDisciplineId != null)
             {
-                var lessonsToCache = await lessonRepository.SearchAsync(new LessonSearchModel
+                var nonCachedStudentGroupIds = lesson.StudentGroups
+                    .Where(x => !studentGroupAcademicDisciplineLessonsCache.ContainsKey((lesson.ScheduleId,
+                        lesson.AcademicDisciplineId!.Value, x.Id!.Value)))
+                    .Select(x => x.Id!.Value)
+                    .ToArray();
+                if (nonCachedStudentGroupIds.Length > 0)
                 {
-                    ScheduleId = lesson.ScheduleId,
-                    AcademicDisciplineId = lesson.AcademicDisciplineId!.Value,
-                    StudentGroupIds = nonCachedStudentGroupIds,
-                });
-                foreach (var lessonToCache in lessonsToCache)
-                {
-                    var lessonNonCachedStudentGroupIds = lessonToCache.StudentGroups
-                        .Where(x => nonCachedStudentGroupIds.Contains(x.Id!.Value))
-                        .Select(x => x.Id!.Value);
-                    foreach (var studentGroupId in lessonNonCachedStudentGroupIds)
+                    var lessonsToCache = await lessonRepository.SearchAsync(new LessonSearchModel
                     {
-                        if (!studentGroupAcademicDisciplineLessonsCache.ContainsKey((lesson.ScheduleId, lesson.AcademicDisciplineId!.Value, studentGroupId)))
+                        ScheduleId = lesson.ScheduleId,
+                        AcademicDisciplineId = lesson.AcademicDisciplineId!.Value,
+                        StudentGroupIds = nonCachedStudentGroupIds,
+                    });
+                    foreach (var lessonToCache in lessonsToCache)
+                    {
+                        var lessonNonCachedStudentGroupIds = lessonToCache.StudentGroups
+                            .Where(x => nonCachedStudentGroupIds.Contains(x.Id!.Value))
+                            .Select(x => x.Id!.Value);
+                        foreach (var studentGroupId in lessonNonCachedStudentGroupIds)
                         {
-                            studentGroupAcademicDisciplineLessonsCache[
-                                (lesson.ScheduleId, lesson.AcademicDisciplineId!.Value, studentGroupId)] = [];
-                        }
+                            if (!studentGroupAcademicDisciplineLessonsCache.ContainsKey((lesson.ScheduleId, lesson.AcademicDisciplineId!.Value, studentGroupId)))
+                            {
+                                studentGroupAcademicDisciplineLessonsCache[
+                                    (lesson.ScheduleId, lesson.AcademicDisciplineId!.Value, studentGroupId)] = [];
+                            }
 
-                        studentGroupAcademicDisciplineLessonsCache[
-                            (lesson.ScheduleId, lesson.AcademicDisciplineId!.Value, studentGroupId)].Add(lessonToCache);
+                            studentGroupAcademicDisciplineLessonsCache[
+                                (lesson.ScheduleId, lesson.AcademicDisciplineId!.Value, studentGroupId)].Add(lessonToCache);
+                        }
                     }
                 }
             }
+
+            var messages = await GetValidationResultMessageAsync(lesson.ValidationMessages, lesson, studentGroupAcademicDisciplineLessonsCache);
+            var index = 0;
             foreach (var validationMessage in lesson.ValidationMessages)
             {
-                var discipline = validationMessage.Payload.AffectedByAcademicDisciplineId.HasValue
-                    ? await academicDisciplineRepository.GetAsync(
-                        validationMessage.Payload.AffectedByAcademicDisciplineId!.Value)
-                    : null;
-                var studentGroup = validationMessage.Payload.AffectedByStudentGroupId.HasValue
-                    ? await studentGroupRepository.GetAsync(validationMessage.Payload.AffectedByStudentGroupId!.Value)
-                    : null;
-                var affectedByLesson = validationMessage.Payload.AffectedByLessonId.HasValue
-                    ? await lessonRepository.GetAsync(validationMessage.Payload.AffectedByLessonId!.Value)
-                    : null;
-                var teacher = validationMessage.Payload.AffectedByTeacherId.HasValue
-                    ? await teacherRepository.GetAsync(validationMessage.Payload.AffectedByTeacherId!.Value)
-                    : null;
-                var room = validationMessage.Payload.AffectedByRoomId.HasValue
-                    ? await roomRepository.GetAsync(validationMessage.Payload.AffectedByRoomId!.Value)
-                    : null;
-                var message = validationMessage.Code switch
-                {
-                    LessonValidationCode.MismatchedSemesterNumber => string.Format(
-                        LessonValidationMessageTemplates.MismatchedSemesterNumberTemplate,
-                        discipline!.Name,
-                        studentGroup!.Name,
-                        studentGroup.SemesterNumber,
-                        discipline.SemesterNumber),
-                    LessonValidationCode.MismatchedAcademicDisciplineType => string.Format(
-                        LessonValidationMessageTemplates.MismatchedAcademicDisciplineTypeTemplate,
-                        discipline!.Name,
-                        lesson.AcademicDisciplineType!.GetDescription()),
-                    LessonValidationCode.FixedLessonTypeConflictByGroup => string.Format(
-                        LessonValidationMessageTemplates.FixedLessonTypeConflictByGroupTemplate,
-                        affectedByLesson!.AcademicDiscipline == null
-                            ? string.Empty
-                            : affectedByLesson.AcademicDiscipline.Name,
-                        studentGroup!.Name),
-                    LessonValidationCode.FlexibleLessonTypeConflictByGroup => string.Format(
-                        LessonValidationMessageTemplates.FlexibleLessonTypeConflictByGroupTemplate,
-                        affectedByLesson!.AcademicDiscipline == null
-                            ? string.Empty
-                            : affectedByLesson.AcademicDiscipline.Name,
-                        studentGroup!.Name),
-                    LessonValidationCode.FixedLessonTypeConflictByTeacher => string.Format(
-                        LessonValidationMessageTemplates.FixedLessonTypeConflictByTeacherTemplate,
-                        affectedByLesson!.AcademicDiscipline == null
-                            ? string.Empty
-                            : affectedByLesson.AcademicDiscipline.Name,
-                        teacher!.Fullname),
-                    LessonValidationCode.FlexibleLessonTypeConflictByTeacher => string.Format(
-                        LessonValidationMessageTemplates.FlexibleLessonTypeConflictByTeacherTemplate,
-                        affectedByLesson!.AcademicDiscipline == null
-                            ? string.Empty
-                            : affectedByLesson.AcademicDiscipline.Name,
-                        teacher!.Fullname),
-                    LessonValidationCode.RestrictedTimeTeacherPreferenceTypeConflict => string.Format(
-                        LessonValidationMessageTemplates.RestrictedTimeTeacherPreferenceTypeConflictTemplate,
-                        teacher!.Fullname),
-                    LessonValidationCode.UndesirableTimeTeacherPreferenceTypeConflict => string.Format(
-                        LessonValidationMessageTemplates.UndesirableTimeTeacherPreferenceTypeConflictTemplate,
-                        teacher!.Fullname),
-                    LessonValidationCode.RestrictedRoomTeacherPreferenceTypeConflict => string.Format(
-                        LessonValidationMessageTemplates.RestrictedRoomTeacherPreferenceTypeConflictTemplate,
-                        teacher!.Fullname),
-                    LessonValidationCode.UndesirableRoomTeacherPreferenceTypeConflict => string.Format(
-                        LessonValidationMessageTemplates.UndesirableRoomTeacherPreferenceTypeConflictTemplate,
-                        teacher!.Fullname),
-                    LessonValidationCode.FixedLessonTypeConflictByRoom => string.Format(
-                        LessonValidationMessageTemplates.FixedLessonTypeConflictByRoomTemplate,
-                        affectedByLesson!.AcademicDiscipline == null
-                            ? string.Empty
-                            : affectedByLesson.AcademicDiscipline.Name,
-                        room!.Name),
-                    LessonValidationCode.FlexibleLessonTypeConflictByRoom => string.Format(
-                        LessonValidationMessageTemplates.FlexibleLessonTypeConflictByRoomTemplate,
-                        affectedByLesson!.AcademicDiscipline == null
-                            ? string.Empty
-                            : affectedByLesson.AcademicDiscipline.Name,
-                        room!.Name),
-                    LessonValidationCode.MismatchedAcademicDisciplineTypeTotalHoursCount => string.Format(
-                        LessonValidationMessageTemplates.MismatchedAcademicDisciplineTypeTotalHoursCountTemplate,
-                        validationMessage.Payload.AffectedByAcademicDisciplineType!.Value.GetDescription(),
-                        discipline!.Name,
-                        studentGroupAcademicDisciplineLessonsCache[(lesson.ScheduleId, lesson.AcademicDisciplineId!.Value, studentGroup!.Id!.Value)]
-                            .Where(x => x.AcademicDisciplineType == validationMessage.Payload.AffectedByAcademicDisciplineType)
-                            .Sum(x => x.HoursCost),
-                        discipline.GetPayloadByType(validationMessage.Payload.AffectedByAcademicDisciplineType!.Value)!.TotalHoursCount,
-                        studentGroup.Name),
-                    _ => throw new NotImplementedException(),
-                };
                 lessonConflicts.Add(new LessonSeriesConflictDto
                 {
                     DayOfWeekTimeInterval = new DayOfWeekTimeInterval
@@ -299,7 +228,7 @@ public class LessonValidationService(
                     Messages = [new LessonSeriesConflictMessageDto
                     {
                         TimeInterval = lesson.DateWithTimeInterval!.TimeInterval,
-                        Message = message,
+                        Message = messages[index++],
                     }],
                     ErrorType = validationMessage.ErrorType,
                 });
@@ -307,6 +236,129 @@ public class LessonValidationService(
         }
 
         return lessonConflicts.ToArray();
+    }
+
+    public async Task<string[]> GetValidationResultMessageAsync(LessonValidationMessage[] validationMessages,
+        Lesson? lesson = null, Dictionary<(Guid, Guid, Guid),List<Lesson>>? studentGroupAcademicDisciplineLessonsCache = null)
+    {
+        var disciplineIds = validationMessages.Where(x => x.Payload.AffectedByAcademicDisciplineId.HasValue)
+            .Select(x => x.Payload.AffectedByAcademicDisciplineId!.Value)
+            .Distinct()
+            .ToArray();
+        var disciplinesById = (await academicDisciplineRepository.SelectAsync(disciplineIds)).ToDictionary(x => x.Id!.Value);
+        var studentGroupsIds = validationMessages.Where(x => x.Payload.AffectedByStudentGroupId.HasValue)
+            .Select(x => x.Payload.AffectedByStudentGroupId!.Value)
+            .Distinct()
+            .ToArray();
+        var studentGroupsById = (await studentGroupRepository.SelectAsync(studentGroupsIds)).ToDictionary(x => x.Id!.Value);
+        var lessonIds = validationMessages.Where(x => x.Payload.AffectedByLessonId.HasValue)
+            .Select(x => x.Payload.AffectedByLessonId!.Value)
+            .Distinct()
+            .ToArray();
+        var lessonsById = (await lessonRepository.SelectAsync(lessonIds)).ToDictionary(x => x.Id!.Value);
+        var teacherIds = validationMessages.Where(x => x.Payload.AffectedByTeacherId.HasValue)
+            .Select(x => x.Payload.AffectedByTeacherId!.Value)
+            .Distinct()
+            .ToArray();
+        var teachersById = (await teacherRepository.SelectAsync(teacherIds)).ToDictionary(x => x.Id!.Value);
+        var roomIds = validationMessages.Where(x => x.Payload.AffectedByRoomId.HasValue)
+            .Select(x => x.Payload.AffectedByRoomId!.Value)
+            .Distinct()
+            .ToArray();
+        var roomsById = (await roomRepository.SelectAsync(roomIds)).ToDictionary(x => x.Id!.Value);
+
+        var result = new List<string>();
+        foreach (var validationMessage in validationMessages)
+        {
+            var discipline = validationMessage.Payload.AffectedByAcademicDisciplineId.HasValue
+                ? disciplinesById[validationMessage.Payload.AffectedByAcademicDisciplineId!.Value]
+                : null;
+            var studentGroup = validationMessage.Payload.AffectedByStudentGroupId.HasValue
+                ? studentGroupsById[validationMessage.Payload.AffectedByStudentGroupId!.Value]
+                : null;
+            var affectedByLesson = validationMessage.Payload.AffectedByLessonId.HasValue
+                ? lessonsById[validationMessage.Payload.AffectedByLessonId!.Value]
+                : null;
+            var teacher = validationMessage.Payload.AffectedByTeacherId.HasValue
+                ? teachersById[validationMessage.Payload.AffectedByTeacherId!.Value]
+                : null;
+            var room = validationMessage.Payload.AffectedByRoomId.HasValue
+                ? roomsById[validationMessage.Payload.AffectedByRoomId!.Value]
+                : null;
+            result.Add(validationMessage.Code switch
+            {
+                LessonValidationCode.MismatchedSemesterNumber => string.Format(
+                    LessonValidationMessageTemplates.MismatchedSemesterNumberTemplate,
+                    discipline!.Name,
+                    studentGroup!.Name,
+                    studentGroup.SemesterNumber,
+                    discipline.SemesterNumber),
+                LessonValidationCode.MismatchedAcademicDisciplineType => string.Format(
+                    LessonValidationMessageTemplates.MismatchedAcademicDisciplineTypeTemplate,
+                    discipline!.Name,
+                    lesson!.AcademicDisciplineType!.GetDescription()),
+                LessonValidationCode.FixedLessonTypeConflictByGroup => string.Format(
+                    LessonValidationMessageTemplates.FixedLessonTypeConflictByGroupTemplate,
+                    affectedByLesson!.AcademicDiscipline == null
+                        ? string.Empty
+                        : affectedByLesson.AcademicDiscipline.Name,
+                    studentGroup!.Name),
+                LessonValidationCode.FlexibleLessonTypeConflictByGroup => string.Format(
+                    LessonValidationMessageTemplates.FlexibleLessonTypeConflictByGroupTemplate,
+                    affectedByLesson!.AcademicDiscipline == null
+                        ? string.Empty
+                        : affectedByLesson.AcademicDiscipline.Name,
+                    studentGroup!.Name),
+                LessonValidationCode.FixedLessonTypeConflictByTeacher => string.Format(
+                    LessonValidationMessageTemplates.FixedLessonTypeConflictByTeacherTemplate,
+                    affectedByLesson!.AcademicDiscipline == null
+                        ? string.Empty
+                        : affectedByLesson.AcademicDiscipline.Name,
+                    teacher!.Fullname),
+                LessonValidationCode.FlexibleLessonTypeConflictByTeacher => string.Format(
+                    LessonValidationMessageTemplates.FlexibleLessonTypeConflictByTeacherTemplate,
+                    affectedByLesson!.AcademicDiscipline == null
+                        ? string.Empty
+                        : affectedByLesson.AcademicDiscipline.Name,
+                    teacher!.Fullname),
+                LessonValidationCode.RestrictedTimeTeacherPreferenceTypeConflict => string.Format(
+                    LessonValidationMessageTemplates.RestrictedTimeTeacherPreferenceTypeConflictTemplate,
+                    teacher!.Fullname),
+                LessonValidationCode.UndesirableTimeTeacherPreferenceTypeConflict => string.Format(
+                    LessonValidationMessageTemplates.UndesirableTimeTeacherPreferenceTypeConflictTemplate,
+                    teacher!.Fullname),
+                LessonValidationCode.RestrictedRoomTeacherPreferenceTypeConflict => string.Format(
+                    LessonValidationMessageTemplates.RestrictedRoomTeacherPreferenceTypeConflictTemplate,
+                    teacher!.Fullname),
+                LessonValidationCode.UndesirableRoomTeacherPreferenceTypeConflict => string.Format(
+                    LessonValidationMessageTemplates.UndesirableRoomTeacherPreferenceTypeConflictTemplate,
+                    teacher!.Fullname),
+                LessonValidationCode.FixedLessonTypeConflictByRoom => string.Format(
+                    LessonValidationMessageTemplates.FixedLessonTypeConflictByRoomTemplate,
+                    affectedByLesson!.AcademicDiscipline == null
+                        ? string.Empty
+                        : affectedByLesson.AcademicDiscipline.Name,
+                    room!.Name),
+                LessonValidationCode.FlexibleLessonTypeConflictByRoom => string.Format(
+                    LessonValidationMessageTemplates.FlexibleLessonTypeConflictByRoomTemplate,
+                    affectedByLesson!.AcademicDiscipline == null
+                        ? string.Empty
+                        : affectedByLesson.AcademicDiscipline.Name,
+                    room!.Name),
+                LessonValidationCode.MismatchedAcademicDisciplineTypeTotalHoursCount => string.Format(
+                    LessonValidationMessageTemplates.MismatchedAcademicDisciplineTypeTotalHoursCountTemplate,
+                    validationMessage.Payload.AffectedByAcademicDisciplineType!.Value.GetDescription(),
+                    discipline!.Name,
+                    studentGroupAcademicDisciplineLessonsCache![(lesson!.ScheduleId, lesson.AcademicDisciplineId!.Value, studentGroup!.Id!.Value)]
+                        .Where(x => x.AcademicDisciplineType == validationMessage.Payload.AffectedByAcademicDisciplineType)
+                        .Sum(x => x.HoursCost),
+                    discipline.GetPayloadByType(validationMessage.Payload.AffectedByAcademicDisciplineType!.Value)!.TotalHoursCount,
+                    studentGroup.Name),
+                _ => throw new NotSupportedException(),
+            });
+        }
+
+        return result.ToArray();
     }
 
     public async Task RemoveValidationMessages(Guid[] lessonIds, LessonValidationCode[] validationCodes)
@@ -329,7 +381,17 @@ public class LessonValidationService(
             .ToArray());
     }
 
-    private static void ValidateAcademicDisciplineStudentGroupMatch(List<LessonValidationMessage> validationMessages,
+    public async Task RemoveValidationMessages(Guid academicDisciplineId)
+    {
+        var validationMessages = await lessonValidationMessageRepository.SearchAsync(
+            new LessonValidationMessageSearchModel
+            {
+                AffectedByAcademicDisciplineIds = [academicDisciplineId],
+            });
+        await lessonValidationMessageRepository.DeleteAsync(validationMessages.Select(x => x.Id!.Value).ToArray());
+    }
+
+    public void ValidateAcademicDisciplineStudentGroupMatch(List<LessonValidationMessage> validationMessages,
         AcademicDiscipline saveDtoAcademicDiscipline,
         StudentGroup[] saveDtoStudentGroups)
     {
@@ -348,11 +410,26 @@ public class LessonValidationService(
         }
     }
 
-    private static void ValidateLessonConflictByGroup(Lesson lesson,
+    public void ValidateAcademicDisciplineTypeMatch(List<LessonValidationMessage> validationMessages,
+        AcademicDiscipline saveDtoAcademicDiscipline,
+        AcademicDisciplineType lessonAcademicDisciplineType)
+    {
+        var payload = new LessonValidationPayload
+        {
+            AffectedByAcademicDisciplineId = saveDtoAcademicDiscipline.Id!,
+        };
+        validationMessages.AddErrorIf(
+            !saveDtoAcademicDiscipline.AllowedLessonTypes.Contains(lessonAcademicDisciplineType),
+            payload,
+            LessonValidationCode.MismatchedAcademicDisciplineType);
+    }
+
+    public void ValidateLessonConflictByGroup(Lesson? lesson,
         Lesson[] conflictingByGroupLessons,
         List<LessonValidationMessage> validationMessages,
-        Dictionary<Guid, List<LessonValidationMessage>?> affectedLessonNewValidationMessagesByLessonId,
-        Guid[] hierarchyIds)
+        Dictionary<Guid, List<LessonValidationMessage>?>? affectedLessonNewValidationMessagesByLessonId,
+        Guid[] hierarchyIds,
+        bool includeTiming = false)
     {
         foreach (var conflictingByGroupLesson in conflictingByGroupLessons)
         {
@@ -361,6 +438,7 @@ public class LessonValidationService(
                 AffectedByLessonId = conflictingByGroupLesson.Id,
                 AffectedByStudentGroupId = conflictingByGroupLesson.StudentGroups
                     .Single(x => hierarchyIds.Contains(x.Id!.Value)).Id!.Value,
+                DateWithTimeInterval = includeTiming ? conflictingByGroupLesson.DateWithTimeInterval : null,
             };
             validationMessages
                 .AddWarningIf(conflictingByGroupLesson.FlexibilityType == LessonFlexibilityType.Flexible,
@@ -371,7 +449,12 @@ public class LessonValidationService(
                     editedLessonPayload,
                     LessonValidationCode.FixedLessonTypeConflictByGroup);
 
-            if (!affectedLessonNewValidationMessagesByLessonId.TryGetValue(conflictingByGroupLesson.Id!.Value,
+            if (lesson == null)
+            {
+                return;
+            }
+
+            if (!affectedLessonNewValidationMessagesByLessonId!.TryGetValue(conflictingByGroupLesson.Id!.Value,
                     out var affectedLessonValidationMessages))
             {
                 affectedLessonValidationMessages = [];
@@ -396,72 +479,70 @@ public class LessonValidationService(
         }
     }
 
-    private void ValidateLessonConflictByTeacher(Lesson lesson,
+    public void ValidateLessonConflictByTeacher(Guid? lessonId,
+        LessonFlexibilityType? lessonFlexibilityType,
+        Guid[] teacherIds,
         Lesson[] conflictingByTeacherLessons,
         List<LessonValidationMessage> validationMessages,
-        Dictionary<Guid, List<LessonValidationMessage>?> affectedLessonNewValidationMessagesByLessonId)
+        Dictionary<Guid, List<LessonValidationMessage>?>? affectedLessonNewValidationMessagesByLessonId,
+        bool includeTiming = false)
     {
         foreach (var conflictingByTeacherLesson in conflictingByTeacherLessons)
         {
-            var editedLessonPayload = new LessonValidationPayload
-                { AffectedByLessonId = conflictingByTeacherLesson.Id };
-            validationMessages
-                .AddWarningIf(conflictingByTeacherLesson.FlexibilityType == LessonFlexibilityType.Flexible,
-                    editedLessonPayload,
-                    LessonValidationCode.FlexibleLessonTypeConflictByTeacher);
-            validationMessages
-                .AddErrorIf(conflictingByTeacherLesson.FlexibilityType == LessonFlexibilityType.Fixed,
-                    editedLessonPayload,
-                    LessonValidationCode.FixedLessonTypeConflictByTeacher);
-
-            if (!affectedLessonNewValidationMessagesByLessonId.TryGetValue(conflictingByTeacherLesson.Id!.Value,
-                    out var affectedLessonValidationMessages))
+            foreach (var teacher in conflictingByTeacherLesson.Teachers.Where(x => teacherIds.Contains(x.Id!.Value)))
             {
-                affectedLessonValidationMessages = [];
-                affectedLessonNewValidationMessagesByLessonId[conflictingByTeacherLesson.Id!.Value] =
-                    affectedLessonValidationMessages;
-            }
+                var editedLessonPayload = new LessonValidationPayload
+                {
+                    AffectedByLessonId = conflictingByTeacherLesson.Id,
+                    AffectedByTeacherId = teacher.Id,
+                    DateWithTimeInterval = includeTiming ? conflictingByTeacherLesson.DateWithTimeInterval : null,
+                };
+                validationMessages
+                    .AddWarningIf(conflictingByTeacherLesson.FlexibilityType == LessonFlexibilityType.Flexible,
+                        editedLessonPayload,
+                        LessonValidationCode.FlexibleLessonTypeConflictByTeacher);
+                validationMessages
+                    .AddErrorIf(conflictingByTeacherLesson.FlexibilityType == LessonFlexibilityType.Fixed,
+                        editedLessonPayload,
+                        LessonValidationCode.FixedLessonTypeConflictByTeacher);
 
-            var existedLessonPayload = new LessonValidationPayload { AffectedByLessonId = lesson.Id };
-            affectedLessonValidationMessages!
-                .AddErrorIf(lesson.FlexibilityType == LessonFlexibilityType.Fixed,
-                    existedLessonPayload,
-                    LessonValidationCode.FixedLessonTypeConflictByTeacher);
-            affectedLessonValidationMessages!
-                .AddWarningIf(lesson.FlexibilityType == LessonFlexibilityType.Flexible,
-                    existedLessonPayload,
-                    LessonValidationCode.FlexibleLessonTypeConflictByTeacher);
+                if (!lessonId.HasValue)
+                {
+                    continue;
+                }
+
+                if (!affectedLessonNewValidationMessagesByLessonId!.TryGetValue(conflictingByTeacherLesson.Id!.Value,
+                        out var affectedLessonValidationMessages))
+                {
+                    affectedLessonValidationMessages = [];
+                    affectedLessonNewValidationMessagesByLessonId[conflictingByTeacherLesson.Id!.Value] =
+                        affectedLessonValidationMessages;
+                }
+
+                var existedLessonPayload = new LessonValidationPayload { AffectedByLessonId = lessonId };
+                affectedLessonValidationMessages!
+                    .AddErrorIf(lessonFlexibilityType == LessonFlexibilityType.Fixed,
+                        existedLessonPayload,
+                        LessonValidationCode.FixedLessonTypeConflictByTeacher);
+                affectedLessonValidationMessages!
+                    .AddWarningIf(lessonFlexibilityType == LessonFlexibilityType.Flexible,
+                        existedLessonPayload,
+                        LessonValidationCode.FlexibleLessonTypeConflictByTeacher);
+            }
         }
     }
 
-    private async Task ValidateTeacherPreferenceConflict(Lesson lesson,
-        List<LessonValidationMessage> validationMessages)
+    public void ValidateTeacherPreferenceConflict(TeacherPreference[] conflictingTeacherPreferences,
+        List<LessonValidationMessage> validationMessages,
+        bool includeTiming = false)
     {
-        var conflictingTimeTeacherPreferences = await teacherPreferenceRepository.SearchAsync(
-            new TeacherPreferenceSearchModel
-            {
-                ScheduleId = lesson.ScheduleId,
-                TeacherIds = lesson.Teachers.Select(x => x.Id!.Value).ToArray(),
-                DaysOfWeek = [lesson.DateWithTimeInterval!.Date.DayOfWeek],
-                TimeInterval = lesson.DateWithTimeInterval!.TimeInterval,
-                TeacherPreferenceTypes = [TeacherPreferenceType.Restricted, TeacherPreferenceType.Undesirable],
-            });
-        var conflictingRoomTeacherPreferences = lesson.Rooms.Length > 0
-            ? await teacherPreferenceRepository.SearchAsync(
-                new TeacherPreferenceSearchModel
-                {
-                    ScheduleId = lesson.ScheduleId,
-                    TeacherIds = lesson.Teachers.Select(x => x.Id!.Value).ToArray(),
-                    RoomIds = lesson.Rooms.Select(x => x.Id!.Value).ToArray(),
-                    TeacherPreferenceTypes = [TeacherPreferenceType.Restricted, TeacherPreferenceType.Undesirable],
-                })
-            : [];
-        foreach (var conflictingTeacherPreference in conflictingTimeTeacherPreferences.Concat(conflictingRoomTeacherPreferences))
+        foreach (var conflictingTeacherPreference in conflictingTeacherPreferences)
         {
             var payload = new LessonValidationPayload
             {
                 AffectedByTeacherPreferenceId = conflictingTeacherPreference.Id,
                 AffectedByTeacherId = conflictingTeacherPreference.TeacherId,
+                DayOfWeekTimeInterval = includeTiming ? conflictingTeacherPreference.DayOfWeekTimeInterval : null,
             };
             validationMessages
                 .AddWarningIf(
@@ -486,40 +567,59 @@ public class LessonValidationService(
         }
     }
 
-    private static void ValidateLessonConflictByRoom(Lesson lesson,
+    public void ValidateLessonConflictByRoom(Lesson? lesson,
+        Guid[] roomIds,
         Lesson[] conflictingByRoomLessons,
         List<LessonValidationMessage> validationMessages,
-        Dictionary<Guid, List<LessonValidationMessage>?> affectedLessonNewValidationMessagesByLessonId)
+        Dictionary<Guid, List<LessonValidationMessage>?>? affectedLessonNewValidationMessagesByLessonId,
+        bool includeTiming = false)
     {
         foreach (var conflictingByRoomLesson in conflictingByRoomLessons)
         {
-            var editedLessonPayload = new LessonValidationPayload { AffectedByLessonId = conflictingByRoomLesson.Id };
-            validationMessages
-                .AddWarningIf(conflictingByRoomLesson.FlexibilityType == LessonFlexibilityType.Flexible,
-                    editedLessonPayload,
-                    LessonValidationCode.FlexibleLessonTypeConflictByRoom);
-            validationMessages
-                .AddErrorIf(conflictingByRoomLesson.FlexibilityType == LessonFlexibilityType.Fixed,
-                    editedLessonPayload,
-                    LessonValidationCode.FixedLessonTypeConflictByRoom);
-
-            if (!affectedLessonNewValidationMessagesByLessonId.TryGetValue(conflictingByRoomLesson.Id!.Value,
-                    out var affectedLessonValidationMessages))
+            foreach (var room in conflictingByRoomLesson.Rooms.Where(x => roomIds.Contains(x.Id!.Value)))
             {
-                affectedLessonValidationMessages = [];
-                affectedLessonNewValidationMessagesByLessonId[conflictingByRoomLesson.Id!.Value] =
-                    affectedLessonValidationMessages;
-            }
+                var editedLessonPayload = new LessonValidationPayload
+                {
+                    AffectedByLessonId = conflictingByRoomLesson.Id,
+                    AffectedByRoomId = room.Id,
+                    DateWithTimeInterval = includeTiming ? conflictingByRoomLesson.DateWithTimeInterval : null,
+                };
+                validationMessages
+                    .AddWarningIf(conflictingByRoomLesson.FlexibilityType == LessonFlexibilityType.Flexible,
+                        editedLessonPayload,
+                        LessonValidationCode.FlexibleLessonTypeConflictByRoom);
+                validationMessages
+                    .AddErrorIf(conflictingByRoomLesson.FlexibilityType == LessonFlexibilityType.Fixed,
+                        editedLessonPayload,
+                        LessonValidationCode.FixedLessonTypeConflictByRoom);
 
-            var existedLessonPayload = new LessonValidationPayload { AffectedByLessonId = lesson.Id };
-            affectedLessonValidationMessages!
-                .AddErrorIf(lesson.FlexibilityType == LessonFlexibilityType.Fixed,
-                    existedLessonPayload,
-                    LessonValidationCode.FixedLessonTypeConflictByRoom);
-            affectedLessonValidationMessages!
-                .AddWarningIf(lesson.FlexibilityType == LessonFlexibilityType.Flexible,
-                    existedLessonPayload,
-                    LessonValidationCode.FlexibleLessonTypeConflictByRoom);
+                if (lesson == null)
+                {
+                    return;
+                }
+
+                if (!affectedLessonNewValidationMessagesByLessonId!.TryGetValue(conflictingByRoomLesson.Id!.Value,
+                        out var affectedLessonValidationMessages))
+                {
+                    affectedLessonValidationMessages = [];
+                    affectedLessonNewValidationMessagesByLessonId[conflictingByRoomLesson.Id!.Value] =
+                        affectedLessonValidationMessages;
+                }
+
+                var existedLessonPayload = new LessonValidationPayload
+                {
+                    AffectedByLessonId = lesson.Id,
+                    AffectedByRoomId = room.Id,
+                };
+                affectedLessonValidationMessages!
+                    .AddErrorIf(lesson.FlexibilityType == LessonFlexibilityType.Fixed,
+                        existedLessonPayload,
+                        LessonValidationCode.FixedLessonTypeConflictByRoom);
+                affectedLessonValidationMessages!
+                    .AddWarningIf(lesson.FlexibilityType == LessonFlexibilityType.Flexible,
+                        existedLessonPayload,
+                        LessonValidationCode.FlexibleLessonTypeConflictByRoom);
+            }
         }
     }
 }

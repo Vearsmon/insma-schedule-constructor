@@ -81,11 +81,6 @@ public class StudentGroupService(
             validationMessages.Add(new ValidationMessage("При создании потока не может указываться группа-предок"));
         }
 
-        if (studentGroupSaveDto is { StudentGroupType: StudentGroupType.Thread, SemesterNumber: null })
-        {
-            validationMessages.Add(new ValidationMessage("При создании потока должен быть указан номер семестра"));
-        }
-
         if (studentGroupSaveDto is { StudentGroupType: StudentGroupType.SemiGroup, ChildIds.Length: > 0 })
         {
             validationMessages.Add(

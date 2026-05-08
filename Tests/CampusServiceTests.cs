@@ -24,7 +24,7 @@ public class CampusServiceTests
     public async Task SaveAsync_Should_Throw_When_Invalid_Data()
     {
         // Arrange
-        var campusToSave = _fixture.Build<SaveCampusDto>()
+        var campusToSave = _fixture.Build<CampusSaveDto>()
             .With(x => x.Id, Guid.NewGuid())
             .Without(x => x.Name)
             .Create();

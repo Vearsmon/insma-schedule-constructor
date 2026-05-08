@@ -28,7 +28,7 @@ public class RoomServiceTests
     public async Task SaveAsync_Should_Throw_When_Invalid_Data()
     {
         // Arrange
-        var roomToSave = _fixture.Build<SaveRoomDto>()
+        var roomToSave = _fixture.Build<RoomSaveDto>()
             .With(x => x.Id, Guid.NewGuid())
             .Without(x => x.Name)
             .With(x => x.CampusId, Guid.NewGuid())

@@ -42,7 +42,7 @@ public class TeacherPreferenceServiceTests
     {
         // Arrange
         var roomId = Guid.NewGuid();
-        var teacherPreferenceToSave = _fixture.Build<SaveTeacherPreferenceDto>()
+        var teacherPreferenceToSave = _fixture.Build<TeacherPreferenceSaveDto>()
             .With(x => x.ScheduleId, Guid.NewGuid())
             .With(x => x.TeacherId, Guid.NewGuid())
             .With(x => x.TeacherTimeAvailabilities,
@@ -50,14 +50,28 @@ public class TeacherPreferenceServiceTests
                     new TeacherTimeAvailabilityDto
                     {
                         TeacherPreferenceType = TeacherPreferenceType.Restricted,
-                        DayOfWeekTimeInterval = new DayOfWeekTimeInterval(DayOfWeek.Monday,
-                            new TimeInterval(new TimeOnly(9, 0), new TimeOnly(10, 0))),
+                        DayOfWeekTimeInterval = new DayOfWeekTimeInterval
+                        {
+                            DayOfWeek = DayOfWeek.Monday,
+                            TimeInterval = new TimeInterval
+                            {
+                                TimeFrom = new TimeOnly(9, 0),
+                                TimeTo = new TimeOnly(10, 0),
+                            },
+                        },
                     },
                     new TeacherTimeAvailabilityDto
                     {
                         TeacherPreferenceType = TeacherPreferenceType.Preferred,
-                        DayOfWeekTimeInterval = new DayOfWeekTimeInterval(DayOfWeek.Monday,
-                            new TimeInterval(new TimeOnly(9, 30), new TimeOnly(10, 30))),
+                        DayOfWeekTimeInterval = new DayOfWeekTimeInterval
+                        {
+                            DayOfWeek = DayOfWeek.Monday,
+                            TimeInterval = new TimeInterval
+                            {
+                                TimeFrom = new TimeOnly(9, 30),
+                                TimeTo = new TimeOnly(10, 30),
+                            },
+                        },
                     },
                 ])
             .With(x => x.TeacherRoomPreferences,
@@ -97,21 +111,35 @@ public class TeacherPreferenceServiceTests
     public async Task SaveAsync_Should_Merge_Time_Intervals()
     {
         // Arrange
-        var preferencesToSave = _fixture.Build<SaveTeacherPreferenceDto>()
+        var preferencesToSave = _fixture.Build<TeacherPreferenceSaveDto>()
             .With(x => x.ScheduleId, Guid.NewGuid())
             .With(x => x.TeacherId, Guid.NewGuid())
             .With(x => x.TeacherTimeAvailabilities, [
                 new TeacherTimeAvailabilityDto
                 {
                     TeacherPreferenceType = TeacherPreferenceType.Restricted,
-                    DayOfWeekTimeInterval = new DayOfWeekTimeInterval(DayOfWeek.Monday,
-                        new TimeInterval(new TimeOnly(9, 0), new TimeOnly(12, 0))),
+                    DayOfWeekTimeInterval = new DayOfWeekTimeInterval
+                    {
+                        DayOfWeek = DayOfWeek.Monday,
+                        TimeInterval = new TimeInterval
+                        {
+                            TimeFrom = new TimeOnly(9, 0),
+                            TimeTo = new TimeOnly(12, 0),
+                        },
+                    },
                 },
                 new TeacherTimeAvailabilityDto
                 {
                     TeacherPreferenceType = TeacherPreferenceType.Restricted,
-                    DayOfWeekTimeInterval = new DayOfWeekTimeInterval(DayOfWeek.Monday,
-                        new TimeInterval(new TimeOnly(10, 0), new TimeOnly(15, 0))),
+                    DayOfWeekTimeInterval = new DayOfWeekTimeInterval
+                    {
+                        DayOfWeek = DayOfWeek.Monday,
+                        TimeInterval = new TimeInterval
+                        {
+                            TimeFrom = new TimeOnly(10, 0),
+                            TimeTo = new TimeOnly(15, 0),
+                        },
+                    },
                 },
             ])
             .Without(x => x.TeacherRoomPreferences)
@@ -144,7 +172,11 @@ public class TeacherPreferenceServiceTests
             v.Length == 1
             && v.First().TeacherPreferenceType == TeacherPreferenceType.Restricted
             && v.First().DayOfWeekTimeInterval!.DayOfWeek == DayOfWeek.Monday
-            && v.First().DayOfWeekTimeInterval!.TimeInterval.Equals(new TimeInterval(new TimeOnly(9, 0), new TimeOnly(15, 0)))),
+            && v.First().DayOfWeekTimeInterval!.TimeInterval.Equals(new TimeInterval
+            {
+                TimeFrom = new TimeOnly(9, 0),
+                TimeTo = new TimeOnly(15, 0),
+            })),
             CancellationToken.None));
     }
 }

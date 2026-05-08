@@ -22,7 +22,8 @@ public class AcademicDisciplineService(
     IAcademicDisciplineRepository academicDisciplineRepository,
     IAcademicDisciplineRegistryRepository academicDisciplineRegistryRepository,
     IScheduleRepository scheduleRepository,
-    ILessonService lessonService) : IAcademicDisciplineService
+    ILessonService lessonService,
+    ILessonValidationService lessonValidationService) : IAcademicDisciplineService
 {
     public async Task<AcademicDisciplineShortDto[]> SearchShortAsync(Guid scheduleId)
     {
@@ -114,6 +115,7 @@ public class AcademicDisciplineService(
 
         var academicDiscipline = AcademicDisciplineDtoMappingRegister.MapSaveDtoToModel(academicDisciplineSaveDto)!;
         var id = await academicDisciplineRepository.SaveAsync(academicDiscipline);
+        await lessonValidationService.RemoveValidationMessages(id);
         academicDiscipline.Id = id;
 
         await lessonService.UpdateAcademicDisciplineLessons(academicDiscipline);
@@ -126,11 +128,11 @@ public class AcademicDisciplineService(
         return;
 
         bool IsSpecified(AcademicDisciplinePayloadDto? payload) =>
-            payload != null&& (payload.LessonBatchInfos.Length > 0 || payload.TotalHoursCount != 0);
+            payload != null && (payload.LessonBatchInfos.Length > 0 || payload.TotalHoursCount != 0);
     }
 
     public async Task<LessonSeriesConflictDto[]> GetLessonSeriesConflictsAsync(Guid academicDisciplineId,
-        AcademicDisciplineType academicDisciplineType)
+        AcademicDisciplineType academicDisciplineType, Guid lessonBatchInfoId)
     {
         var academicDiscipline = await academicDisciplineRepository.GetAsync(academicDisciplineId);
         if (!academicDiscipline.AllowedLessonTypes.Contains(academicDisciplineType))
@@ -139,13 +141,9 @@ public class AcademicDisciplineService(
         }
 
         var payload = academicDiscipline.GetPayloadByType(academicDisciplineType);
+        var lessonBatchInfo = payload!.LessonBatchInfos.Single(x => x.Id == lessonBatchInfoId);
 
-        var result = new List<LessonSeriesConflictDto>();
-        foreach (var lessonBatchInfo in payload!.LessonBatchInfos)
-        {
-            result.AddRange(await lessonService.GetLessonSeriesConflictsAsync(academicDiscipline.Id!.Value, lessonBatchInfo, academicDisciplineType, academicDiscipline.ScheduleId));
-        }
-        return result.ToArray();
+        return await lessonService.GetLessonSeriesConflictsAsync(lessonBatchInfo, academicDiscipline.ScheduleId);
     }
 
     public async Task DeleteAsync(Guid academicDisciplineId)

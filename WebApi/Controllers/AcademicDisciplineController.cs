@@ -102,6 +102,7 @@ public class AcademicDisciplineController(IAcademicDisciplineService academicDis
     /// </summary>
     /// <param name="academicDisciplineId">Идентификатор академической дисциплины</param>
     /// <param name="academicDisciplineType">Вид занятий, проводимых по академической дисциплине</param>
+    /// <param name="lessonBatchInfoId">Идентификатор набора сведений о занятиях по академической дисциплине указанного вида</param>
     /// <returns>Модель списка временных отрезков по дням недели с конфликтами</returns>
     /// <response code="200">Поиск данных выполнился успешно</response>
     /// <response code="400">Поиск данных завершился с ошибкой валидации входных данных</response>
@@ -116,8 +117,9 @@ public class AcademicDisciplineController(IAcademicDisciplineService academicDis
     [ProducesResponseType(typeof(ErrorDto), StatusCodes.Status500InternalServerError)]
     [HttpGet("week-conflicts")]
     public async Task<LessonSeriesConflictDto[]> GetLessonConflicts(Guid academicDisciplineId,
-        AcademicDisciplineType academicDisciplineType) =>
-        await academicDisciplineService.GetLessonSeriesConflictsAsync(academicDisciplineId, academicDisciplineType);
+        AcademicDisciplineType academicDisciplineType, Guid lessonBatchInfoId) =>
+        await academicDisciplineService.GetLessonSeriesConflictsAsync(academicDisciplineId, academicDisciplineType,
+            lessonBatchInfoId);
 
     /// <summary>
     /// Удалить данные академической дисциплины

@@ -24,7 +24,7 @@ public class ScheduleServiceTests
     public async Task SaveAsync_Should_Throw_When_Invalid_Data()
     {
         // Arrange
-        var scheduleToSave = _fixture.Build<SaveScheduleDto>()
+        var scheduleToSave = _fixture.Build<ScheduleSaveDto>()
             .With(x => x.Id, Guid.NewGuid())
             .Without(x => x.Name)
             .Create();
