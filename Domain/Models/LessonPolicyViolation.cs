@@ -3,7 +3,7 @@ using Domain.Models.Enums;
 
 namespace Domain.Models;
 
-public class LessonValidationMessage : IModelWithId
+public class LessonPolicyViolation : IModelWithId
 {
     public Guid? Id { get; set; }
 
@@ -25,15 +25,10 @@ public class LessonValidationMessage : IModelWithId
     /// <summary>
     /// Код ошибки
     /// </summary>
-    public LessonValidationCode Code { get; set; }
+    public LessonPolicyViolationCode Code { get; set; }
 
     /// <summary>
     /// Оказавшие влияние данные
     /// </summary>
     public LessonValidationPayload Payload { get; set; } = null!;
-
-    /// <summary>
-    /// Сообщение валидации
-    /// </summary>
-    public string Message { get; set; } = null!;
 }

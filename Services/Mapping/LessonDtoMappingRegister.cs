@@ -36,13 +36,18 @@ public static partial class LessonDtoMappingRegister
         return model;
     }
 
-    public static partial LessonRegistryItemDto? MapItemToItemDto(LessonRegistryItem? item);
+    [UserMapping(Default = true)]
+    public static LessonShortDto? MapModelToShortDto(Lesson? model)
+    {
+        var shortDto = AutoMapModelToShortDto(model);
+        if (model == null) return shortDto;
+        shortDto!.StudentGroups = model.StudentGroups.Select(StudentGroupDtoMappingRegister.MapModelToShortDto).ToArray()!;
+        shortDto.Teachers = model.Teachers.Select(TeacherDtoMappingRegister.MapModelToShortDto).ToArray()!;
+        shortDto.Rooms = model.Rooms.Select(RoomDtoMappingRegister.MapModelToShortDto).ToArray()!;
+        return shortDto;
+    }
 
-    [MapperIgnoreSource(nameof(Lesson.ScheduleId))]
-    [MapperIgnoreSource(nameof(Lesson.Schedule))]
-    [MapperIgnoreSource(nameof(Lesson.AcademicDiscipline))]
-    [MapProperty(nameof(Lesson.ValidationMessages), nameof(LessonShortDto.CurrentErrorsMaxLevel), Use = nameof(GetErrorsMaxLevel))]
-    public static partial LessonShortDto? MapModelToShortDto(Lesson? model);
+    public static partial LessonRegistryItemDto? MapItemToItemDto(LessonRegistryItem? item);
 
     [MapperIgnoreSource(nameof(Lesson.ScheduleId))]
     [MapperIgnoreSource(nameof(Lesson.Schedule))]
@@ -63,8 +68,20 @@ public static partial class LessonDtoMappingRegister
     [MapperIgnoreTarget(nameof(Lesson.StudentGroups))]
     [MapperIgnoreTarget(nameof(Lesson.Teachers))]
     [MapperIgnoreTarget(nameof(Lesson.Rooms))]
-    [MapperIgnoreTarget(nameof(Lesson.ValidationMessages))]
+    [MapperIgnoreTarget(nameof(Lesson.Violations))]
     private static partial Lesson? AutoMapSaveDtoToModel(LessonSaveDto? dto);
 
-    private static LessonValidationErrorType? GetErrorsMaxLevel(LessonValidationMessage[] messages) => messages.Length == 0 ? null : messages.Max(x => x.ErrorType);
+    [MapperIgnoreSource(nameof(Lesson.ScheduleId))]
+    [MapperIgnoreSource(nameof(Lesson.Schedule))]
+    [MapperIgnoreSource(nameof(Lesson.AcademicDiscipline))]
+    [MapperIgnoreSource(nameof(Lesson.StudentGroups))]
+    [MapperIgnoreSource(nameof(Lesson.Teachers))]
+    [MapperIgnoreSource(nameof(Lesson.Rooms))]
+    [MapperIgnoreTarget(nameof(Lesson.StudentGroups))]
+    [MapperIgnoreTarget(nameof(Lesson.Teachers))]
+    [MapperIgnoreTarget(nameof(Lesson.Rooms))]
+    [MapProperty(nameof(Lesson.Violations), nameof(LessonShortDto.CurrentErrorsMaxLevel), Use = nameof(GetViolationsMaxLevel))]
+    private static partial LessonShortDto? AutoMapModelToShortDto(Lesson? model);
+
+    private static LessonValidationErrorType? GetViolationsMaxLevel(LessonPolicyViolation[] violations) => violations.Length == 0 ? null : violations.Max(x => x.ErrorType);
 }

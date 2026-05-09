@@ -75,22 +75,13 @@ public class AcademicDiscipline : IModelWithId
     /// </summary>
     public string? Comment { get; set; }
 
-    public AcademicDisciplinePayload? GetPayloadByType(AcademicDisciplineType type)
+    public AcademicDisciplinePayload? GetPayloadByType(AcademicDisciplineType type) => type switch
     {
-        switch (type)
-        {
-            case AcademicDisciplineType.Lecture:
-                return LecturePayload;
-            case AcademicDisciplineType.Practice:
-                return PracticePayload;
-            case AcademicDisciplineType.Lab:
-                return LabPayload;
-            case AcademicDisciplineType.Exam:
-                return ExamPayload;
-            case AcademicDisciplineType.Test:
-                return TestPayload;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(type), type, null);
-        }
-    }
+        AcademicDisciplineType.Lecture => LecturePayload,
+        AcademicDisciplineType.Practice => PracticePayload,
+        AcademicDisciplineType.Lab => LabPayload,
+        AcademicDisciplineType.Exam => ExamPayload,
+        AcademicDisciplineType.Test => TestPayload,
+        _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+    };
 }

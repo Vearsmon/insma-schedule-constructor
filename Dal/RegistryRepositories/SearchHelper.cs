@@ -21,7 +21,7 @@ public static class SearchHelper
         {
             page = 1;
         }
-        PaginationHelper.CheckPageLimits(checkPageLimits, pageSize!.Value);
+        PaginationHelper.CheckPageLimits(checkPageLimits, pageSize.Value);
 
         var num = (page - 1) * pageSize.Value;
         return obj.Skip(num).Take(pageSize.Value);

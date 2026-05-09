@@ -6,7 +6,7 @@ namespace Domain.Models.Enums;
 /// Коды валидаций для занятий
 /// </summary>
 [JsonConverter(typeof(JsonStringEnumConverter))]
-public enum LessonValidationCode
+public enum LessonPolicyViolationCode
 {
     MismatchedSemesterNumber = 2,
     MismatchedAcademicDisciplineType = 3,

@@ -28,7 +28,7 @@ public static class TimeOnlyHelper
     public static TimeInterval[] MergeIntersections(this TimeInterval[] timeIntervals)
     {
         var sortedIntervals = timeIntervals.OrderBy(x => x.TimeFrom).ToArray();
-        var result = new List<TimeInterval>() { sortedIntervals.First() };
+        var result = new List<TimeInterval> { sortedIntervals.First() };
         for (var i = 1; i < sortedIntervals.Length; i++)
         {
             var lastInterval = result.Last();

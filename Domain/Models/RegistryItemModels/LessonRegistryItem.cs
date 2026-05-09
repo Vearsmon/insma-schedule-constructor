@@ -15,5 +15,5 @@ public class LessonRegistryItem : IModelWithId
     public LessonFlexibilityType FlexibilityType { get; set; }
     public bool AllowCombining { get; set; }
     public int? HoursCost { get; set; }
-    public LessonValidationMessage[] ValidationMessages { get; set; } = [];
+    public LessonPolicyViolation[] Violations { get; set; } = [];
 }

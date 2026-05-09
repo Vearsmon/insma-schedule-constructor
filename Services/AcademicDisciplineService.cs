@@ -59,12 +59,12 @@ public class AcademicDisciplineService(
         }
 
         if (academicDisciplineSaveDto.Id.HasValue
-            && !(await academicDisciplineRepository.ExistsAsync(academicDisciplineSaveDto.Id!.Value)))
+            && !await academicDisciplineRepository.ExistsAsync(academicDisciplineSaveDto.Id!.Value))
         {
             validationMessages.Add(new ValidationMessage("Не найдена академическая дисциплина для обновления"));
         }
 
-        if (!(await scheduleRepository.ExistsAsync(academicDisciplineSaveDto.ScheduleId)))
+        if (!await scheduleRepository.ExistsAsync(academicDisciplineSaveDto.ScheduleId))
         {
             validationMessages.Add(
                 new ValidationMessage("Не найден проект расписания для сохранения академической дисциплины"));
@@ -115,7 +115,7 @@ public class AcademicDisciplineService(
 
         var academicDiscipline = AcademicDisciplineDtoMappingRegister.MapSaveDtoToModel(academicDisciplineSaveDto)!;
         var id = await academicDisciplineRepository.SaveAsync(academicDiscipline);
-        await lessonValidationService.RemoveValidationMessages(id);
+        await lessonValidationService.RemovePolicyViolations(id);
         academicDiscipline.Id = id;
 
         await lessonService.UpdateAcademicDisciplineLessons(academicDiscipline);

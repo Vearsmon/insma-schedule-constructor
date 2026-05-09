@@ -73,5 +73,5 @@ public class Lesson : IModelWithId
     /// <summary>
     /// Сообщения валидации
     /// </summary>
-    public LessonValidationMessage[] ValidationMessages { get; set; } = [];
+    public LessonPolicyViolation[] Violations { get; set; } = [];
 }

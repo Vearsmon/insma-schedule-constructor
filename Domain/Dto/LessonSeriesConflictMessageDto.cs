@@ -4,7 +4,7 @@ namespace Domain.Dto;
 
 public class LessonSeriesConflictMessageDto
 {
-    public TimeInterval? TimeInterval { get; set; } = null!;
+    public TimeInterval? TimeInterval { get; set; }
 
     public string Message { get; set; } = null!;
 }

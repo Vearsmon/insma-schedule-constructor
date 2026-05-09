@@ -24,31 +24,7 @@ namespace Services.Mapping
             {
                 target.HoursCost = item.HoursCost.Value;
             }
-            target.ValidationMessages = item.ValidationMessages;
-            return target;
-        }
-
-        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(model))]
-        public static partial global::Domain.Dto.ShortDto.LessonShortDto? MapModelToShortDto(global::Domain.Models.Lesson? model)
-        {
-            if (model == null)
-                return default;
-            var target = new global::Domain.Dto.ShortDto.LessonShortDto();
-            target.Id = model.Id;
-            target.AcademicDisciplineId = model.AcademicDisciplineId;
-            target.AcademicDisciplineType = model.AcademicDisciplineType;
-            target.StudentGroups = MapToStudentGroupShortDtoArray(model.StudentGroups);
-            target.Teachers = MapToTeacherShortDtoArray(model.Teachers);
-            target.Rooms = MapToRoomShortDtoArray(model.Rooms);
-            target.DateWithTimeInterval = model.DateWithTimeInterval;
-            target.FlexibilityType = model.FlexibilityType;
-            target.AllowCombining = model.AllowCombining;
-            if (model.HoursCost != null)
-            {
-                target.HoursCost = model.HoursCost.Value;
-            }
-            target.CurrentErrorsMaxLevel = GetErrorsMaxLevel(model.ValidationMessages);
+            target.Violations = item.Violations;
             return target;
         }
 
@@ -69,7 +45,7 @@ namespace Services.Mapping
             {
                 target.HoursCost = model.HoursCost.Value;
             }
-            target.ValidationMessages = model.ValidationMessages;
+            target.Violations = model.Violations;
             return target;
         }
 
@@ -92,77 +68,23 @@ namespace Services.Mapping
         }
 
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        private static global::Domain.Dto.ShortDto.StudentGroupShortDto MapToStudentGroupShortDto(global::Domain.Models.StudentGroup source)
+        [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(model))]
+        private static partial global::Domain.Dto.ShortDto.LessonShortDto? AutoMapModelToShortDto(global::Domain.Models.Lesson? model)
         {
-            var target = new global::Domain.Dto.ShortDto.StudentGroupShortDto();
-            if (source.Id != null)
+            if (model == null)
+                return default;
+            var target = new global::Domain.Dto.ShortDto.LessonShortDto();
+            target.Id = model.Id;
+            target.AcademicDisciplineId = model.AcademicDisciplineId;
+            target.AcademicDisciplineType = model.AcademicDisciplineType;
+            target.DateWithTimeInterval = model.DateWithTimeInterval;
+            target.FlexibilityType = model.FlexibilityType;
+            target.AllowCombining = model.AllowCombining;
+            if (model.HoursCost != null)
             {
-                target.Id = source.Id.Value;
+                target.HoursCost = model.HoursCost.Value;
             }
-            target.Name = source.Name;
-            return target;
-        }
-
-        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        private static global::Domain.Dto.ShortDto.StudentGroupShortDto[] MapToStudentGroupShortDtoArray(global::Domain.Models.StudentGroup[] source)
-        {
-            var target = new global::Domain.Dto.ShortDto.StudentGroupShortDto[source.Length];
-            for (var i = 0; i < source.Length; i++)
-            {
-                target[i] = MapToStudentGroupShortDto(source[i]);
-            }
-            return target;
-        }
-
-        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        private static global::Domain.Dto.ShortDto.TeacherShortDto MapToTeacherShortDto(global::Domain.Models.Teacher source)
-        {
-            var target = new global::Domain.Dto.ShortDto.TeacherShortDto();
-            if (source.Id != null)
-            {
-                target.Id = source.Id.Value;
-            }
-            target.Fullname = source.Fullname;
-            target.Contacts = source.Contacts;
-            return target;
-        }
-
-        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        private static global::Domain.Dto.ShortDto.TeacherShortDto[] MapToTeacherShortDtoArray(global::Domain.Models.Teacher[] source)
-        {
-            var target = new global::Domain.Dto.ShortDto.TeacherShortDto[source.Length];
-            for (var i = 0; i < source.Length; i++)
-            {
-                target[i] = MapToTeacherShortDto(source[i]);
-            }
-            return target;
-        }
-
-        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        private static global::Domain.Dto.ShortDto.RoomShortDto MapToRoomShortDto(global::Domain.Models.Room source)
-        {
-            var target = new global::Domain.Dto.ShortDto.RoomShortDto();
-            if (source.Id != null)
-            {
-                target.Id = source.Id.Value;
-            }
-            target.Name = source.Name;
-            target.CampusId = source.CampusId;
-            target.RoomType = source.RoomType;
-            target.Capacity = source.Capacity;
-            target.RoomBoardType = source.RoomBoardType;
-            target.HasProjector = source.HasProjector;
-            return target;
-        }
-
-        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        private static global::Domain.Dto.ShortDto.RoomShortDto[] MapToRoomShortDtoArray(global::Domain.Models.Room[] source)
-        {
-            var target = new global::Domain.Dto.ShortDto.RoomShortDto[source.Length];
-            for (var i = 0; i < source.Length; i++)
-            {
-                target[i] = MapToRoomShortDto(source[i]);
-            }
+            target.CurrentErrorsMaxLevel = GetViolationsMaxLevel(model.Violations);
             return target;
         }
     }

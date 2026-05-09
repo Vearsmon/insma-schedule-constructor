@@ -39,7 +39,7 @@ public class CampusService(
         {
             validationMessages.Add(new ValidationMessage("Не допускается отсутствие названия"));
         }
-        if (campusSaveDto.Id.HasValue && !(await campusRepository.ExistsAsync(campusSaveDto.Id!.Value)))
+        if (campusSaveDto.Id.HasValue && !await campusRepository.ExistsAsync(campusSaveDto.Id!.Value))
         {
             validationMessages.Add(new ValidationMessage("Не найден учебный корпус для обновления"));
         }

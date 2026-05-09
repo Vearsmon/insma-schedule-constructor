@@ -87,7 +87,7 @@ public class StudentGroupService(
                 new ValidationMessage("При создании подгруппы не могут указываться группы-наследники"));
         }
 
-        if (!(await scheduleRepository.ExistsAsync(studentGroupSaveDto.ScheduleId)))
+        if (!await scheduleRepository.ExistsAsync(studentGroupSaveDto.ScheduleId))
         {
             validationMessages.Add(
                 new ValidationMessage("Не найден проект расписания для сохранения академической группы"));

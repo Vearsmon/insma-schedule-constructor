@@ -26,7 +26,7 @@ public static partial class LessonMappingRegister
         model.StudentGroups = entity.StudentGroups.Select(x => StudentGroupMappingRegister.MapEntityToModel(x.StudentGroup)).ToArray()!;
         model.Teachers = entity.Teachers.Select(x => TeacherMappingRegister.MapEntityToModel(x.Teacher)).ToArray()!;
         model.Rooms = entity.Rooms.Select(x => RoomMappingRegister.MapEntityToModel(x.Room)).ToArray()!;
-        model.ValidationMessages = entity.ValidationMessages.Select(LessonValidationMessageMappingRegister.MapEntityToModel).ToArray()!;
+        model.Violations = entity.Violations.Select(x => LessonPolicyViolationMappingRegister.MapEntityToModel(x.LessonPolicyViolation)).ToArray()!;
         return model;
     }
 
@@ -38,10 +38,10 @@ public static partial class LessonMappingRegister
         entity!.Date = model.DateWithTimeInterval?.Date;
         entity.TimeFrom = model.DateWithTimeInterval?.TimeInterval.TimeFrom;
         entity.TimeTo = model.DateWithTimeInterval?.TimeInterval.TimeTo;
-        entity.StudentGroups = model.StudentGroups.Select(x => new DbLessonStudentGroup { LessonId = model.Id ?? Guid.Empty, StudentGroupId = x.Id ?? Guid.Empty }).ToArray();
-        entity.Teachers = model.Teachers.Select(x => new DbLessonTeacher { LessonId = model.Id ?? Guid.Empty, TeacherId = x.Id ?? Guid.Empty }).ToArray();
-        entity.Rooms = model.Rooms.Select(x => new DbLessonRoom { LessonId = model.Id ?? Guid.Empty, RoomId = x.Id ?? Guid.Empty }).ToArray();
-        entity.ValidationMessages = model.ValidationMessages.Select(LessonValidationMessageMappingRegister.MapModelToEntity).ToArray()!;
+        entity.StudentGroups = model.StudentGroups.Select(x => new DbLessonStudentGroup { LessonId = model.Id ?? Guid.Empty, StudentGroupId = x.Id ?? Guid.Empty }).ToList();
+        entity.Teachers = model.Teachers.Select(x => new DbLessonTeacher { LessonId = model.Id ?? Guid.Empty, TeacherId = x.Id ?? Guid.Empty }).ToList();
+        entity.Rooms = model.Rooms.Select(x => new DbLessonRoom { LessonId = model.Id ?? Guid.Empty, RoomId = x.Id ?? Guid.Empty }).ToList();
+        entity.Violations = model.Violations.Select(x => new DbLessonPolicyViolationLink { LessonId = model.Id ?? Guid.Empty, LessonPolicyViolationId = x.Id ?? Guid.Empty }).ToList();
         return entity;
     }
 
@@ -56,7 +56,12 @@ public static partial class LessonMappingRegister
         entity.StudentGroups = model.StudentGroups.Select(x => new DbLessonStudentGroup { LessonId = model.Id ?? Guid.Empty, StudentGroupId = x.Id ?? Guid.Empty }).ToList();
         entity.Teachers = model.Teachers.Select(x => new DbLessonTeacher { LessonId = model.Id ?? Guid.Empty, TeacherId = x.Id ?? Guid.Empty }).ToList();
         entity.Rooms = model.Rooms.Select(x => new DbLessonRoom { LessonId = model.Id ?? Guid.Empty, RoomId = x.Id ?? Guid.Empty }).ToList();
-        entity.ValidationMessages = model.ValidationMessages.Select(LessonValidationMessageMappingRegister.MapModelToEntity).ToArray()!;
+        entity.Violations = model.Violations.Select(x => new DbLessonPolicyViolationLink
+        {
+            LessonId = model.Id ?? Guid.Empty,
+            LessonPolicyViolationId = x.Id ?? Guid.Empty,
+            LessonPolicyViolation = LessonPolicyViolationMappingRegister.MapModelToEntity(x)!,
+        }).ToList();
     }
 
     [UserMapping(Default = true)]
@@ -76,7 +81,7 @@ public static partial class LessonMappingRegister
         item.StudentGroupIds = entity.StudentGroups.Select(x => x.StudentGroupId).ToArray();
         item.TeacherIds = entity.Teachers.Select(x => x.TeacherId).ToArray();
         item.RoomIds = entity.Rooms.Select(x => x.RoomId).ToArray();
-        item.ValidationMessages = entity.ValidationMessages.Select(LessonValidationMessageMappingRegister.MapEntityToModel).ToArray()!;
+        item.Violations = entity.Violations.Select(x => LessonPolicyViolationMappingRegister.MapEntityToModel(x.LessonPolicyViolation)).ToArray()!;
         return item;
     }
 
@@ -89,13 +94,13 @@ public static partial class LessonMappingRegister
     [MapperIgnoreSource(nameof(DbLesson.StudentGroups))]
     [MapperIgnoreSource(nameof(DbLesson.Teachers))]
     [MapperIgnoreSource(nameof(DbLesson.Rooms))]
-    [MapperIgnoreSource(nameof(DbLesson.ValidationMessages))]
+    [MapperIgnoreSource(nameof(DbLesson.Violations))]
     [MapperIgnoreTarget(nameof(Lesson.Schedule))]
     [MapperIgnoreTarget(nameof(Lesson.DateWithTimeInterval))]
     [MapperIgnoreTarget(nameof(Lesson.StudentGroups))]
     [MapperIgnoreTarget(nameof(Lesson.Teachers))]
     [MapperIgnoreTarget(nameof(Lesson.Rooms))]
-    [MapperIgnoreTarget(nameof(Lesson.ValidationMessages))]
+    [MapperIgnoreTarget(nameof(Lesson.Violations))]
     private static partial Lesson? AutoMapEntityToModel(DbLesson? entity);
 
     [MapProperty(nameof(Lesson.Schedule), nameof(DbLesson.Schedule), Use = nameof(@ScheduleMappingRegister.MapModelToEntity))]
@@ -104,14 +109,14 @@ public static partial class LessonMappingRegister
     [MapperIgnoreSource(nameof(Lesson.StudentGroups))]
     [MapperIgnoreSource(nameof(Lesson.Teachers))]
     [MapperIgnoreSource(nameof(Lesson.Rooms))]
-    [MapperIgnoreSource(nameof(Lesson.ValidationMessages))]
+    [MapperIgnoreSource(nameof(Lesson.Violations))]
     [MapperIgnoreTarget(nameof(DbLesson.Date))]
     [MapperIgnoreTarget(nameof(DbLesson.TimeFrom))]
     [MapperIgnoreTarget(nameof(DbLesson.TimeTo))]
     [MapperIgnoreTarget(nameof(DbLesson.StudentGroups))]
     [MapperIgnoreTarget(nameof(DbLesson.Teachers))]
     [MapperIgnoreTarget(nameof(DbLesson.Rooms))]
-    [MapperIgnoreTarget(nameof(DbLesson.ValidationMessages))]
+    [MapperIgnoreTarget(nameof(DbLesson.Violations))]
     private static partial DbLesson? AutoMapModelToEntity(Lesson? model);
 
     // [MapProperty(nameof(Lesson.Schedule), nameof(DbLesson.Schedule), Use = nameof(@ScheduleMappingRegister.MapModelToEntity))]
@@ -121,7 +126,7 @@ public static partial class LessonMappingRegister
     [MapperIgnoreSource(nameof(Lesson.StudentGroups))]
     [MapperIgnoreSource(nameof(Lesson.Teachers))]
     [MapperIgnoreSource(nameof(Lesson.Rooms))]
-    [MapperIgnoreSource(nameof(Lesson.ValidationMessages))]
+    [MapperIgnoreSource(nameof(Lesson.Violations))]
     [MapperIgnoreTarget(nameof(DbLesson.Schedule))]
     [MapperIgnoreTarget(nameof(DbLesson.Date))]
     [MapperIgnoreTarget(nameof(DbLesson.TimeFrom))]
@@ -129,7 +134,7 @@ public static partial class LessonMappingRegister
     [MapperIgnoreTarget(nameof(DbLesson.StudentGroups))]
     [MapperIgnoreTarget(nameof(DbLesson.Teachers))]
     [MapperIgnoreTarget(nameof(DbLesson.Rooms))]
-    [MapperIgnoreTarget(nameof(DbLesson.ValidationMessages))]
+    [MapperIgnoreTarget(nameof(DbLesson.Violations))]
     private static partial void AutoUpdateEntityWithModel(Lesson? model, DbLesson? entity);
 
     [MapperIgnoreSource(nameof(DbLesson.ScheduleId))]
@@ -141,11 +146,11 @@ public static partial class LessonMappingRegister
     [MapperIgnoreSource(nameof(DbLesson.StudentGroups))]
     [MapperIgnoreSource(nameof(DbLesson.Teachers))]
     [MapperIgnoreSource(nameof(DbLesson.Rooms))]
-    [MapperIgnoreSource(nameof(DbLesson.ValidationMessages))]
+    [MapperIgnoreSource(nameof(DbLesson.Violations))]
     [MapperIgnoreTarget(nameof(LessonRegistryItem.DateWithTimeInterval))]
     [MapperIgnoreTarget(nameof(LessonRegistryItem.StudentGroupIds))]
     [MapperIgnoreTarget(nameof(LessonRegistryItem.TeacherIds))]
     [MapperIgnoreTarget(nameof(LessonRegistryItem.RoomIds))]
-    [MapperIgnoreTarget(nameof(LessonRegistryItem.ValidationMessages))]
+    [MapperIgnoreTarget(nameof(LessonRegistryItem.Violations))]
     private static partial LessonRegistryItem? AutoMapEntityToRegistryItem(DbLesson? entity);
 }

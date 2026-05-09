@@ -39,7 +39,7 @@ public class ScheduleService(
         {
             validationMessages.Add(new ValidationMessage("Не допускается отсутствие названия"));
         }
-        if (scheduleSaveDto.Id.HasValue && !(await scheduleRepository.ExistsAsync(scheduleSaveDto.Id!.Value)))
+        if (scheduleSaveDto.Id.HasValue && !await scheduleRepository.ExistsAsync(scheduleSaveDto.Id!.Value))
         {
             validationMessages.Add(new ValidationMessage("Не найден проект расписания для обновления"));
         }

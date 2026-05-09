@@ -23,8 +23,8 @@ public static partial class StudentGroupMappingRegister
     {
         var entity = AutoMapModelToEntity(model);
         if (model == null) return entity;
-        entity!.Children = model.Children.Select(x => new DbStudentGroupLink { ParentStudentGroupId = model.Id ?? Guid.Empty, ChildStudentGroupId = x.Id ?? Guid.Empty }).ToArray();
-        entity.Parents = model.Parents.Select(x =>new DbStudentGroupLink { ParentStudentGroupId = x.Id ?? Guid.Empty, ChildStudentGroupId = model.Id ?? Guid.Empty }).ToArray();
+        entity!.Children = model.Children.Select(x => new DbStudentGroupLink { ParentStudentGroupId = model.Id ?? Guid.Empty, ChildStudentGroupId = x.Id ?? Guid.Empty }).ToList();
+        entity.Parents = model.Parents.Select(x =>new DbStudentGroupLink { ParentStudentGroupId = x.Id ?? Guid.Empty, ChildStudentGroupId = model.Id ?? Guid.Empty }).ToList();
         return entity;
     }
 
@@ -33,8 +33,8 @@ public static partial class StudentGroupMappingRegister
     {
         AutoUpdateEntityWithModel(model, entity);
         if (model == null) return;
-        entity!.Children = model.Children.Select(x => new DbStudentGroupLink { ParentStudentGroupId = model.Id ?? Guid.Empty, ChildStudentGroupId = x.Id ?? Guid.Empty }).ToArray();
-        entity.Parents = model.Parents.Select(x =>new DbStudentGroupLink { ParentStudentGroupId = x.Id ?? Guid.Empty, ChildStudentGroupId = model.Id ?? Guid.Empty }).ToArray();
+        entity!.Children = model.Children.Select(x => new DbStudentGroupLink { ParentStudentGroupId = model.Id ?? Guid.Empty, ChildStudentGroupId = x.Id ?? Guid.Empty }).ToList();
+        entity.Parents = model.Parents.Select(x =>new DbStudentGroupLink { ParentStudentGroupId = x.Id ?? Guid.Empty, ChildStudentGroupId = model.Id ?? Guid.Empty }).ToList();
     }
 
     [UserMapping(Default = true)]

@@ -11,10 +11,7 @@ public static class StringExtensions
 
     private static string ChangeCase(this string text, char delimiter)
     {
-        if (text == null)
-        {
-            throw new ArgumentNullException(nameof(text));
-        }
+        ArgumentNullException.ThrowIfNull(text);
 
         if (text.Length < 2)
         {

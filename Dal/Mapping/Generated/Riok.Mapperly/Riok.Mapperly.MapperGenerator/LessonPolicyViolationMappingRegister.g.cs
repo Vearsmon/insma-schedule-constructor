@@ -2,48 +2,15 @@
 #nullable enable
 namespace Dal.Mapping
 {
-    public static partial class LessonValidationMessageMappingRegister
+    public static partial class LessonPolicyViolationMappingRegister
     {
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(entity))]
-        public static partial global::Domain.Models.LessonValidationMessage? MapEntityToModel(global::Dal.Entities.DbLessonValidationMessage? entity)
-        {
-            if (entity == null)
-                return default;
-            var target = new global::Domain.Models.LessonValidationMessage();
-            target.Id = entity.Id;
-            target.LessonId = entity.LessonId;
-            target.ErrorType = entity.ErrorType;
-            target.Code = entity.Code;
-            target.Payload.AffectedByAcademicDisciplineId = entity.AffectedByAcademicDisciplineId;
-            target.Payload.AffectedByAcademicDiscipline = global::Dal.Mapping.AcademicDisciplineMappingRegister.MapEntityToModel(entity.AffectedByAcademicDiscipline);
-            target.Payload.AffectedByAcademicDisciplineType = entity.AffectedByAcademicDisciplineType;
-            target.Payload.AffectedByStudentGroupId = entity.AffectedByStudentGroupId;
-            target.Payload.AffectedByStudentGroup = global::Dal.Mapping.StudentGroupMappingRegister.MapEntityToModel(entity.AffectedByStudentGroup);
-            target.Payload.AffectedByLessonId = entity.AffectedByLessonId;
-            target.Payload.AffectedByLesson = global::Dal.Mapping.LessonMappingRegister.MapEntityToModel(entity.AffectedByLesson);
-            target.Payload.AffectedByTeacherPreferenceId = entity.AffectedByTeacherPreferenceId;
-            target.Payload.AffectedByTeacherPreference = global::Dal.Mapping.TeacherPreferenceMappingRegister.MapEntityToModel(entity.AffectedByTeacherPreference);
-            target.Payload.AffectedByTeacherId = entity.AffectedByTeacherId;
-            if (entity.AffectedByTeacher != null)
-            {
-                target.Payload.AffectedByTeacher = MapToTeacher(entity.AffectedByTeacher);
-            }
-            else
-            {
-                target.Payload.AffectedByTeacher = null;
-            }
-            target.Message = entity.Message;
-            return target;
-        }
-
-        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
         [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(model))]
-        public static partial global::Dal.Entities.DbLessonValidationMessage? MapModelToEntity(global::Domain.Models.LessonValidationMessage? model)
+        public static partial global::Dal.Entities.DbLessonPolicyViolation? MapModelToEntity(global::Domain.Models.LessonPolicyViolation? model)
         {
             if (model == null)
                 return default;
-            var target = new global::Dal.Entities.DbLessonValidationMessage();
+            var target = new global::Dal.Entities.DbLessonPolicyViolation();
             if (model.Id != null)
             {
                 target.Id = model.Id.Value;
@@ -69,12 +36,11 @@ namespace Dal.Mapping
             }
             target.AffectedByTeacherPreferenceId = model.Payload.AffectedByTeacherPreferenceId;
             target.AffectedByTeacherPreference = global::Dal.Mapping.TeacherPreferenceMappingRegister.MapModelToEntity(model.Payload.AffectedByTeacherPreference);
-            target.Message = model.Message;
             return target;
         }
 
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        public static partial void UpdateEntityWithModel(global::Domain.Models.LessonValidationMessage? model, global::Dal.Entities.DbLessonValidationMessage? entity)
+        public static partial void UpdateEntityWithModel(global::Domain.Models.LessonPolicyViolation? model, global::Dal.Entities.DbLessonPolicyViolation? entity)
         {
             if (model == null || entity == null)
                 return;
@@ -103,16 +69,19 @@ namespace Dal.Mapping
             }
             entity.AffectedByTeacherPreferenceId = model.Payload.AffectedByTeacherPreferenceId;
             entity.AffectedByTeacherPreference = global::Dal.Mapping.TeacherPreferenceMappingRegister.MapModelToEntity(model.Payload.AffectedByTeacherPreference);
-            entity.Message = model.Message;
         }
 
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        private static global::Domain.Models.Teacher MapToTeacher(global::Dal.Entities.DbTeacher source)
+        [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(entity))]
+        private static partial global::Domain.Models.LessonPolicyViolation? AutoMapEntityToModel(global::Dal.Entities.DbLessonPolicyViolation? entity)
         {
-            var target = new global::Domain.Models.Teacher();
-            target.Id = source.Id;
-            target.Fullname = source.Fullname;
-            target.Contacts = source.Contacts;
+            if (entity == null)
+                return default;
+            var target = new global::Domain.Models.LessonPolicyViolation();
+            target.Id = entity.Id;
+            target.LessonId = entity.LessonId;
+            target.ErrorType = entity.ErrorType;
+            target.Code = entity.Code;
             return target;
         }
 

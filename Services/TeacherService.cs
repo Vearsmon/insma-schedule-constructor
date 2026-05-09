@@ -46,7 +46,7 @@ public class TeacherService(
         {
             validationMessages.Add(new ValidationMessage("Не допускается отсутствие имени"));
         }
-        if (teacherSaveDto.Id.HasValue && !(await teacherRepository.ExistsAsync(teacherSaveDto.Id!.Value)))
+        if (teacherSaveDto.Id.HasValue && !await teacherRepository.ExistsAsync(teacherSaveDto.Id!.Value))
         {
             validationMessages.Add(new ValidationMessage("Не найден преподаватель для обновления"));
         }

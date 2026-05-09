@@ -91,12 +91,12 @@ public class LessonServiceTests
 
         // Assert
         Assert.Equal(2, actualLessons.Count);
-        Assert.Equal(2, actualLessons.First().ValidationMessages.Length);
-        Assert.Contains(actualLessons.First().ValidationMessages,
-            x => x.Code == LessonValidationCode.MismatchedSemesterNumber);
-        Assert.Single(actualLessons.Last().ValidationMessages);
-        Assert.Contains(actualLessons.Last().ValidationMessages,
-            x => x.Code == LessonValidationCode.MismatchedAcademicDisciplineType);
+        Assert.Equal(2, actualLessons.First().Violations.Length);
+        Assert.Contains(actualLessons.First().Violations,
+            x => x.Code == LessonPolicyViolationCode.MismatchedSemesterNumber);
+        Assert.Single(actualLessons.Last().Violations);
+        Assert.Contains(actualLessons.Last().Violations,
+            x => x.Code == LessonPolicyViolationCode.MismatchedAcademicDisciplineType);
     }
 
     [Fact]
@@ -162,11 +162,7 @@ public class LessonServiceTests
             });
 
         _lessonValidationServiceMock.Setup(x => x.ValidateAsync(It.IsAny<Lesson>()))
-            .ReturnsAsync(new LessonValidationResult
-            {
-                Messages = [],
-                LessonsWithConflictById = new Dictionary<Guid, Lesson>(),
-            });
+            .ReturnsAsync([]);
 
         var service = CreateService();
 
@@ -258,11 +254,7 @@ public class LessonServiceTests
                 });
 
         _lessonValidationServiceMock.Setup(x => x.ValidateAsync(It.IsAny<Lesson>()))
-            .ReturnsAsync(new LessonValidationResult
-            {
-                Messages = [],
-                LessonsWithConflictById = new Dictionary<Guid, Lesson>(),
-            });
+            .ReturnsAsync([]);
 
         var service = CreateService();
 
@@ -348,12 +340,12 @@ public class LessonServiceTests
 
         // Assert
         Assert.Equal(2, actualLessons.Count);
-        Assert.Single(actualLessons.First().ValidationMessages);
-        Assert.Contains(actualLessons.First().ValidationMessages,
-            x => x.Code == LessonValidationCode.RestrictedTimeTeacherPreferenceTypeConflict);
-        Assert.Single(actualLessons.Last().ValidationMessages);
-        Assert.Contains(actualLessons.Last().ValidationMessages,
-            x => x.Code == LessonValidationCode.RestrictedRoomTeacherPreferenceTypeConflict);
+        Assert.Single(actualLessons.First().Violations);
+        Assert.Contains(actualLessons.First().Violations,
+            x => x.Code == LessonPolicyViolationCode.RestrictedTimeTeacherPreferenceTypeConflict);
+        Assert.Single(actualLessons.Last().Violations);
+        Assert.Contains(actualLessons.Last().Violations,
+            x => x.Code == LessonPolicyViolationCode.RestrictedRoomTeacherPreferenceTypeConflict);
     }
 
     [Fact]
@@ -379,7 +371,7 @@ public class LessonServiceTests
             .Create();
 
         _studentGroupRepositoryMock.Setup(r => r.GetStudentGroupTreeIdsAsync(new[] { studentGroup.Id!.Value }))
-            .ReturnsAsync(new Dictionary<Guid, List<Guid>>()
+            .ReturnsAsync(new Dictionary<Guid, List<Guid>>
             {
                 { studentGroup.Id!.Value, [studentGroup.Id!.Value, firstStudentGroupId, secondStudentGroupId] }
             });
@@ -466,26 +458,26 @@ public class LessonServiceTests
         // Assert
         Assert.Equal(4, actualLessons.Count);
 
-        Assert.Single(actualLessons.First().ValidationMessages);
-        Assert.Contains(actualLessons.First().ValidationMessages,
-            x => x.Code == LessonValidationCode.MismatchedSemesterNumber);
+        Assert.Single(actualLessons.First().Violations);
+        Assert.Contains(actualLessons.First().Violations,
+            x => x.Code == LessonPolicyViolationCode.MismatchedSemesterNumber);
 
-        Assert.Single(actualLessons[1].ValidationMessages);
-        Assert.Contains(actualLessons[1].ValidationMessages, x =>
-            x.Code == LessonValidationCode.FixedLessonTypeConflictByGroup &&
+        Assert.Single(actualLessons[1].Violations);
+        Assert.Contains(actualLessons[1].Violations, x =>
+            x.Code == LessonPolicyViolationCode.FixedLessonTypeConflictByGroup &&
             x.Payload.AffectedByLessonId == secondExpectedLessonId);
 
-        Assert.Equal(2, actualLessons[2].ValidationMessages.Length);
-        Assert.Contains(actualLessons[2].ValidationMessages, x =>
-            x.Code == LessonValidationCode.FixedLessonTypeConflictByGroup &&
+        Assert.Equal(2, actualLessons[2].Violations.Length);
+        Assert.Contains(actualLessons[2].Violations, x =>
+            x.Code == LessonPolicyViolationCode.FixedLessonTypeConflictByGroup &&
             x.Payload.AffectedByLessonId == firstExpectedLessonId);
-        Assert.Contains(actualLessons[2].ValidationMessages, x =>
-            x.Code == LessonValidationCode.FixedLessonTypeConflictByGroup &&
+        Assert.Contains(actualLessons[2].Violations, x =>
+            x.Code == LessonPolicyViolationCode.FixedLessonTypeConflictByGroup &&
             x.Payload.AffectedByLessonId == thirdExpectedLessonId);
 
-        Assert.Single(actualLessons[3].ValidationMessages);
-        Assert.Contains(actualLessons[3].ValidationMessages, x =>
-            x.Code == LessonValidationCode.FixedLessonTypeConflictByGroup &&
+        Assert.Single(actualLessons[3].Violations);
+        Assert.Contains(actualLessons[3].Violations, x =>
+            x.Code == LessonPolicyViolationCode.FixedLessonTypeConflictByGroup &&
             x.Payload.AffectedByLessonId == secondExpectedLessonId);
     }
 }

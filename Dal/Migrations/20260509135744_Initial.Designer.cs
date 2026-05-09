@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Dal.Migrations
 {
     [DbContext(typeof(InsmaScheduleContext))]
-    [Migration("20260507103558_Initial")]
+    [Migration("20260509135744_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -213,26 +213,6 @@ namespace Dal.Migrations
                         .HasColumnType("text")
                         .HasColumnName("day_of_week_time_intervals");
 
-                    b.Property<Guid?>("DbAcademicDisciplineId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("academic_discipline_id");
-
-                    b.Property<Guid?>("DbAcademicDisciplineId1")
-                        .HasColumnType("uuid")
-                        .HasColumnName("academic_discipline_id1");
-
-                    b.Property<Guid?>("DbAcademicDisciplineId2")
-                        .HasColumnType("uuid")
-                        .HasColumnName("academic_discipline_id2");
-
-                    b.Property<Guid?>("DbAcademicDisciplineId3")
-                        .HasColumnType("uuid")
-                        .HasColumnName("academic_discipline_id3");
-
-                    b.Property<Guid?>("DbAcademicDisciplineId4")
-                        .HasColumnType("uuid")
-                        .HasColumnName("academic_discipline_id4");
-
                     b.Property<int?>("HoursCost")
                         .HasColumnType("integer")
                         .HasColumnName("hours_cost");
@@ -242,23 +222,43 @@ namespace Dal.Migrations
                         .HasColumnType("text")
                         .HasColumnName("repeat_type");
 
+                    b.Property<Guid?>("exam_academic_discipline_id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("exam_academic_discipline_id");
+
+                    b.Property<Guid?>("lab_academic_discipline_id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("lab_academic_discipline_id");
+
+                    b.Property<Guid?>("lecture_academic_discipline_id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("lecture_academic_discipline_id");
+
+                    b.Property<Guid?>("practice_academic_discipline_id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("practice_academic_discipline_id");
+
+                    b.Property<Guid?>("test_academic_discipline_id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("test_academic_discipline_id");
+
                     b.HasKey("Id")
                         .HasName("pk_lesson_batch_info");
 
-                    b.HasIndex("DbAcademicDisciplineId")
-                        .HasDatabaseName("ix_lesson_batch_info_db_academic_discipline_id");
+                    b.HasIndex("exam_academic_discipline_id")
+                        .HasDatabaseName("ix_lesson_batch_info_exam_academic_discipline_id");
 
-                    b.HasIndex("DbAcademicDisciplineId1")
-                        .HasDatabaseName("ix_lesson_batch_info_db_academic_discipline_id1");
+                    b.HasIndex("lab_academic_discipline_id")
+                        .HasDatabaseName("ix_lesson_batch_info_lab_academic_discipline_id");
 
-                    b.HasIndex("DbAcademicDisciplineId2")
-                        .HasDatabaseName("ix_lesson_batch_info_db_academic_discipline_id2");
+                    b.HasIndex("lecture_academic_discipline_id")
+                        .HasDatabaseName("ix_lesson_batch_info_lecture_academic_discipline_id");
 
-                    b.HasIndex("DbAcademicDisciplineId3")
-                        .HasDatabaseName("ix_lesson_batch_info_db_academic_discipline_id3");
+                    b.HasIndex("practice_academic_discipline_id")
+                        .HasDatabaseName("ix_lesson_batch_info_practice_academic_discipline_id");
 
-                    b.HasIndex("DbAcademicDisciplineId4")
-                        .HasDatabaseName("ix_lesson_batch_info_db_academic_discipline_id4");
+                    b.HasIndex("test_academic_discipline_id")
+                        .HasDatabaseName("ix_lesson_batch_info_test_academic_discipline_id");
 
                     b.ToTable("lesson_batch_info", (string)null);
                 });
@@ -320,6 +320,95 @@ namespace Dal.Migrations
                     b.ToTable("lesson_batch_info_teacher", (string)null);
                 });
 
+            modelBuilder.Entity("Dal.Entities.DbLessonPolicyViolation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid?>("AffectedByAcademicDisciplineId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("affected_by_academic_discipline_id");
+
+                    b.Property<string>("AffectedByAcademicDisciplineType")
+                        .HasColumnType("text")
+                        .HasColumnName("affected_by_academic_discipline_type");
+
+                    b.Property<Guid?>("AffectedByLessonId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("affected_by_lesson_id");
+
+                    b.Property<Guid?>("AffectedByStudentGroupId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("affected_by_student_group_id");
+
+                    b.Property<Guid?>("AffectedByTeacherId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("affected_by_teacher_id");
+
+                    b.Property<Guid?>("AffectedByTeacherPreferenceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("affected_by_teacher_preference_id");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("code");
+
+                    b.Property<string>("ErrorType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("error_type");
+
+                    b.Property<Guid>("LessonId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("lesson_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_lesson_policy_violation");
+
+                    b.HasIndex("AffectedByAcademicDisciplineId")
+                        .HasDatabaseName("ix_lesson_policy_violation_affected_by_academic_discipline_id");
+
+                    b.HasIndex("AffectedByLessonId")
+                        .HasDatabaseName("ix_lesson_policy_violation_affected_by_lesson_id");
+
+                    b.HasIndex("AffectedByStudentGroupId")
+                        .HasDatabaseName("ix_lesson_policy_violation_affected_by_student_group_id");
+
+                    b.HasIndex("AffectedByTeacherId")
+                        .HasDatabaseName("ix_lesson_policy_violation_affected_by_teacher_id");
+
+                    b.HasIndex("AffectedByTeacherPreferenceId")
+                        .HasDatabaseName("ix_lesson_policy_violation_affected_by_teacher_preference_id");
+
+                    b.HasIndex("LessonId")
+                        .HasDatabaseName("ix_lesson_policy_violation_lesson_id");
+
+                    b.ToTable("lesson_policy_violation", (string)null);
+                });
+
+            modelBuilder.Entity("Dal.Entities.DbLessonPolicyViolationLink", b =>
+                {
+                    b.Property<Guid>("LessonId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("lesson_id");
+
+                    b.Property<Guid>("LessonPolicyViolationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("lesson_policy_violation_id");
+
+                    b.HasKey("LessonId", "LessonPolicyViolationId")
+                        .HasName("pk_lesson_policy_violation_link");
+
+                    b.HasIndex("LessonPolicyViolationId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_lesson_policy_violation_link_lesson_policy_violation_id");
+
+                    b.ToTable("lesson_policy_violation_link", (string)null);
+                });
+
             modelBuilder.Entity("Dal.Entities.DbLessonRoom", b =>
                 {
                     b.Property<Guid>("LessonId")
@@ -375,81 +464,6 @@ namespace Dal.Migrations
                         .HasDatabaseName("ix_lesson_teacher_teacher_id");
 
                     b.ToTable("lesson_teacher", (string)null);
-                });
-
-            modelBuilder.Entity("Dal.Entities.DbLessonValidationMessage", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<Guid?>("AffectedByAcademicDisciplineId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("affected_by_academic_discipline_id");
-
-                    b.Property<string>("AffectedByAcademicDisciplineType")
-                        .HasColumnType("text")
-                        .HasColumnName("affected_by_academic_discipline_type");
-
-                    b.Property<Guid?>("AffectedByLessonId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("affected_by_lesson_id");
-
-                    b.Property<Guid?>("AffectedByStudentGroupId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("affected_by_student_group_id");
-
-                    b.Property<Guid?>("AffectedByTeacherId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("affected_by_teacher_id");
-
-                    b.Property<Guid?>("AffectedByTeacherPreferenceId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("affected_by_teacher_preference_id");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("code");
-
-                    b.Property<string>("ErrorType")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("error_type");
-
-                    b.Property<Guid>("LessonId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("lesson_id");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasMaxLength(512)
-                        .HasColumnType("character varying(512)")
-                        .HasColumnName("message");
-
-                    b.HasKey("Id")
-                        .HasName("pk_lesson_validation_message");
-
-                    b.HasIndex("AffectedByAcademicDisciplineId")
-                        .HasDatabaseName("ix_lesson_validation_message_affected_by_academic_discipline_id");
-
-                    b.HasIndex("AffectedByLessonId")
-                        .HasDatabaseName("ix_lesson_validation_message_affected_by_lesson_id");
-
-                    b.HasIndex("AffectedByStudentGroupId")
-                        .HasDatabaseName("ix_lesson_validation_message_affected_by_student_group_id");
-
-                    b.HasIndex("AffectedByTeacherId")
-                        .HasDatabaseName("ix_lesson_validation_message_affected_by_teacher_id");
-
-                    b.HasIndex("AffectedByTeacherPreferenceId")
-                        .HasDatabaseName("ix_lesson_validation_message_affected_by_teacher_preference_id");
-
-                    b.HasIndex("LessonId")
-                        .HasDatabaseName("ix_lesson_validation_message_lesson_id");
-
-                    b.ToTable("lesson_validation_message", (string)null);
                 });
 
             modelBuilder.Entity("Dal.Entities.DbRoom", b =>
@@ -754,31 +768,31 @@ namespace Dal.Migrations
                 {
                     b.HasOne("Dal.Entities.DbAcademicDiscipline", null)
                         .WithMany("AcademicDisciplineExamLessonBatchInfos")
-                        .HasForeignKey("DbAcademicDisciplineId")
+                        .HasForeignKey("exam_academic_discipline_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .HasConstraintName("fk_lesson_batch_info_exam");
 
                     b.HasOne("Dal.Entities.DbAcademicDiscipline", null)
                         .WithMany("AcademicDisciplineLabLessonBatchInfos")
-                        .HasForeignKey("DbAcademicDisciplineId1")
+                        .HasForeignKey("lab_academic_discipline_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .HasConstraintName("fk_lesson_batch_info_lab");
 
                     b.HasOne("Dal.Entities.DbAcademicDiscipline", null)
                         .WithMany("AcademicDisciplineLectureLessonBatchInfos")
-                        .HasForeignKey("DbAcademicDisciplineId2")
+                        .HasForeignKey("lecture_academic_discipline_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .HasConstraintName("fk_lesson_batch_info_lecture");
 
                     b.HasOne("Dal.Entities.DbAcademicDiscipline", null)
                         .WithMany("AcademicDisciplinePracticeLessonBatchInfos")
-                        .HasForeignKey("DbAcademicDisciplineId3")
+                        .HasForeignKey("practice_academic_discipline_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .HasConstraintName("fk_lesson_batch_info_practice");
 
                     b.HasOne("Dal.Entities.DbAcademicDiscipline", null)
                         .WithMany("AcademicDisciplineTestLessonBatchInfos")
-                        .HasForeignKey("DbAcademicDisciplineId4")
+                        .HasForeignKey("test_academic_discipline_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .HasConstraintName("fk_lesson_batch_info_test");
                 });
@@ -846,6 +860,79 @@ namespace Dal.Migrations
                     b.Navigation("Teacher");
                 });
 
+            modelBuilder.Entity("Dal.Entities.DbLessonPolicyViolation", b =>
+                {
+                    b.HasOne("Dal.Entities.DbAcademicDiscipline", "AffectedByAcademicDiscipline")
+                        .WithMany()
+                        .HasForeignKey("AffectedByAcademicDisciplineId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_lesson_policy_violation_academic_discipline_affected_by_aca");
+
+                    b.HasOne("Dal.Entities.DbLesson", "AffectedByLesson")
+                        .WithMany()
+                        .HasForeignKey("AffectedByLessonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_lesson_policy_violation_lesson_affected_by_lesson_id");
+
+                    b.HasOne("Dal.Entities.DbStudentGroup", "AffectedByStudentGroup")
+                        .WithMany()
+                        .HasForeignKey("AffectedByStudentGroupId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_lesson_policy_violation_db_student_group_affected_by_studen");
+
+                    b.HasOne("Dal.Entities.DbTeacher", "AffectedByTeacher")
+                        .WithMany()
+                        .HasForeignKey("AffectedByTeacherId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_lesson_policy_violation_db_teacher_affected_by_teacher_id");
+
+                    b.HasOne("Dal.Entities.DbTeacherPreference", "AffectedByTeacherPreference")
+                        .WithMany()
+                        .HasForeignKey("AffectedByTeacherPreferenceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_lesson_policy_violation_db_teacher_preference_affected_by_t");
+
+                    b.HasOne("Dal.Entities.DbLesson", "Lesson")
+                        .WithMany()
+                        .HasForeignKey("LessonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_lesson_policy_violation_lesson_lesson_id");
+
+                    b.Navigation("AffectedByAcademicDiscipline");
+
+                    b.Navigation("AffectedByLesson");
+
+                    b.Navigation("AffectedByStudentGroup");
+
+                    b.Navigation("AffectedByTeacher");
+
+                    b.Navigation("AffectedByTeacherPreference");
+
+                    b.Navigation("Lesson");
+                });
+
+            modelBuilder.Entity("Dal.Entities.DbLessonPolicyViolationLink", b =>
+                {
+                    b.HasOne("Dal.Entities.DbLesson", "Lesson")
+                        .WithMany("Violations")
+                        .HasForeignKey("LessonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_lesson_policy_violation_link_lesson_lesson_id");
+
+                    b.HasOne("Dal.Entities.DbLessonPolicyViolation", "LessonPolicyViolation")
+                        .WithOne()
+                        .HasForeignKey("Dal.Entities.DbLessonPolicyViolationLink", "LessonPolicyViolationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_lesson_policy_violation_link_lesson_policy_violation_lesson");
+
+                    b.Navigation("Lesson");
+
+                    b.Navigation("LessonPolicyViolation");
+                });
+
             modelBuilder.Entity("Dal.Entities.DbLessonRoom", b =>
                 {
                     b.HasOne("Dal.Entities.DbLesson", "Lesson")
@@ -907,58 +994,6 @@ namespace Dal.Migrations
                     b.Navigation("Lesson");
 
                     b.Navigation("Teacher");
-                });
-
-            modelBuilder.Entity("Dal.Entities.DbLessonValidationMessage", b =>
-                {
-                    b.HasOne("Dal.Entities.DbAcademicDiscipline", "AffectedByAcademicDiscipline")
-                        .WithMany()
-                        .HasForeignKey("AffectedByAcademicDisciplineId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("fk_lesson_validation_message_academic_discipline_affected_by_a");
-
-                    b.HasOne("Dal.Entities.DbLesson", "AffectedByLesson")
-                        .WithMany()
-                        .HasForeignKey("AffectedByLessonId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("fk_lesson_validation_message_lesson_affected_by_lesson_id");
-
-                    b.HasOne("Dal.Entities.DbStudentGroup", "AffectedByStudentGroup")
-                        .WithMany()
-                        .HasForeignKey("AffectedByStudentGroupId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("fk_lesson_validation_message_db_student_group_affected_by_stud");
-
-                    b.HasOne("Dal.Entities.DbTeacher", "AffectedByTeacher")
-                        .WithMany()
-                        .HasForeignKey("AffectedByTeacherId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("fk_lesson_validation_message_db_teacher_affected_by_teacher_id");
-
-                    b.HasOne("Dal.Entities.DbTeacherPreference", "AffectedByTeacherPreference")
-                        .WithMany()
-                        .HasForeignKey("AffectedByTeacherPreferenceId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("fk_lesson_validation_message_db_teacher_preference_affected_by");
-
-                    b.HasOne("Dal.Entities.DbLesson", "Lesson")
-                        .WithMany("ValidationMessages")
-                        .HasForeignKey("LessonId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_lesson_validation_message_lesson_lesson_id");
-
-                    b.Navigation("AffectedByAcademicDiscipline");
-
-                    b.Navigation("AffectedByLesson");
-
-                    b.Navigation("AffectedByStudentGroup");
-
-                    b.Navigation("AffectedByTeacher");
-
-                    b.Navigation("AffectedByTeacherPreference");
-
-                    b.Navigation("Lesson");
                 });
 
             modelBuilder.Entity("Dal.Entities.DbRoom", b =>
@@ -1077,7 +1112,7 @@ namespace Dal.Migrations
 
                     b.Navigation("Teachers");
 
-                    b.Navigation("ValidationMessages");
+                    b.Navigation("Violations");
                 });
 
             modelBuilder.Entity("Dal.Entities.DbLessonBatchInfo", b =>

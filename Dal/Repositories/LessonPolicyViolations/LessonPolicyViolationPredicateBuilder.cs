@@ -3,13 +3,13 @@ using Dal.Entities;
 using Dal.Helpers;
 using Domain.Models.SearchModels;
 
-namespace Dal.Repositories.LessonValidationMessages;
+namespace Dal.Repositories.LessonPolicyViolations;
 
-public class LessonValidationMessagePredicateBuilder : IPredicateBuilder<DbLessonValidationMessage, LessonValidationMessageSearchModel>
+public class LessonPolicyViolationPredicateBuilder : IPredicateBuilder<DbLessonPolicyViolation, LessonPolicyViolationSearchModel>
 {
-    public Expression<Func<DbLessonValidationMessage, bool>> Predicate { get; } = PredicateBuilderExtensions.True<DbLessonValidationMessage>();
+    public Expression<Func<DbLessonPolicyViolation, bool>> Predicate { get; } = PredicateBuilderExtensions.True<DbLessonPolicyViolation>();
 
-    public Expression<Func<DbLessonValidationMessage, bool>> Build(LessonValidationMessageSearchModel searchModel)
+    public Expression<Func<DbLessonPolicyViolation, bool>> Build(LessonPolicyViolationSearchModel searchModel)
     {
         return Predicate
                 .AndIf(searchModel.AffectedByLessonIds.Length > 0, f => f.AffectedByLessonId.HasValue && searchModel.AffectedByLessonIds.Contains(f.AffectedByLessonId!.Value))

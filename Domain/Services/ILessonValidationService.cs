@@ -6,59 +6,58 @@ namespace Domain.Services;
 
 public interface ILessonValidationService
 {
-    Task<LessonValidationResult> ValidateAsync(Lesson lesson);
+    Task<LessonPolicyViolation[]> ValidateAsync(Lesson lesson);
 
-    void BuildValidationMessages(List<LessonValidationMessage> lessonValidationMessages,
+    void BuildPolicyViolations(List<LessonPolicyViolation> lessonPolicyViolations,
         Dictionary<Guid, List<Guid>> studentGroupHierarchyIdsByStudentGroupId,
         Lesson[] conflictingLessons,
         Lesson? lesson,
         Guid[] teacherIds,
         Guid[] roomIds,
         TeacherPreference[] conflictingTeacherPreferences,
-        Dictionary<Guid, List<LessonValidationMessage>?>? affectedLessonNewValidationMessagesByLessonId,
         bool includeTiming = false);
 
     Task<LessonSeriesConflictDto[]> FillValidationMessages(Lesson[] lessons);
 
-    public void ValidateAcademicDisciplineStudentGroupMatch(List<LessonValidationMessage> validationMessages,
-        AcademicDiscipline saveDtoAcademicDiscipline,
-        StudentGroup[] saveDtoStudentGroups);
+    public void ValidateAcademicDisciplineStudentGroupMatch(Lesson? lesson,
+        List<LessonPolicyViolation> violations,
+        AcademicDiscipline academicDiscipline,
+        StudentGroup[] studentGroups);
 
-    public void ValidateAcademicDisciplineTypeMatch(List<LessonValidationMessage> validationMessages,
-        AcademicDiscipline saveDtoAcademicDiscipline,
+    public void ValidateAcademicDisciplineTypeMatch(Lesson? lesson,
+        List<LessonPolicyViolation> violations,
+        AcademicDiscipline academicDiscipline,
         AcademicDisciplineType lessonAcademicDisciplineType);
 
     void ValidateLessonConflictByGroup(Lesson? lesson,
         Lesson[] conflictingByGroupLessons,
-        List<LessonValidationMessage> validationMessages,
-        Dictionary<Guid, List<LessonValidationMessage>?>? affectedLessonNewValidationMessagesByLessonId,
+        List<LessonPolicyViolation> violations,
         Guid[] hierarchyIds,
         bool includeTiming = false);
 
-    void ValidateLessonConflictByTeacher(Guid? lessonId,
-        LessonFlexibilityType? lessonFlexibilityType,
+    void ValidateLessonConflictByTeacher(
+        Lesson? lesson,
         Guid[] teacherIds,
         Lesson[] conflictingByTeacherLessons,
-        List<LessonValidationMessage> validationMessages,
-        Dictionary<Guid, List<LessonValidationMessage>?>? affectedLessonNewValidationMessagesByLessonId,
+        List<LessonPolicyViolation> violations,
         bool includeTiming = false);
 
     void ValidateTeacherPreferenceConflict(
+        Lesson? lesson,
         TeacherPreference[] conflictingTeacherPreferences,
-        List<LessonValidationMessage> validationMessages,
+        List<LessonPolicyViolation> violations,
         bool includeTiming = false);
 
     void ValidateLessonConflictByRoom(Lesson? lesson,
         Guid[] roomIds,
         Lesson[] conflictingByRoomLessons,
-        List<LessonValidationMessage> validationMessages,
-        Dictionary<Guid, List<LessonValidationMessage>?>? affectedLessonNewValidationMessagesByLessonId,
+        List<LessonPolicyViolation> violations,
         bool includeTiming = false);
 
-    Task<string[]> GetValidationResultMessageAsync(LessonValidationMessage[] validationMessage,
+    Task<string[]> GetValidationResultMessageAsync(LessonPolicyViolation[] violations,
         Lesson? lesson = null, Dictionary<(Guid, Guid, Guid), List<Lesson>>? studentGroupAcademicDisciplineLessonsCache = null);
 
-    Task RemoveValidationMessages(Guid[] lessonIds, LessonValidationCode[] validationCodes);
+    Task RemovePolicyViolations(Guid[] lessonIds, LessonPolicyViolationCode[] validationCodes);
 
-    Task RemoveValidationMessages(Guid academicDisciplineId);
+    Task RemovePolicyViolations(Guid academicDisciplineId);
 }

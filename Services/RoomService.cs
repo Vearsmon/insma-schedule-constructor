@@ -79,11 +79,11 @@ public class RoomService(
         {
             validationMessages.Add(new ValidationMessage("Не допускается отсутствие названия"));
         }
-        if (roomSaveDto.Id.HasValue && !(await roomRepository.ExistsAsync(roomSaveDto.Id!.Value)))
+        if (roomSaveDto.Id.HasValue && !await roomRepository.ExistsAsync(roomSaveDto.Id!.Value))
         {
             validationMessages.Add(new ValidationMessage("Не найдена аудитория для обновления"));
         }
-        if (!(await campusRepository.ExistsAsync(roomSaveDto.CampusId)))
+        if (!await campusRepository.ExistsAsync(roomSaveDto.CampusId))
         {
             validationMessages.Add(new ValidationMessage("Не найден учебный корпус для сохранения аудитории"));
         }

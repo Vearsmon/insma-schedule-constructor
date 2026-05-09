@@ -54,11 +54,8 @@ public static class EnumExtensions
         where TEnum : struct, Enum
     {
         normalizeFunc ??= s => s;
-        return !string.IsNullOrWhiteSpace(input) &&
-            Enum.GetValues(typeof(TEnum))
-                .Cast<TEnum>()
-                .Any(e =>
-                    normalizeFunc.Invoke(e.GetDescription()) == normalizeFunc.Invoke(input));
+        return !string.IsNullOrWhiteSpace(input)
+               && Enum.GetValues<TEnum>().Any(e => normalizeFunc.Invoke(e.GetDescription()) == normalizeFunc.Invoke(input));
     }
 
     public static IEnumerable<TEnum> Values<TEnum>() where TEnum : Enum

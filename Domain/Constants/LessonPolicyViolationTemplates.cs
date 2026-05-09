@@ -1,6 +1,6 @@
 ﻿namespace Domain.Constants;
 
-public static class LessonValidationMessageTemplates
+public static class LessonPolicyViolationTemplates
 {
     public const string MismatchedSemesterNumberTemplate =
         "Занятие по дисциплине \"{0}\" не может преподаваться у группы \"{1}\" (номер семетра группы \"{2}\" отличается от номера семестра дисциплины \"{3}\" в учебном плане).";

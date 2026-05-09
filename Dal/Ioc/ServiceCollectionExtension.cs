@@ -12,7 +12,7 @@ using Dal.Repositories;
 using Dal.Repositories.AcademicDisciplines;
 using Dal.Repositories.Campuses;
 using Dal.Repositories.Lessons;
-using Dal.Repositories.LessonValidationMessages;
+using Dal.Repositories.LessonPolicyViolations;
 using Dal.Repositories.Rooms;
 using Dal.Repositories.Schedules;
 using Dal.Repositories.StudentGroups;
@@ -61,9 +61,9 @@ public static class ServiceCollectionExtension
             .AddScoped<IRegistryRepositoryOrderer<DbLesson, LessonRegistryInternalSearchModel>, LessonRegistryOrderer>()
             .AddScoped<IPredicateBuilder<DbLesson, LessonRegistryInternalSearchModel>, LessonRegistryPredicateBuilder>()
 
-            .AddScoped<ILessonValidationMessageRepository, LessonValidationMessageRepository>()
-            .AddScoped<IRepositoryMapper<DbLessonValidationMessage, LessonValidationMessage>, LessonValidationMessageMapper>()
-            .AddScoped<IPredicateBuilder<DbLessonValidationMessage, LessonValidationMessageSearchModel>, LessonValidationMessagePredicateBuilder>()
+            .AddScoped<ILessonPolicyViolationRepository, LessonPolicyViolationRepository>()
+            .AddScoped<IRepositoryMapper<DbLessonPolicyViolation, LessonPolicyViolation>, LessonPolicyViolationMapper>()
+            .AddScoped<IPredicateBuilder<DbLessonPolicyViolation, LessonPolicyViolationSearchModel>, LessonPolicyViolationPredicateBuilder>()
 
             .AddScoped<IRoomRepository, RoomRepository>()
             .AddScoped<IRepositoryMapper<DbRoom, Room>, RoomMapper>()

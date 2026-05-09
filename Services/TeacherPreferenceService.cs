@@ -74,13 +74,13 @@ public class TeacherPreferenceService(
     public async Task SaveAsync(TeacherPreferenceSaveDto teacherPreferenceSaveDto)
     {
         var validationMessages = new List<ValidationMessage>();
-        if (!(await scheduleRepository.ExistsAsync(teacherPreferenceSaveDto.ScheduleId)))
+        if (!await scheduleRepository.ExistsAsync(teacherPreferenceSaveDto.ScheduleId))
         {
             validationMessages.Add(
                 new ValidationMessage("Не найден проект расписания для сохранения пожеланий преподавателя"));
         }
 
-        if (!(await teacherRepository.ExistsAsync(teacherPreferenceSaveDto.TeacherId)))
+        if (!await teacherRepository.ExistsAsync(teacherPreferenceSaveDto.TeacherId))
         {
             validationMessages.Add(
                 new ValidationMessage("Не найден преподаватель для сохранения пожеланий преподавателя"));

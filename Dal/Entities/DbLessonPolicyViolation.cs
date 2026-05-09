@@ -1,12 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
-using Domain.Models.Enums;
+﻿using Domain.Models.Enums;
 
 namespace Dal.Entities;
 
 /// <summary>
 /// Сообщения валидации
 /// </summary>
-public class DbLessonValidationMessage : IDbEntityWithId
+public class DbLessonPolicyViolation : IDbEntityWithId
 {
     public Guid Id { get; set; }
 
@@ -28,7 +27,7 @@ public class DbLessonValidationMessage : IDbEntityWithId
     /// <summary>
     /// Код ошибки
     /// </summary>
-    public LessonValidationCode Code { get; set; }
+    public LessonPolicyViolationCode Code { get; set; }
 
     /// <summary>
     /// Оказавшая влияние академическая дисциплина
@@ -84,10 +83,4 @@ public class DbLessonValidationMessage : IDbEntityWithId
     /// Оказавшее влияние пожелание преподавателя
     /// </summary>
     public DbTeacherPreference? AffectedByTeacherPreference { get; set; }
-
-    /// <summary>
-    /// Сообщение валидации
-    /// </summary>
-    [MaxLength(512)]
-    public string Message { get; set; } = null!;
 }
