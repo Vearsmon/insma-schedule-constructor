@@ -67,11 +67,14 @@ public class LessonService(
     public async Task SaveAsync(LessonSaveDto lessonSaveDto)
     {
         var lesson = LessonDtoMappingRegister.MapSaveDtoToModel(lessonSaveDto)!;
+        lesson.Id ??= await lessonRepository.SaveAsync(lesson);
         var violations = await lessonValidationService.ValidateAsync(lesson);
         lesson.Violations = lesson.Violations.Concat(violations.Where(x => x.LessonId == (lesson.Id ?? Guid.Empty))).ToArray();
-        var conflictingLessons = await lessonRepository.SelectAsync(violations.Select(x => x.LessonId).ToArray());
+        var conflictingLessons = await lessonRepository.SelectAsync(violations.Where(x => x.LessonId != (lesson.Id ?? Guid.Empty)).Select(x => x.LessonId).Distinct().ToArray());
 
-        var lessonsWithConflict = UpdateLessonsPolicyViolations(violations.ToList(), conflictingLessons);
+        var lessonsWithConflict = UpdateLessonsPolicyViolations(violations.Where(x => x.LessonId != (lesson.Id ?? Guid.Empty)).ToList(), conflictingLessons);
+        await lessonValidationService.DeleteViolationLinksAsync(lessonsWithConflict.SelectMany(x => x.Violations)
+            .Where(x => x.Id.HasValue).Select(x => x.Id!.Value).ToArray());
         await lessonRepository.SaveAllAsync(lessonsWithConflict.Concat([lesson]).ToArray());
     }
 

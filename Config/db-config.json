@@ -2,7 +2,7 @@
   "ConnectionStrings": {
     "InsmaScheduleConstructor": "Server=; Port=; Database=; User Id=; Password=; Connection Idle Lifetime=30; CommandTimeout=30; Maximum Pool Size=10;"
   },
-  "SfsTransactionOptions": {
+  "TransactionOptions": {
     "TransactionTimeoutType": {
       "Default": 120,
       "Maximum": 600

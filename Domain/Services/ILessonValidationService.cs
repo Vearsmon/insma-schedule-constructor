@@ -8,6 +8,8 @@ public interface ILessonValidationService
 {
     Task<LessonPolicyViolation[]> ValidateAsync(Lesson lesson);
 
+    Task DeleteViolationLinksAsync(Guid[] ids);
+
     void BuildPolicyViolations(List<LessonPolicyViolation> lessonPolicyViolations,
         Dictionary<Guid, List<Guid>> studentGroupHierarchyIdsByStudentGroupId,
         Lesson[] conflictingLessons,

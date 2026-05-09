@@ -143,6 +143,11 @@ public class LessonValidationService(
         return lessonPolicyViolations.ToArray();
     }
 
+    public async Task DeleteViolationLinksAsync(Guid[] ids)
+    {
+        await lessonPolicyViolationRepository.DeleteViolationLinksAsync(ids);
+    }
+
     public void BuildPolicyViolations(List<LessonPolicyViolation> lessonPolicyViolations,
         Dictionary<Guid,List<Guid>> studentGroupHierarchyIdsByStudentGroupId,
         Lesson[] conflictingLessons,
