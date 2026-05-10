@@ -81,7 +81,7 @@ public class StudentGroupService(
             validationMessages.Add(new ValidationMessage("При создании потока не может указываться группа-предок"));
         }
 
-        if (studentGroupSaveDto is { StudentGroupType: StudentGroupType.SemiGroup, ChildIds.Length: > 0 })
+        if (studentGroupSaveDto is { StudentGroupType: StudentGroupType.SemiGroup, Children.Length: > 0 })
         {
             validationMessages.Add(
                 new ValidationMessage("При создании подгруппы не могут указываться группы-наследники"));
@@ -104,11 +104,10 @@ public class StudentGroupService(
             }
         }
 
-        var children = Array.Empty<StudentGroup>();
-        var childIds = studentGroupSaveDto.ChildIds.Distinct().ToArray();
+        var childIds = studentGroupSaveDto.Children.Where(x => x.Id.HasValue).Select(x => x.Id!.Value).Distinct().ToArray();
         if (childIds.Length != 0)
         {
-            children = await studentGroupRepository.SelectAsync(childIds);
+            var children = await studentGroupRepository.SelectAsync(childIds);
             if (children.Length != childIds.Length)
             {
                 validationMessages.Add(
@@ -132,7 +131,7 @@ public class StudentGroupService(
 
         StudentGroup studentGroup;
         var id = studentGroupSaveDto.Id;
-        if (studentGroupSaveDto.Id.HasValue)
+        if (id.HasValue)
         {
             studentGroup = await studentGroupRepository.GetAsync(studentGroupSaveDto.Id!.Value);
             StudentGroupDtoMappingRegister.UpdateModelWithSaveDto(studentGroupSaveDto, studentGroup);
@@ -144,19 +143,29 @@ public class StudentGroupService(
             id = await studentGroupRepository.SaveAsync(studentGroup);
         }
 
-        var newSemiGroupNames = studentGroupSaveDto.SemiGroupToCreateNames.Where(x => children.All(y => y.Name != x));
-        var newSemiGroups = newSemiGroupNames.Select(name => new StudentGroup
+        var previousSemiGroupsSaveDto = studentGroupSaveDto.Children
+            .Where(x => x.Id.HasValue)
+            .ToArray();
+        var previousSemiGroups =
+            await studentGroupRepository.SelectAsync(previousSemiGroupsSaveDto.Select(x => x.Id!.Value).ToArray());
+        foreach (var previousSemiGroup in previousSemiGroups)
         {
-            ScheduleId = studentGroupSaveDto.ScheduleId,
-            Name = name,
-            SemesterNumber = studentGroupSaveDto.SemesterNumber,
-            StudentGroupType = StudentGroupType.SemiGroup,
-            Parents = [new StudentGroup { Id = id!.Value }],
-        }).ToArray();
+            previousSemiGroup.Name = previousSemiGroupsSaveDto.Single(x => x.Id == previousSemiGroup.Id).Name;
+        }
+        var newSemiGroups = studentGroupSaveDto.Children
+            .Where(x => !x.Id.HasValue)
+            .Select(semiGroup => new StudentGroup
+            {
+                ScheduleId = studentGroupSaveDto.ScheduleId,
+                Name = semiGroup.Name,
+                SemesterNumber = studentGroupSaveDto.SemesterNumber,
+                StudentGroupType = StudentGroupType.SemiGroup,
+                Parents = [new StudentGroup { Id = id!.Value }],
+            }).ToArray();
 
-        if (newSemiGroups.Length > 0)
+        if (newSemiGroups.Length > 0 || previousSemiGroups.Length > 0)
         {
-            await studentGroupRepository.SaveAllAsync(newSemiGroups.ToArray());
+            await studentGroupRepository.SaveAllAsync(newSemiGroups.Concat(previousSemiGroups).ToArray());
         }
 
         if (studentGroupSaveDto.Id.HasValue)
@@ -167,6 +176,21 @@ public class StudentGroupService(
 
     public async Task DeleteAsync(Guid studentGroupId)
     {
+        var studentGroup = await studentGroupRepository.GetAsync(studentGroupId);
+        switch (studentGroup.StudentGroupType)
+        {
+            case StudentGroupType.Thread:
+                studentGroup.Children = [];
+                await studentGroupRepository.SaveAsync(studentGroup);
+                break;
+            case StudentGroupType.Group:
+                await studentGroupRepository.DeleteAsync(studentGroup.Children.Select(x => x.Id!.Value).ToArray());
+                break;
+            case StudentGroupType.SemiGroup:
+            default:
+                break;
+        }
+
         await studentGroupRepository.DeleteAsync(studentGroupId);
     }
 }

@@ -24,7 +24,7 @@ public static partial class LessonBatchInfoMappingRegister
     public static DbLessonBatchInfo? MapModelToEntity(LessonBatchInfo? model)
     {
         var entity = AutoMapModelToEntity(model);
-        if (model == null) return entity;
+        if (model == null || model.Id.HasValue) return entity;
         entity!.DateFrom = model.DateInterval.DateFrom;
         entity.DateTo = model.DateInterval.DateTo;
         entity.StudentGroups = model.StudentGroups.Select(x => new DbLessonBatchInfoStudentGroup { LessonBatchInfoId = model.Id ?? Guid.Empty, StudentGroupId = x.Id ?? Guid.Empty }).ToArray();

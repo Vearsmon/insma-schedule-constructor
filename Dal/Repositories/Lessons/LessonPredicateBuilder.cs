@@ -45,6 +45,7 @@ public class LessonPredicateBuilder : IPredicateBuilder<DbLesson, LessonSearchMo
                 .AndIf(searchModel.DayOfWeekTimeIntervals.Length > 0, BuildDayOfWeekTimeIntervalExpression(searchModel))
                 .AndIf(searchModel.ExcludeAllowCombining, f => f.AllowCombining == false)
                 .AndIf(searchModel.ExcludeLessonIds.Length > 0, f => !searchModel.ExcludeLessonIds.Contains(f.Id))
+                .AndIf(searchModel.LessonBatchInfoIds.Length > 0, f => f.LessonBatchInfoId.HasValue && searchModel.LessonBatchInfoIds.Contains(f.LessonBatchInfoId!.Value))
             ;
     }
 

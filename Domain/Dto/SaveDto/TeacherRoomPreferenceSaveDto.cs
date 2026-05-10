@@ -1,10 +1,9 @@
 ﻿using Domain.Models.Enums;
 
-namespace Domain.Dto;
+namespace Domain.Dto.SaveDto;
 
-public class TeacherRoomPreferenceDto
+public class TeacherRoomPreferenceSaveDto
 {
     public TeacherPreferenceType TeacherPreferenceType { get; set; }
     public Guid RoomId { get; set; }
-    public string RoomName { get; set; } = null!;
 }

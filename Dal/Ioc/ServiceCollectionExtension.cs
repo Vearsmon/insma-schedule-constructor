@@ -11,6 +11,7 @@ using Dal.RegistryRepositories.TeacherPreference;
 using Dal.Repositories;
 using Dal.Repositories.AcademicDisciplines;
 using Dal.Repositories.Campuses;
+using Dal.Repositories.LessonBatchInfo;
 using Dal.Repositories.Lessons;
 using Dal.Repositories.LessonPolicyViolations;
 using Dal.Repositories.Rooms;
@@ -44,6 +45,10 @@ public static class ServiceCollectionExtension
             .AddScoped<IReadonlyRepositoryMapper<DbAcademicDiscipline, AcademicDisciplineRegistryItem>, AcademicDisciplineRegistryMapper>()
             .AddScoped<IRegistryRepositoryOrderer<DbAcademicDiscipline, AcademicDisciplineRegistryInternalSearchModel>, AcademicDisciplineRegistryOrderer>()
             .AddScoped<IPredicateBuilder<DbAcademicDiscipline, AcademicDisciplineRegistryInternalSearchModel>, AcademicDisciplineRegistryPredicateBuilder>()
+
+            .AddScoped<ILessonBatchInfoRepository, LessonBatchInfoRepository>()
+            .AddScoped<IRepositoryMapper<DbLessonBatchInfo, LessonBatchInfo>, LessonBatchInfoMapper>()
+            .AddScoped<IPredicateBuilder<DbLessonBatchInfo, LessonBatchInfoSearchModel>, LessonBatchInfoPredicateBuilder>()
 
             .AddScoped<ICampusRepository, CampusRepository>()
             .AddScoped<IRepositoryMapper<DbCampus, Campus>, CampusMapper>()

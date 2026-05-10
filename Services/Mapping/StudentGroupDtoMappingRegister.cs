@@ -28,17 +28,15 @@ public static partial class StudentGroupDtoMappingRegister
     [MapperIgnoreSource(nameof(StudentGroup.StudentGroupType))]
     public static partial StudentGroupShortDto? MapModelToShortDto(StudentGroup? model);
 
-    [MapperIgnoreSource(nameof(StudentGroupSaveDto.ChildIds))]
-    [MapperIgnoreSource(nameof(StudentGroupSaveDto.SemiGroupToCreateNames))]
+    [MapperIgnoreSource(nameof(StudentGroupSaveDto.Children))]
     [MapperIgnoreTarget(nameof(StudentGroup.Schedule))]
     [MapperIgnoreTarget(nameof(StudentGroup.Children))]
-    [MapProperty(nameof(StudentGroupSaveDto.ParentIds), nameof(StudentGroup.Parents), Use = nameof(MapReferences))]
+    [MapProperty(nameof(StudentGroupSaveDto.ParentIds), nameof(StudentGroup.Parents), Use = nameof(MapIdReferences))]
     public static partial StudentGroup? MapSaveDtoToModel(StudentGroupSaveDto? dto);
 
-    [MapperIgnoreSource(nameof(StudentGroupSaveDto.SemiGroupToCreateNames))]
     [MapperIgnoreTarget(nameof(StudentGroup.Schedule))]
-    [MapProperty(nameof(StudentGroupSaveDto.ChildIds), nameof(StudentGroup.Children), Use = nameof(MapReferences))]
-    [MapProperty(nameof(StudentGroupSaveDto.ParentIds), nameof(StudentGroup.Parents), Use = nameof(MapReferences))]
+    [MapProperty(nameof(StudentGroupSaveDto.Children), nameof(StudentGroup.Children), Use = nameof(MapReferences))]
+    [MapProperty(nameof(StudentGroupSaveDto.ParentIds), nameof(StudentGroup.Parents), Use = nameof(MapIdReferences))]
     public static partial void UpdateModelWithSaveDto(StudentGroupSaveDto? dto, StudentGroup? model);
 
     public static partial StudentGroupRegistryItemDto? MapItemToItemDto(StudentGroupRegistryItem? item);
@@ -52,5 +50,7 @@ public static partial class StudentGroupDtoMappingRegister
     [MapperIgnoreSource(nameof(StudentGroup.ChildrenFlat))]
     public static partial StudentGroupTreeDto? MapModelToTreeDto(StudentGroup model);
 
-    private static StudentGroup[] MapReferences(Guid[] ids) => ids.Select(x => new StudentGroup { Id = x }).ToArray();
+    private static StudentGroup[] MapReferences(StudentSemiGroupSaveDto[] semiGroups) =>
+        semiGroups.Where(x => x.Id.HasValue).Select(x => new StudentGroup { Id = x.Id, Name = x.Name }).ToArray();
+    private static StudentGroup[] MapIdReferences(Guid[] ids) => ids.Select(x => new StudentGroup { Id = x }).ToArray();
 }

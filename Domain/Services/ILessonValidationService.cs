@@ -57,7 +57,7 @@ public interface ILessonValidationService
         bool includeTiming = false);
 
     Task<string[]> GetValidationResultMessageAsync(LessonPolicyViolation[] violations,
-        Lesson? lesson = null, Dictionary<(Guid, Guid, Guid), List<Lesson>>? studentGroupAcademicDisciplineLessonsCache = null);
+        Lesson? lesson = null, Dictionary<Guid, int>? currentBatchLessonsTotalHoursByLessonId = null);
 
     Task RemovePolicyViolations(Guid[] lessonIds, LessonPolicyViolationCode[] validationCodes);
 

@@ -47,11 +47,6 @@ public class DbAcademicDiscipline : IDbEntityWithId
     public bool IsLectureLessonsAllowed { get; set; }
 
     /// <summary>
-    /// Требуемое количество часов освоения лекционных занятий
-    /// </summary>
-    public int? LectureTotalHoursCount { get; set; }
-
-    /// <summary>
     /// Сведения о созданных через академическую дисциплину лекционных занятиях
     /// </summary>
     public ICollection<DbLessonBatchInfo> AcademicDisciplineLectureLessonBatchInfos { get; set; } = [];
@@ -62,11 +57,6 @@ public class DbAcademicDiscipline : IDbEntityWithId
     public bool IsPracticeLessonsAllowed { get; set; }
 
     /// <summary>
-    /// Требуемое количество часов освоения практических занятий
-    /// </summary>
-    public int? PracticeTotalHoursCount { get; set; }
-
-    /// <summary>
     /// Сведения о созданных через академическую дисциплину практических занятиях
     /// </summary>
     public ICollection<DbLessonBatchInfo> AcademicDisciplinePracticeLessonBatchInfos { get; set; } = [];
@@ -75,11 +65,6 @@ public class DbAcademicDiscipline : IDbEntityWithId
     /// Поддерживает назначение лабораторных занятий
     /// </summary>
     public bool IsLabLessonsAllowed { get; set; }
-
-    /// <summary>
-    /// Требуемое количество часов освоения лабораторных занятий
-    /// </summary>
-    public int? LabTotalHoursCount { get; set; }
 
     /// <summary>
     /// Сведения о созданных через академическую дисциплину лабораторных занятиях

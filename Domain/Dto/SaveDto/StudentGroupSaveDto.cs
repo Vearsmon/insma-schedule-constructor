@@ -11,6 +11,5 @@ public class StudentGroupSaveDto
     public int? StudentsCount { get; set; }
     public StudentGroupType StudentGroupType { get; set; }
     public Guid[] ParentIds { get; set; } = [];
-    public Guid[] ChildIds { get; set; } = [];
-    public string[] SemiGroupToCreateNames { get; set; } = [];
+    public StudentSemiGroupSaveDto[] Children { get; set; } = [];
 }

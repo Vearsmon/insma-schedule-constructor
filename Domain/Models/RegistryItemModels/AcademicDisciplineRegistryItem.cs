@@ -11,10 +11,10 @@ public class AcademicDisciplineRegistryItem : IModelWithId
     public int? SemesterNumber { get; set; }
     public AcademicDisciplineTargetType AcademicDisciplineTargetType { get; set; }
     public AcademicDisciplineType[] AllowedLessonTypes { get; set; } = [];
-    public AcademicDisciplinePayload? LecturePayload { get; set; }
-    public AcademicDisciplinePayload? PracticePayload { get; set; }
-    public AcademicDisciplinePayload? LabPayload { get; set; }
-    public AcademicDisciplinePayload? ExamPayload { get; set; }
-    public AcademicDisciplinePayload? TestPayload { get; set; }
+    public LessonBatchInfo[] LectureLessonBatchInfos { get; set; } = [];
+    public LessonBatchInfo[] PracticeLessonBatchInfos { get; set; } = [];
+    public LessonBatchInfo[] LabLessonBatchInfos { get; set; } = [];
+    public LessonBatchInfo[] ExamLessonBatchInfos { get; set; } = [];
+    public LessonBatchInfo[] TestLessonBatchInfos { get; set; } = [];
     public string? Comment { get; set; }
 }

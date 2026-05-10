@@ -18,5 +18,6 @@ public class LessonSearchModel
     public DayOfWeekTimeInterval[] DayOfWeekTimeIntervals { get; set; } = [];
     public bool ExcludeAllowCombining { get; set; }
     public Guid[] ExcludeLessonIds { get; set; } = [];
+    public Guid[] LessonBatchInfoIds { get; set; } = [];
     public bool SearchForConflicts { get; set; }
 }

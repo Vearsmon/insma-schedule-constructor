@@ -84,6 +84,16 @@ public class DbLesson : IDbEntityWithId
     public bool AllowCombining { get; set; }
 
     /// <summary>
+    /// Сведения о созданных занятиях, к которым относится данное
+    /// </summary>
+    public Guid? LessonBatchInfoId { get; set; }
+
+    /// <summary>
+    /// Сведения о созданных занятиях, к которым относится данное
+    /// </summary>
+    public DbLessonBatchInfo? LessonBatchInfo { get; set; }
+
+    /// <summary>
     /// Сообщения валидации
     /// </summary>
     public ICollection<DbLessonPolicyViolationLink> Violations { get; set; } = [];

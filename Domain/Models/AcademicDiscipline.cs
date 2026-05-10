@@ -46,42 +46,42 @@ public class AcademicDiscipline : IModelWithId
     public AcademicDisciplineType[] AllowedLessonTypes { get; set; } = [];
 
     /// <summary>
-    /// Нагрузка по лекционным занятиям
+    /// Сведения о созданных через академическую дисциплину лекционных занятиях
     /// </summary>
-    public AcademicDisciplinePayload? LecturePayload { get; set; }
+    public LessonBatchInfo[] LectureLessonBatchInfos { get; set; } = [];
 
     /// <summary>
-    /// Нагрузка по практическим занятиям
+    /// Сведения о созданных через академическую дисциплину практических занятиях
     /// </summary>
-    public AcademicDisciplinePayload? PracticePayload { get; set; }
+    public LessonBatchInfo[] PracticeLessonBatchInfos { get; set; } = [];
 
     /// <summary>
-    /// Нагрузка по лабораторным занятиям
+    /// Сведения о созданных через академическую дисциплину лабораторных занятиях
     /// </summary>
-    public AcademicDisciplinePayload? LabPayload { get; set; }
+    public LessonBatchInfo[] LabLessonBatchInfos { get; set; } = [];
 
     /// <summary>
-    /// Нагрузка по экзаменам
+    /// Сведения о созданных через академическую дисциплину экзаменах
     /// </summary>
-    public AcademicDisciplinePayload? ExamPayload { get; set; }
+    public LessonBatchInfo[] ExamLessonBatchInfos { get; set; } = [];
 
     /// <summary>
-    /// Нагрузка по зачетам
+    /// Сведения о созданных через академическую дисциплину зачетах
     /// </summary>
-    public AcademicDisciplinePayload? TestPayload { get; set; }
+    public LessonBatchInfo[] TestLessonBatchInfos { get; set; } = [];
 
     /// <summary>
     /// Комментарий
     /// </summary>
     public string? Comment { get; set; }
 
-    public AcademicDisciplinePayload? GetPayloadByType(AcademicDisciplineType type) => type switch
+    public LessonBatchInfo[] GetBatchInfosByType(AcademicDisciplineType type) => type switch
     {
-        AcademicDisciplineType.Lecture => LecturePayload,
-        AcademicDisciplineType.Practice => PracticePayload,
-        AcademicDisciplineType.Lab => LabPayload,
-        AcademicDisciplineType.Exam => ExamPayload,
-        AcademicDisciplineType.Test => TestPayload,
+        AcademicDisciplineType.Lecture => LectureLessonBatchInfos,
+        AcademicDisciplineType.Practice => PracticeLessonBatchInfos,
+        AcademicDisciplineType.Lab => LabLessonBatchInfos,
+        AcademicDisciplineType.Exam => ExamLessonBatchInfos,
+        AcademicDisciplineType.Test => TestLessonBatchInfos,
         _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
     };
 }

@@ -11,10 +11,10 @@ public class AcademicDisciplineSaveDto
     public int? SemesterNumber { get; set; }
     public AcademicDisciplineTargetType AcademicDisciplineTargetType { get; set; }
     public AcademicDisciplineType[] AllowedLessonTypes { get; set; } = [];
-    public AcademicDisciplinePayloadDto? LecturePayload { get; set; } = null!;
-    public AcademicDisciplinePayloadDto? PracticePayload { get; set; } = null!;
-    public AcademicDisciplinePayloadDto? LabPayload { get; set; } = null!;
-    public AcademicDisciplinePayloadDto? ExamPayload { get; set; } = null!;
-    public AcademicDisciplinePayloadDto? TestPayload { get; set; } = null!;
+    public LessonBatchInfoDto[] LectureLessonBatchInfos { get; set; } = [];
+    public LessonBatchInfoDto[] PracticeLessonBatchInfos { get; set; } = [];
+    public LessonBatchInfoDto[] LabLessonBatchInfos { get; set; } = [];
+    public LessonBatchInfoDto[] ExamLessonBatchInfos { get; set; } = [];
+    public LessonBatchInfoDto[] TestLessonBatchInfos { get; set; } = [];
     public string? Comment { get; set; }
 }

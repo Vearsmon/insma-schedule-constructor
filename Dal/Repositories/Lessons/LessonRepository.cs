@@ -28,6 +28,7 @@ public class LessonRepository(
             .ThenInclude(x => x.Teacher)
             .Include(x => x.Rooms)
             .ThenInclude(x => x.Room)
+            .Include(x => x.LessonBatchInfo)
             .Include(x => x.Violations)
             .ThenInclude(x => x.LessonPolicyViolation);
     }

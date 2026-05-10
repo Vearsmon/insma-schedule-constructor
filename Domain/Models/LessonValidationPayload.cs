@@ -21,6 +21,16 @@ public class LessonValidationPayload
     public AcademicDisciplineType? AffectedByAcademicDisciplineType { get; set; }
 
     /// <summary>
+    /// Оказавший влияние набор сведений о занятиях дисциплины
+    /// </summary>
+    public Guid? AffectedByLessonBatchInfoId { get; set; }
+
+    /// <summary>
+    /// Оказавший влияние набор сведений о занятиях дисциплины
+    /// </summary>
+    public LessonBatchInfo? AffectedByLessonBatchInfo { get; set; }
+
+    /// <summary>
     /// Оказавшее влияние занятие
     /// </summary>
     public Guid? AffectedByLessonId { get; set; }

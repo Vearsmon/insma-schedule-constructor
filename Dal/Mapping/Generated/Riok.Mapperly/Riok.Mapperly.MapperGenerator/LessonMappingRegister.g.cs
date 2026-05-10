@@ -19,6 +19,7 @@ namespace Dal.Mapping
             target.FlexibilityType = entity.FlexibilityType;
             target.HoursCost = entity.HoursCost;
             target.AllowCombining = entity.AllowCombining;
+            target.LessonBatchInfoId = entity.LessonBatchInfoId;
             return target;
         }
 
@@ -41,6 +42,7 @@ namespace Dal.Mapping
             target.FlexibilityType = model.FlexibilityType;
             target.HoursCost = model.HoursCost;
             target.AllowCombining = model.AllowCombining;
+            target.LessonBatchInfoId = model.LessonBatchInfoId;
             return target;
         }
 
@@ -60,6 +62,7 @@ namespace Dal.Mapping
             entity.FlexibilityType = model.FlexibilityType;
             entity.HoursCost = model.HoursCost;
             entity.AllowCombining = model.AllowCombining;
+            entity.LessonBatchInfoId = model.LessonBatchInfoId;
         }
 
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]

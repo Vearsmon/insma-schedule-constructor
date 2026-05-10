@@ -16,6 +16,7 @@ namespace Dal.Mapping
             target.RepeatType = entity.RepeatType;
             target.AllowCombining = entity.AllowCombining;
             target.HoursCost = entity.HoursCost;
+            target.TotalHoursCount = entity.TotalHoursCount;
             return target;
         }
 
@@ -34,6 +35,7 @@ namespace Dal.Mapping
             target.RepeatType = model.RepeatType;
             target.AllowCombining = model.AllowCombining;
             target.HoursCost = model.HoursCost;
+            target.TotalHoursCount = model.TotalHoursCount;
             return target;
         }
 
@@ -50,6 +52,7 @@ namespace Dal.Mapping
             entity.RepeatType = model.RepeatType;
             entity.AllowCombining = model.AllowCombining;
             entity.HoursCost = model.HoursCost;
+            entity.TotalHoursCount = model.TotalHoursCount;
         }
     }
 }

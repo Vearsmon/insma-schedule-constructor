@@ -2,6 +2,7 @@
 using Dal.Transactions;
 using Domain.Models;
 using Domain.Models.SearchModels;
+using Microsoft.EntityFrameworkCore;
 
 namespace Dal.Repositories.AcademicDisciplines;
 
@@ -21,4 +22,56 @@ public class AcademicDisciplineRepository(
     {
         return await ExistAsync(predicateBuilder, new AcademicDisciplineSearchModel { Id = id });
     }
+
+    protected override IQueryable<DbAcademicDiscipline> Query() => Context.Set<DbAcademicDiscipline>()
+        .Include(x => x.Schedule)
+        .Include(x => x.AcademicDisciplineLectureLessonBatchInfos)
+        .ThenInclude(x => x.StudentGroups)
+        .ThenInclude(x => x.StudentGroup)
+        .Include(x => x.AcademicDisciplineLectureLessonBatchInfos)
+        .ThenInclude(x => x.Teachers)
+        .ThenInclude(x => x.Teacher)
+        .Include(x => x.AcademicDisciplineLectureLessonBatchInfos)
+        .ThenInclude(x => x.Rooms)
+        .ThenInclude(x => x.Room)
+
+        .Include(x => x.AcademicDisciplinePracticeLessonBatchInfos)
+        .ThenInclude(x => x.StudentGroups)
+        .ThenInclude(x => x.StudentGroup)
+        .Include(x => x.AcademicDisciplinePracticeLessonBatchInfos)
+        .ThenInclude(x => x.Teachers)
+        .ThenInclude(x => x.Teacher)
+        .Include(x => x.AcademicDisciplinePracticeLessonBatchInfos)
+        .ThenInclude(x => x.Rooms)
+        .ThenInclude(x => x.Room)
+
+        .Include(x => x.AcademicDisciplineLabLessonBatchInfos)
+        .ThenInclude(x => x.StudentGroups)
+        .ThenInclude(x => x.StudentGroup)
+        .Include(x => x.AcademicDisciplineLabLessonBatchInfos)
+        .ThenInclude(x => x.Teachers)
+        .ThenInclude(x => x.Teacher)
+        .Include(x => x.AcademicDisciplineLabLessonBatchInfos)
+        .ThenInclude(x => x.Rooms)
+        .ThenInclude(x => x.Room)
+
+        .Include(x => x.AcademicDisciplineExamLessonBatchInfos)
+        .ThenInclude(x => x.StudentGroups)
+        .ThenInclude(x => x.StudentGroup)
+        .Include(x => x.AcademicDisciplineExamLessonBatchInfos)
+        .ThenInclude(x => x.Teachers)
+        .ThenInclude(x => x.Teacher)
+        .Include(x => x.AcademicDisciplineExamLessonBatchInfos)
+        .ThenInclude(x => x.Rooms)
+        .ThenInclude(x => x.Room)
+
+        .Include(x => x.AcademicDisciplineTestLessonBatchInfos)
+        .ThenInclude(x => x.StudentGroups)
+        .ThenInclude(x => x.StudentGroup)
+        .Include(x => x.AcademicDisciplineTestLessonBatchInfos)
+        .ThenInclude(x => x.Teachers)
+        .ThenInclude(x => x.Teacher)
+        .Include(x => x.AcademicDisciplineTestLessonBatchInfos)
+        .ThenInclude(x => x.Rooms)
+        .ThenInclude(x => x.Room);
 }

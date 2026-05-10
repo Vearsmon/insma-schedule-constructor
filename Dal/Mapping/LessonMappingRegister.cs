@@ -26,6 +26,7 @@ public static partial class LessonMappingRegister
         model.StudentGroups = entity.StudentGroups.Select(x => StudentGroupMappingRegister.MapEntityToModel(x.StudentGroup)).ToArray()!;
         model.Teachers = entity.Teachers.Select(x => TeacherMappingRegister.MapEntityToModel(x.Teacher)).ToArray()!;
         model.Rooms = entity.Rooms.Select(x => RoomMappingRegister.MapEntityToModel(x.Room)).ToArray()!;
+        model.LessonBatchInfo = LessonBatchInfoMappingRegister.MapEntityToModel(entity.LessonBatchInfo);
         model.Violations = entity.Violations.Select(x => LessonPolicyViolationMappingRegister.MapEntityToModel(x.LessonPolicyViolation)).ToArray()!;
         return model;
     }
@@ -94,12 +95,14 @@ public static partial class LessonMappingRegister
     [MapperIgnoreSource(nameof(DbLesson.StudentGroups))]
     [MapperIgnoreSource(nameof(DbLesson.Teachers))]
     [MapperIgnoreSource(nameof(DbLesson.Rooms))]
+    [MapperIgnoreSource(nameof(DbLesson.LessonBatchInfo))]
     [MapperIgnoreSource(nameof(DbLesson.Violations))]
     [MapperIgnoreTarget(nameof(Lesson.Schedule))]
     [MapperIgnoreTarget(nameof(Lesson.DateWithTimeInterval))]
     [MapperIgnoreTarget(nameof(Lesson.StudentGroups))]
     [MapperIgnoreTarget(nameof(Lesson.Teachers))]
     [MapperIgnoreTarget(nameof(Lesson.Rooms))]
+    [MapperIgnoreTarget(nameof(Lesson.LessonBatchInfo))]
     [MapperIgnoreTarget(nameof(Lesson.Violations))]
     private static partial Lesson? AutoMapEntityToModel(DbLesson? entity);
 
@@ -109,6 +112,7 @@ public static partial class LessonMappingRegister
     [MapperIgnoreSource(nameof(Lesson.StudentGroups))]
     [MapperIgnoreSource(nameof(Lesson.Teachers))]
     [MapperIgnoreSource(nameof(Lesson.Rooms))]
+    [MapperIgnoreSource(nameof(Lesson.LessonBatchInfo))]
     [MapperIgnoreSource(nameof(Lesson.Violations))]
     [MapperIgnoreTarget(nameof(DbLesson.Date))]
     [MapperIgnoreTarget(nameof(DbLesson.TimeFrom))]
@@ -116,6 +120,7 @@ public static partial class LessonMappingRegister
     [MapperIgnoreTarget(nameof(DbLesson.StudentGroups))]
     [MapperIgnoreTarget(nameof(DbLesson.Teachers))]
     [MapperIgnoreTarget(nameof(DbLesson.Rooms))]
+    [MapperIgnoreTarget(nameof(DbLesson.LessonBatchInfo))]
     [MapperIgnoreTarget(nameof(DbLesson.Violations))]
     private static partial DbLesson? AutoMapModelToEntity(Lesson? model);
 
@@ -126,6 +131,7 @@ public static partial class LessonMappingRegister
     [MapperIgnoreSource(nameof(Lesson.StudentGroups))]
     [MapperIgnoreSource(nameof(Lesson.Teachers))]
     [MapperIgnoreSource(nameof(Lesson.Rooms))]
+    [MapperIgnoreSource(nameof(Lesson.LessonBatchInfo))]
     [MapperIgnoreSource(nameof(Lesson.Violations))]
     [MapperIgnoreTarget(nameof(DbLesson.Schedule))]
     [MapperIgnoreTarget(nameof(DbLesson.Date))]
@@ -134,6 +140,7 @@ public static partial class LessonMappingRegister
     [MapperIgnoreTarget(nameof(DbLesson.StudentGroups))]
     [MapperIgnoreTarget(nameof(DbLesson.Teachers))]
     [MapperIgnoreTarget(nameof(DbLesson.Rooms))]
+    [MapperIgnoreTarget(nameof(DbLesson.LessonBatchInfo))]
     [MapperIgnoreTarget(nameof(DbLesson.Violations))]
     private static partial void AutoUpdateEntityWithModel(Lesson? model, DbLesson? entity);
 
@@ -146,6 +153,8 @@ public static partial class LessonMappingRegister
     [MapperIgnoreSource(nameof(DbLesson.StudentGroups))]
     [MapperIgnoreSource(nameof(DbLesson.Teachers))]
     [MapperIgnoreSource(nameof(DbLesson.Rooms))]
+    [MapperIgnoreSource(nameof(DbLesson.LessonBatchInfoId))]
+    [MapperIgnoreSource(nameof(DbLesson.LessonBatchInfo))]
     [MapperIgnoreSource(nameof(DbLesson.Violations))]
     [MapperIgnoreTarget(nameof(LessonRegistryItem.DateWithTimeInterval))]
     [MapperIgnoreTarget(nameof(LessonRegistryItem.StudentGroupIds))]

@@ -55,6 +55,8 @@ public static partial class LessonDtoMappingRegister
     [MapperIgnoreSource(nameof(Lesson.StudentGroups))]
     [MapperIgnoreSource(nameof(Lesson.Teachers))]
     [MapperIgnoreSource(nameof(Lesson.Rooms))]
+    [MapperIgnoreSource(nameof(Lesson.LessonBatchInfoId))]
+    [MapperIgnoreSource(nameof(Lesson.LessonBatchInfo))]
     [MapperIgnoreTarget(nameof(LessonViewDto.StudentGroupIds))]
     [MapperIgnoreTarget(nameof(LessonViewDto.TeacherIds))]
     [MapperIgnoreTarget(nameof(LessonViewDto.RoomIds))]
@@ -68,6 +70,8 @@ public static partial class LessonDtoMappingRegister
     [MapperIgnoreTarget(nameof(Lesson.StudentGroups))]
     [MapperIgnoreTarget(nameof(Lesson.Teachers))]
     [MapperIgnoreTarget(nameof(Lesson.Rooms))]
+    [MapperIgnoreTarget(nameof(Lesson.LessonBatchInfoId))]
+    [MapperIgnoreTarget(nameof(Lesson.LessonBatchInfo))]
     [MapperIgnoreTarget(nameof(Lesson.Violations))]
     private static partial Lesson? AutoMapSaveDtoToModel(LessonSaveDto? dto);
 
@@ -77,11 +81,15 @@ public static partial class LessonDtoMappingRegister
     [MapperIgnoreSource(nameof(Lesson.StudentGroups))]
     [MapperIgnoreSource(nameof(Lesson.Teachers))]
     [MapperIgnoreSource(nameof(Lesson.Rooms))]
-    [MapperIgnoreTarget(nameof(Lesson.StudentGroups))]
-    [MapperIgnoreTarget(nameof(Lesson.Teachers))]
-    [MapperIgnoreTarget(nameof(Lesson.Rooms))]
+    [MapperIgnoreSource(nameof(Lesson.LessonBatchInfoId))]
+    [MapperIgnoreSource(nameof(Lesson.LessonBatchInfo))]
+    [MapperIgnoreTarget(nameof(LessonShortDto.StudentGroups))]
+    [MapperIgnoreTarget(nameof(LessonShortDto.Teachers))]
+    [MapperIgnoreTarget(nameof(LessonShortDto.Rooms))]
+    [MapperIgnoreTarget(nameof(LessonShortDto.LessonPolicyViolationDescription))]
     [MapProperty(nameof(Lesson.Violations), nameof(LessonShortDto.CurrentErrorsMaxLevel), Use = nameof(GetViolationsMaxLevel))]
     private static partial LessonShortDto? AutoMapModelToShortDto(Lesson? model);
 
-    private static LessonValidationErrorType? GetViolationsMaxLevel(LessonPolicyViolation[] violations) => violations.Length == 0 ? null : violations.Max(x => x.ErrorType);
+    private static LessonValidationErrorType? GetViolationsMaxLevel(LessonPolicyViolation[] violations) =>
+        violations.Length == 0 ? null : violations.Max(x => x.ErrorType);
 }

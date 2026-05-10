@@ -2,6 +2,7 @@
 using Dal.Transactions;
 using Domain.Models;
 using Domain.Models.SearchModels;
+using Microsoft.EntityFrameworkCore;
 
 namespace Dal.Repositories.TeacherPreferences;
 
@@ -24,4 +25,10 @@ public class TeacherPreferenceRepository(
 
         return teacherPreferences;
     }
+
+    protected override IQueryable<DbTeacherPreference> Query() => Context.Set<DbTeacherPreference>()
+        .AsNoTracking()
+        .Include(x => x.Schedule)
+        .Include(x => x.Teacher)
+        .Include(x => x.Room);
 }

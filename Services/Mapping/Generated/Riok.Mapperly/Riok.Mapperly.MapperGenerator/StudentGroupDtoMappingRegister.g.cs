@@ -51,7 +51,7 @@ namespace Services.Mapping
             target.SemesterNumber = dto.SemesterNumber;
             target.StudentsCount = dto.StudentsCount;
             target.StudentGroupType = dto.StudentGroupType;
-            target.Parents = MapReferences(dto.ParentIds);
+            target.Parents = MapIdReferences(dto.ParentIds);
             return target;
         }
 
@@ -66,8 +66,8 @@ namespace Services.Mapping
             model.SemesterNumber = dto.SemesterNumber;
             model.StudentsCount = dto.StudentsCount;
             model.StudentGroupType = dto.StudentGroupType;
-            model.Parents = MapReferences(dto.ParentIds);
-            model.Children = MapReferences(dto.ChildIds);
+            model.Parents = MapIdReferences(dto.ParentIds);
+            model.Children = MapReferences(dto.Children);
         }
 
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]

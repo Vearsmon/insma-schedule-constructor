@@ -64,23 +64,11 @@ namespace Dal.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_test_lessons_allowed");
 
-                    b.Property<int?>("LabTotalHoursCount")
-                        .HasColumnType("integer")
-                        .HasColumnName("lab_total_hours_count");
-
-                    b.Property<int?>("LectureTotalHoursCount")
-                        .HasColumnType("integer")
-                        .HasColumnName("lecture_total_hours_count");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)")
                         .HasColumnName("name");
-
-                    b.Property<int?>("PracticeTotalHoursCount")
-                        .HasColumnType("integer")
-                        .HasColumnName("practice_total_hours_count");
 
                     b.Property<Guid>("ScheduleId")
                         .HasColumnType("uuid")
@@ -162,6 +150,10 @@ namespace Dal.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("hours_cost");
 
+                    b.Property<Guid?>("LessonBatchInfoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("lesson_batch_info_id");
+
                     b.Property<Guid>("ScheduleId")
                         .HasColumnType("uuid")
                         .HasColumnName("schedule_id");
@@ -179,6 +171,9 @@ namespace Dal.Migrations
 
                     b.HasIndex("AcademicDisciplineId")
                         .HasDatabaseName("ix_lesson_academic_discipline_id");
+
+                    b.HasIndex("LessonBatchInfoId")
+                        .HasDatabaseName("ix_lesson_lesson_batch_info_id");
 
                     b.HasIndex("ScheduleId")
                         .HasDatabaseName("ix_lesson_schedule_id");
@@ -218,6 +213,10 @@ namespace Dal.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("repeat_type");
+
+                    b.Property<int?>("TotalHoursCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("total_hours_count");
 
                     b.Property<Guid?>("exam_academic_discipline_id")
                         .HasColumnType("uuid")
@@ -749,6 +748,12 @@ namespace Dal.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .HasConstraintName("fk_lesson_academic_discipline_academic_discipline_id");
 
+                    b.HasOne("Dal.Entities.DbLessonBatchInfo", "LessonBatchInfo")
+                        .WithMany()
+                        .HasForeignKey("LessonBatchInfoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasConstraintName("fk_lesson_db_lesson_batch_info_lesson_batch_info_id");
+
                     b.HasOne("Dal.Entities.DbSchedule", "Schedule")
                         .WithMany()
                         .HasForeignKey("ScheduleId")
@@ -757,6 +762,8 @@ namespace Dal.Migrations
                         .HasConstraintName("fk_lesson_db_schedule_schedule_id");
 
                     b.Navigation("AcademicDiscipline");
+
+                    b.Navigation("LessonBatchInfo");
 
                     b.Navigation("Schedule");
                 });

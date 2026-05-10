@@ -1,5 +1,6 @@
 ﻿using Dal.RegistryRepositories.AcademicDiscipline;
 using Dal.Repositories.AcademicDisciplines;
+using Dal.Repositories.LessonBatchInfo;
 using Dal.Repositories.Schedules;
 using Domain.Dto;
 using Domain.Dto.RegistryDto;
@@ -9,6 +10,7 @@ using Domain.Dto.ViewDto;
 using Domain.Exceptions;
 using Domain.Helpers;
 using Domain.Mapping;
+using Domain.Models;
 using Domain.Models.Enums;
 using Domain.Models.RegistrySearchModels;
 using Domain.Models.SearchModels;
@@ -20,6 +22,7 @@ namespace Services;
 
 public class AcademicDisciplineService(
     IAcademicDisciplineRepository academicDisciplineRepository,
+    ILessonBatchInfoRepository lessonBatchInfoRepository,
     IAcademicDisciplineRegistryRepository academicDisciplineRegistryRepository,
     IScheduleRepository scheduleRepository,
     ILessonService lessonService,
@@ -29,7 +32,7 @@ public class AcademicDisciplineService(
     {
         var items = await academicDisciplineRepository.SearchAsync(
             new AcademicDisciplineSearchModel { ScheduleId = scheduleId });
-        return items.Select(AcademicDisciplineDtoMappingRegister.MapToRootDto).ToArray()!;
+        return items.Select(AcademicDisciplineDtoMappingRegister.MapModelToShortDto).ToArray()!;
     }
 
     public async Task<RegistryDto<AcademicDisciplineRegistryItemDto>> SearchAsync(
@@ -39,7 +42,7 @@ public class AcademicDisciplineService(
             await academicDisciplineRegistryRepository.SearchAsync(RegistrySearchModelMappingRegister.Map(searchModel));
         return new RegistryDto<AcademicDisciplineRegistryItemDto>
         {
-            Items = registryEntries.Items.Select(AcademicDisciplineDtoMappingRegister.Map).ToArray()!,
+            Items = registryEntries.Items.Select(AcademicDisciplineDtoMappingRegister.MapItemToItemDto).ToArray()!,
             ItemsCount = registryEntries.ItemsCount,
         };
     }
@@ -72,63 +75,119 @@ public class AcademicDisciplineService(
 
         academicDisciplineSaveDto.AllowedLessonTypes =
             academicDisciplineSaveDto.AllowedLessonTypes.Distinct().ToArray();
-        var notAllowedLessonTypes = new[]
-            {
-                AcademicDisciplineType.Lecture,
-                AcademicDisciplineType.Practice,
-                AcademicDisciplineType.Lab,
-                AcademicDisciplineType.Exam,
-                AcademicDisciplineType.Test,
-            }
+        var allLessonTypes = new[]
+        {
+            AcademicDisciplineType.Lecture,
+            AcademicDisciplineType.Practice,
+            AcademicDisciplineType.Lab,
+            AcademicDisciplineType.Exam,
+            AcademicDisciplineType.Test,
+        };
+        var notAllowedLessonTypes = allLessonTypes
             .Except(academicDisciplineSaveDto.AllowedLessonTypes)
             .ToArray();
 
-        var specifiedPayloads = new[]
+        var specifiedBatchInfos = new[]
         {
-            (IsSpecified: IsSpecified(academicDisciplineSaveDto.LecturePayload),
+            (IsSpecified: academicDisciplineSaveDto.LectureLessonBatchInfos.Length > 0,
                 IsNotAllowed: notAllowedLessonTypes.Contains(AcademicDisciplineType.Lecture),
                 Type: AcademicDisciplineType.Lecture),
-            (IsSpecified: IsSpecified(academicDisciplineSaveDto.PracticePayload),
+            (IsSpecified: academicDisciplineSaveDto.PracticeLessonBatchInfos.Length > 0,
                 IsNotAllowed: notAllowedLessonTypes.Contains(AcademicDisciplineType.Practice),
                 Type: AcademicDisciplineType.Practice),
-            (IsSpecified: IsSpecified(academicDisciplineSaveDto.LabPayload),
+            (IsSpecified: academicDisciplineSaveDto.LabLessonBatchInfos.Length > 0,
                 IsNotAllowed: notAllowedLessonTypes.Contains(AcademicDisciplineType.Lab),
                 Type: AcademicDisciplineType.Lab),
-            (IsSpecified: IsSpecified(academicDisciplineSaveDto.ExamPayload),
+            (IsSpecified: academicDisciplineSaveDto.ExamLessonBatchInfos.Length > 0,
                 IsNotAllowed: notAllowedLessonTypes.Contains(AcademicDisciplineType.Exam),
                 Type: AcademicDisciplineType.Exam),
-            (IsSpecified: IsSpecified(academicDisciplineSaveDto.TestPayload),
+            (IsSpecified: academicDisciplineSaveDto.TestLessonBatchInfos.Length > 0,
                 IsNotAllowed: notAllowedLessonTypes.Contains(AcademicDisciplineType.Test),
                 Type: AcademicDisciplineType.Test),
         };
 
-        validationMessages.AddRange(specifiedPayloads
+        validationMessages.AddRange(specifiedBatchInfos
             .Where(x => x is { IsSpecified: true, IsNotAllowed: true })
-            .Select(specifiedPayload =>
+            .Select(specifiedBatchInfo =>
                 new ValidationMessage($"Дисциплина не может содержать дополнительную информацию по занятиям вида " +
-                                      $"\"{specifiedPayload.Type.GetDescription()}\", если она не подразумевает их проведение")));
+                                      $"\"{specifiedBatchInfo.Type.GetDescription()}\", если она не подразумевает их проведение")));
+
+        var batchesStudentGroupIds = new[]
+        {
+            (Type: AcademicDisciplineType.Lecture,
+                StudentGroupIds: academicDisciplineSaveDto.LectureLessonBatchInfos.SelectMany(x => x.StudentGroups)),
+            (Type: AcademicDisciplineType.Practice,
+                StudentGroupIds: academicDisciplineSaveDto.PracticeLessonBatchInfos.SelectMany(x => x.StudentGroups)),
+            (Type: AcademicDisciplineType.Lab,
+                StudentGroupIds: academicDisciplineSaveDto.LabLessonBatchInfos.SelectMany(x => x.StudentGroups)),
+            (Type: AcademicDisciplineType.Exam,
+                StudentGroupIds: academicDisciplineSaveDto.ExamLessonBatchInfos.SelectMany(x => x.StudentGroups)),
+            (Type: AcademicDisciplineType.Test,
+                StudentGroupIds: academicDisciplineSaveDto.TestLessonBatchInfos.SelectMany(x => x.StudentGroups)),
+        };
+
+        validationMessages.AddRange(batchesStudentGroupIds
+            .Where(x => x.StudentGroupIds.Distinct().Count() != x.StudentGroupIds.Count())
+            .Select(batchStudentGroupIds =>
+                new ValidationMessage($"Наборы занятий вида \"{batchStudentGroupIds.Type.GetDescription()}\" " +
+                                      $"не должны иметь общие группы")));
 
         if (validationMessages.Count != 0)
         {
             throw new ServiceException(validationMessages.ToArray());
         }
 
-        var academicDiscipline = AcademicDisciplineDtoMappingRegister.MapSaveDtoToModel(academicDisciplineSaveDto)!;
-        var id = await academicDisciplineRepository.SaveAsync(academicDiscipline);
-        await lessonValidationService.RemovePolicyViolations(id);
-        academicDiscipline.Id = id;
+        AcademicDiscipline academicDiscipline;
+        var id = academicDisciplineSaveDto.Id;
+        if (id.HasValue)
+        {
+            academicDiscipline = AcademicDisciplineDtoMappingRegister.MapSaveDtoToModel(academicDisciplineSaveDto)!;
+            foreach (var lessonType in allLessonTypes)
+            {
+                var ids = await lessonBatchInfoRepository.SaveAllAsync(academicDiscipline.GetBatchInfosByType(lessonType).ToArray());
+                switch (lessonType)
+                {
+                    case AcademicDisciplineType.Lecture:
+                        academicDiscipline.LectureLessonBatchInfos = ids.Select(x => new LessonBatchInfo { Id = x }).ToArray();
+                        break;
+                    case AcademicDisciplineType.Practice:
+                        academicDiscipline.PracticeLessonBatchInfos = ids.Select(x => new LessonBatchInfo { Id = x }).ToArray();
+                        break;
+                    case AcademicDisciplineType.Lab:
+                        academicDiscipline.LabLessonBatchInfos = ids.Select(x => new LessonBatchInfo { Id = x }).ToArray();
+                        break;
+                    case AcademicDisciplineType.Exam:
+                        academicDiscipline.ExamLessonBatchInfos = ids.Select(x => new LessonBatchInfo { Id = x }).ToArray();
+                        break;
+                    case AcademicDisciplineType.Test:
+                        academicDiscipline.TestLessonBatchInfos = ids.Select(x => new LessonBatchInfo { Id = x }).ToArray();
+                        break;
+                }
+            }
+            academicDiscipline = await academicDisciplineRepository.GetAsync(id.Value);
+            AcademicDisciplineDtoMappingRegister.UpdateModelWithSaveDto(academicDisciplineSaveDto, academicDiscipline);
+            await academicDisciplineRepository.SaveAsync(academicDiscipline);
+        }
+        else
+        {
+            academicDiscipline = AcademicDisciplineDtoMappingRegister.MapSaveDtoToModel(academicDisciplineSaveDto)!;
+            id = await academicDisciplineRepository.SaveAsync(academicDiscipline);
+        }
 
-        await lessonService.UpdateAcademicDisciplineLessons(academicDiscipline);
+        // var academicDiscipline = AcademicDisciplineDtoMappingRegister.MapSaveDtoToModel(academicDisciplineSaveDto)!;
+        // var schedule = await scheduleRepository.GetAsync(academicDisciplineSaveDto.ScheduleId);
+        // academicDiscipline.Schedule = schedule;
+
+        // var id = await academicDisciplineRepository.SaveAsync(academicDiscipline);
+        await lessonValidationService.RemovePolicyViolations(id!.Value);
+        var savedAcademicDiscipline = await academicDisciplineRepository.GetAsync(id!.Value);
+
+        await lessonService.UpdateAcademicDisciplineLessons(savedAcademicDiscipline);
 
         if (academicDisciplineSaveDto.Id.HasValue)
         {
-            await lessonService.RecalculateConflictsForUpdatedAcademicDiscipline(academicDiscipline);
+            await lessonService.RecalculateConflictsForUpdatedAcademicDiscipline(savedAcademicDiscipline);
         }
-
-        return;
-
-        bool IsSpecified(AcademicDisciplinePayloadDto? payload) =>
-            payload != null && (payload.LessonBatchInfos.Length > 0 || payload.TotalHoursCount != 0);
     }
 
     public async Task<LessonSeriesConflictDto[]> GetLessonSeriesConflictsAsync(Guid academicDisciplineId,
@@ -140,9 +199,7 @@ public class AcademicDisciplineService(
             throw new ServiceException(new ValidationMessage($"Выбранная академическая дисциплина не поддерживает проведение занятий вида \"{academicDisciplineType.GetDescription()}\""));
         }
 
-        var payload = academicDiscipline.GetPayloadByType(academicDisciplineType);
-        var lessonBatchInfo = payload!.LessonBatchInfos.Single(x => x.Id == lessonBatchInfoId);
-
+        var lessonBatchInfo = academicDiscipline.GetBatchInfosByType(academicDisciplineType).Single(x => x.Id == lessonBatchInfoId);
         return await lessonService.GetLessonSeriesConflictsAsync(lessonBatchInfo, academicDiscipline.ScheduleId);
     }
 

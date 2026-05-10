@@ -3,7 +3,6 @@ using Dal.Repositories.Rooms;
 using Dal.Repositories.Schedules;
 using Dal.Repositories.TeacherPreferences;
 using Dal.Repositories.Teachers;
-using Domain.Dto;
 using Domain.Dto.RegistryDto;
 using Domain.Dto.SaveDto;
 using Domain.Dto.ViewDto;
@@ -50,9 +49,9 @@ public class TeacherPreferenceService(
         });
         return new TeacherPreferenceViewDto
         {
-            TeacherTimeAvailabilities = teacherPreferences
+            TeacherTimePreferences = teacherPreferences
                 .Where(x => x.DayOfWeekTimeInterval != null)
-                .Select(x => new TeacherTimeAvailabilityDto
+                .Select(x => new TeacherTimePreferenceViewDto
                 {
                     DayOfWeekTimeInterval = x.DayOfWeekTimeInterval!,
                     TeacherPreferenceType = x.TeacherPreferenceType!.Value,
@@ -60,7 +59,7 @@ public class TeacherPreferenceService(
                 .ToArray(),
             TeacherRoomPreferences = teacherPreferences
                 .Where(x => x.RoomId != null)
-                .Select(x => new TeacherRoomPreferenceDto
+                .Select(x => new TeacherRoomPreferenceViewDto
                 {
                     RoomId = x.RoomId!.Value,
                     RoomName = x.Room!.Name,
@@ -86,10 +85,10 @@ public class TeacherPreferenceService(
                 new ValidationMessage("Не найден преподаватель для сохранения пожеланий преподавателя"));
         }
 
-        var mergedTimeAvailabilities = new List<TeacherTimeAvailabilityDto>();
+        var mergedTimeAvailabilities = new List<TeacherTimePreferenceViewDto>();
         var mergedTimeAvailabilitiesByDayOfWeek =
             new Dictionary<DayOfWeek, List<(TeacherPreferenceType, List<TimeInterval>)>>();
-        var dayOfWeekTimeIntervalsByPreferenceType = teacherPreferenceSaveDto.TeacherTimeAvailabilities
+        var dayOfWeekTimeIntervalsByPreferenceType = teacherPreferenceSaveDto.TeacherTimePreferences
             .GroupBy(x => x.TeacherPreferenceType);
         foreach (var groupByPreferenceType in dayOfWeekTimeIntervalsByPreferenceType)
         {
@@ -112,7 +111,7 @@ public class TeacherPreferenceService(
                 timeAvailabilities.Add((groupByPreferenceType.Key, mergedIntervals.ToList()));
 
                 mergedTimeAvailabilities.AddRange(mergedIntervals
-                    .Select(mergedInterval => new TeacherTimeAvailabilityDto
+                    .Select(mergedInterval => new TeacherTimePreferenceViewDto
                     {
                         TeacherPreferenceType = groupByPreferenceType.Key,
                         DayOfWeekTimeInterval = new DayOfWeekTimeInterval

@@ -146,6 +146,11 @@ public class InsmaScheduleContext(DbContextOptions options) : DbContextBase(opti
         builder.Property(x => x.FlexibilityType)
             .HasConversion(new EnumToStringConverter<LessonFlexibilityType>());
 
+        builder.HasOne(x => x.LessonBatchInfo)
+            .WithMany()
+            .HasForeignKey(x => x.LessonBatchInfoId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         builder.HasMany(x => x.Violations)
             .WithOne(x => x.Lesson)
             .HasForeignKey(x => x.LessonId)

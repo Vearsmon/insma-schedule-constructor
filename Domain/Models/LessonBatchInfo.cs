@@ -46,4 +46,9 @@ public class LessonBatchInfo : IModelWithId
     /// Вес для всех занятий в часах
     /// </summary>
     public int? HoursCost { get; set; }
+
+    /// <summary>
+    /// Требуемое количество часов освоения занятий указанного вида
+    /// </summary>
+    public int? TotalHoursCount { get; set; }
 }

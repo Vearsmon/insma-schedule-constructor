@@ -39,9 +39,7 @@ namespace Dal.Mapping
                 entity.Id = model.Id.Value;
             }
             entity.ScheduleId = model.ScheduleId;
-            entity.Schedule = global::Dal.Mapping.ScheduleMappingRegister.MapModelToEntity(model.Schedule) ?? throw new global::System.NullReferenceException("global::Dal.Mapping.ScheduleMappingRegister.MapModelToEntity returned null");
             entity.TeacherId = model.TeacherId;
-            entity.Teacher = global::Dal.Mapping.TeacherMappingRegister.MapModelToEntity(model.Teacher) ?? throw new global::System.NullReferenceException("global::Dal.Mapping.TeacherMappingRegister.MapModelToEntity returned null");
             entity.RoomId = model.RoomId;
             entity.Room = global::Dal.Mapping.RoomMappingRegister.MapModelToEntity(model.Room);
             entity.DayOfWeek = model.DayOfWeekTimeInterval?.DayOfWeek;

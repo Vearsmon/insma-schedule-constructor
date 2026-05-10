@@ -182,50 +182,75 @@ public class LessonValidationService(
     public async Task<LessonSeriesConflictDto[]> FillValidationMessages(Lesson[] lessons)
     {
         var lessonConflicts = new List<LessonSeriesConflictDto>();
-        var studentGroupAcademicDisciplineLessonsCache = new Dictionary<(Guid, Guid, Guid), List<Lesson>>();
+        // var studentGroupAcademicDisciplineLessonsCache = new Dictionary<(Guid, Guid, Guid), List<Lesson>>();
+
+        var affectedByLessonBatchInfoIds = lessons
+            .SelectMany(x => x.Violations
+                .Where(y => y.Payload.AffectedByLessonBatchInfoId.HasValue)
+                .Select(y => y.Payload.AffectedByLessonBatchInfoId!.Value))
+            .ToArray();
+
+        var currentBatchLessons = await lessonRepository.SearchAsync(new LessonSearchModel
+        {
+            LessonBatchInfoIds = affectedByLessonBatchInfoIds,
+        });
+
+        var currentBatchLessonsTotalHoursByLessonId = lessons
+            .ToDictionary(x => x.Id!.Value,
+                x => currentBatchLessons.Where(y => y.LessonBatchInfoId == x.LessonBatchInfoId).Sum(y => y.HoursCost ?? 0));
+
+        // var lessonsToCache = lessons
+        //     .Where(x => x.AcademicDisciplineId.HasValue)
+        //     .Select(x => x.StudentGroups
+        //         .Where(y => !studentGroupAcademicDisciplineLessonsCache.ContainsKey((x.ScheduleId,
+        //             x.AcademicDisciplineId!.Value, y.Id!.Value)))
+        //         .Select(y => y.Id!.Value))
+        //     .Where(x => x.Any());
+
         foreach (var lesson in lessons)
         {
-            if (lesson.AcademicDisciplineId != null)
-            {
-                var nonCachedStudentGroupIds = lesson.StudentGroups
-                    .Where(x => !studentGroupAcademicDisciplineLessonsCache.ContainsKey((lesson.ScheduleId,
-                        lesson.AcademicDisciplineId!.Value, x.Id!.Value)))
-                    .Select(x => x.Id!.Value)
-                    .ToArray();
-                if (nonCachedStudentGroupIds.Length > 0)
-                {
-                    var lessonsToCache = await lessonRepository.SearchAsync(new LessonSearchModel
-                    {
-                        ScheduleId = lesson.ScheduleId,
-                        AcademicDisciplineId = lesson.AcademicDisciplineId!.Value,
-                        StudentGroupIds = nonCachedStudentGroupIds,
-                    });
-                    foreach (var lessonToCache in lessonsToCache)
-                    {
-                        var lessonNonCachedStudentGroupIds = lessonToCache.StudentGroups
-                            .Where(x => nonCachedStudentGroupIds.Contains(x.Id!.Value))
-                            .Select(x => x.Id!.Value);
-                        foreach (var studentGroupId in lessonNonCachedStudentGroupIds)
-                        {
-                            if (!studentGroupAcademicDisciplineLessonsCache.ContainsKey((lesson.ScheduleId, lesson.AcademicDisciplineId!.Value, studentGroupId)))
-                            {
-                                studentGroupAcademicDisciplineLessonsCache[
-                                    (lesson.ScheduleId, lesson.AcademicDisciplineId!.Value, studentGroupId)] = [];
-                            }
+            // if (lesson.AcademicDisciplineId != null)
+            // {
+            //     var nonCachedStudentGroupIds = lesson.StudentGroups
+            //         .Where(x => !studentGroupAcademicDisciplineLessonsCache.ContainsKey((lesson.ScheduleId,
+            //             lesson.AcademicDisciplineId!.Value, x.Id!.Value)))
+            //         .Select(x => x.Id!.Value)
+            //         .ToArray();
+            //     if (nonCachedStudentGroupIds.Length > 0)
+            //     {
+            //         var lessonsToCache = await lessonRepository.SearchAsync(new LessonSearchModel
+            //         {
+            //             ScheduleId = lesson.ScheduleId,
+            //             AcademicDisciplineId = lesson.AcademicDisciplineId!.Value,
+            //             StudentGroupIds = nonCachedStudentGroupIds,
+            //         });
+            //         foreach (var lessonToCache in lessonsToCache)
+            //         {
+            //             var lessonNonCachedStudentGroupIds = lessonToCache.StudentGroups
+            //                 .Where(x => nonCachedStudentGroupIds.Contains(x.Id!.Value))
+            //                 .Select(x => x.Id!.Value);
+            //             foreach (var studentGroupId in lessonNonCachedStudentGroupIds)
+            //             {
+            //                 if (!studentGroupAcademicDisciplineLessonsCache.ContainsKey((lesson.ScheduleId, lesson.AcademicDisciplineId!.Value, studentGroupId)))
+            //                 {
+            //                     studentGroupAcademicDisciplineLessonsCache[
+            //                         (lesson.ScheduleId, lesson.AcademicDisciplineId!.Value, studentGroupId)] = [];
+            //                 }
+            //
+            //                 studentGroupAcademicDisciplineLessonsCache[
+            //                     (lesson.ScheduleId, lesson.AcademicDisciplineId!.Value, studentGroupId)].Add(lessonToCache);
+            //             }
+            //         }
+            //     }
+            // }
 
-                            studentGroupAcademicDisciplineLessonsCache[
-                                (lesson.ScheduleId, lesson.AcademicDisciplineId!.Value, studentGroupId)].Add(lessonToCache);
-                        }
-                    }
-                }
-            }
-
-            var messages = await GetValidationResultMessageAsync(lesson.Violations, lesson, studentGroupAcademicDisciplineLessonsCache);
+            var messages = await GetValidationResultMessageAsync(lesson.Violations, lesson, currentBatchLessonsTotalHoursByLessonId);
             var index = 0;
             foreach (var violation in lesson.Violations)
             {
                 lessonConflicts.Add(new LessonSeriesConflictDto
                 {
+                    LessonIds = [lesson.Id!.Value],
                     DayOfWeekTimeInterval = new DayOfWeekTimeInterval
                     {
                         DayOfWeek = lesson.DateWithTimeInterval!.Date.DayOfWeek,
@@ -245,7 +270,7 @@ public class LessonValidationService(
     }
 
     public async Task<string[]> GetValidationResultMessageAsync(LessonPolicyViolation[] violations,
-        Lesson? lesson = null, Dictionary<(Guid, Guid, Guid),List<Lesson>>? studentGroupAcademicDisciplineLessonsCache = null)
+        Lesson? lesson = null, Dictionary<Guid, int>? currentBatchLessonsTotalHoursByLessonId = null)
     {
         var disciplineIds = violations.Where(x => x.Payload.AffectedByAcademicDisciplineId.HasValue)
             .Select(x => x.Payload.AffectedByAcademicDisciplineId!.Value)
@@ -355,11 +380,9 @@ public class LessonValidationService(
                     LessonPolicyViolationTemplates.MismatchedAcademicDisciplineTypeTotalHoursCountTemplate,
                     violation.Payload.AffectedByAcademicDisciplineType!.Value.GetDescription(),
                     discipline!.Name,
-                    studentGroupAcademicDisciplineLessonsCache![(lesson!.ScheduleId, lesson.AcademicDisciplineId!.Value, studentGroup!.Id!.Value)]
-                        .Where(x => x.AcademicDisciplineType == violation.Payload.AffectedByAcademicDisciplineType)
-                        .Sum(x => x.HoursCost),
-                    discipline.GetPayloadByType(violation.Payload.AffectedByAcademicDisciplineType!.Value)!.TotalHoursCount,
-                    studentGroup.Name),
+                    currentBatchLessonsTotalHoursByLessonId![lesson!.Id!.Value],
+                    violation.Payload.AffectedByLessonBatchInfo!.TotalHoursCount,
+                    studentGroup!.Name),
                 _ => throw new NotSupportedException(),
             });
         }
