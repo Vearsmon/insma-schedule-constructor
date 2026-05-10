@@ -165,7 +165,9 @@ public class StudentGroupService(
 
         if (newSemiGroups.Length > 0 || previousSemiGroups.Length > 0)
         {
-            await studentGroupRepository.SaveAllAsync(newSemiGroups.Concat(previousSemiGroups).ToArray());
+            await studentGroupRepository.SaveAllAsync(newSemiGroups
+                .Concat(studentGroupSaveDto.StudentGroupType == StudentGroupType.Thread ? [] : previousSemiGroups)
+                .ToArray());
         }
 
         if (studentGroupSaveDto.Id.HasValue)
