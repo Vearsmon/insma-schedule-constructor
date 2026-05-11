@@ -385,26 +385,6 @@ namespace Dal.Migrations
                     b.ToTable("lesson_policy_violation", (string)null);
                 });
 
-            modelBuilder.Entity("Dal.Entities.DbLessonPolicyViolationLink", b =>
-                {
-                    b.Property<Guid>("LessonId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("lesson_id");
-
-                    b.Property<Guid>("LessonPolicyViolationId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("lesson_policy_violation_id");
-
-                    b.HasKey("LessonId", "LessonPolicyViolationId")
-                        .HasName("pk_lesson_policy_violation_link");
-
-                    b.HasIndex("LessonPolicyViolationId")
-                        .IsUnique()
-                        .HasDatabaseName("ix_lesson_policy_violation_link_lesson_policy_violation_id");
-
-                    b.ToTable("lesson_policy_violation_link", (string)null);
-                });
-
             modelBuilder.Entity("Dal.Entities.DbLessonRoom", b =>
                 {
                     b.Property<Guid>("LessonId")
@@ -869,35 +849,35 @@ namespace Dal.Migrations
                     b.HasOne("Dal.Entities.DbAcademicDiscipline", "AffectedByAcademicDiscipline")
                         .WithMany()
                         .HasForeignKey("AffectedByAcademicDisciplineId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .HasConstraintName("fk_lesson_policy_violation_academic_discipline_affected_by_aca");
 
                     b.HasOne("Dal.Entities.DbLesson", "AffectedByLesson")
                         .WithMany()
                         .HasForeignKey("AffectedByLessonId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .HasConstraintName("fk_lesson_policy_violation_lesson_affected_by_lesson_id");
 
                     b.HasOne("Dal.Entities.DbStudentGroup", "AffectedByStudentGroup")
                         .WithMany()
                         .HasForeignKey("AffectedByStudentGroupId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .HasConstraintName("fk_lesson_policy_violation_db_student_group_affected_by_studen");
 
                     b.HasOne("Dal.Entities.DbTeacher", "AffectedByTeacher")
                         .WithMany()
                         .HasForeignKey("AffectedByTeacherId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .HasConstraintName("fk_lesson_policy_violation_db_teacher_affected_by_teacher_id");
 
                     b.HasOne("Dal.Entities.DbTeacherPreference", "AffectedByTeacherPreference")
                         .WithMany()
                         .HasForeignKey("AffectedByTeacherPreferenceId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .HasConstraintName("fk_lesson_policy_violation_db_teacher_preference_affected_by_t");
 
                     b.HasOne("Dal.Entities.DbLesson", "Lesson")
-                        .WithMany()
+                        .WithMany("Violations")
                         .HasForeignKey("LessonId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
@@ -914,27 +894,6 @@ namespace Dal.Migrations
                     b.Navigation("AffectedByTeacherPreference");
 
                     b.Navigation("Lesson");
-                });
-
-            modelBuilder.Entity("Dal.Entities.DbLessonPolicyViolationLink", b =>
-                {
-                    b.HasOne("Dal.Entities.DbLesson", "Lesson")
-                        .WithMany("Violations")
-                        .HasForeignKey("LessonId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_lesson_policy_violation_link_lesson_lesson_id");
-
-                    b.HasOne("Dal.Entities.DbLessonPolicyViolation", "LessonPolicyViolation")
-                        .WithOne()
-                        .HasForeignKey("Dal.Entities.DbLessonPolicyViolationLink", "LessonPolicyViolationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_lesson_policy_violation_link_lesson_policy_violation_lesson");
-
-                    b.Navigation("Lesson");
-
-                    b.Navigation("LessonPolicyViolation");
                 });
 
             modelBuilder.Entity("Dal.Entities.DbLessonRoom", b =>

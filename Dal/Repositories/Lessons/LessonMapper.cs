@@ -13,6 +13,5 @@ public class LessonMapper : IRepositoryMapper<DbLesson, Lesson>
     public void Update(DbLesson entity, Lesson model)
     {
         LessonMappingRegister.UpdateEntityWithModel(model, entity);
-        entity.AcademicDiscipline = null;
     }
 }

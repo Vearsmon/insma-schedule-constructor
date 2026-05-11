@@ -413,31 +413,31 @@ namespace Dal.Migrations
                         column: x => x.affected_by_academic_discipline_id,
                         principalTable: "academic_discipline",
                         principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "fk_lesson_policy_violation_db_student_group_affected_by_studen",
                         column: x => x.affected_by_student_group_id,
                         principalTable: "student_group",
                         principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "fk_lesson_policy_violation_db_teacher_affected_by_teacher_id",
                         column: x => x.affected_by_teacher_id,
                         principalTable: "teacher",
                         principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "fk_lesson_policy_violation_db_teacher_preference_affected_by_t",
                         column: x => x.affected_by_teacher_preference_id,
                         principalTable: "teacher_preference",
                         principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "fk_lesson_policy_violation_lesson_affected_by_lesson_id",
                         column: x => x.affected_by_lesson_id,
                         principalTable: "lesson",
                         principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "fk_lesson_policy_violation_lesson_lesson_id",
                         column: x => x.lesson_id,
@@ -514,30 +514,6 @@ namespace Dal.Migrations
                         name: "fk_lesson_teacher_lesson_lesson_id",
                         column: x => x.lesson_id,
                         principalTable: "lesson",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "lesson_policy_violation_link",
-                columns: table => new
-                {
-                    lesson_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    lesson_policy_violation_id = table.Column<Guid>(type: "uuid", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("pk_lesson_policy_violation_link", x => new { x.lesson_id, x.lesson_policy_violation_id });
-                    table.ForeignKey(
-                        name: "fk_lesson_policy_violation_link_lesson_lesson_id",
-                        column: x => x.lesson_id,
-                        principalTable: "lesson",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "fk_lesson_policy_violation_link_lesson_policy_violation_lesson",
-                        column: x => x.lesson_policy_violation_id,
-                        principalTable: "lesson_policy_violation",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -642,12 +618,6 @@ namespace Dal.Migrations
                 column: "lesson_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_lesson_policy_violation_link_lesson_policy_violation_id",
-                table: "lesson_policy_violation_link",
-                column: "lesson_policy_violation_id",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "ix_lesson_room_room_id",
                 table: "lesson_room",
                 column: "room_id");
@@ -716,7 +686,7 @@ namespace Dal.Migrations
                 name: "lesson_batch_info_teacher");
 
             migrationBuilder.DropTable(
-                name: "lesson_policy_violation_link");
+                name: "lesson_policy_violation");
 
             migrationBuilder.DropTable(
                 name: "lesson_room");
@@ -734,19 +704,16 @@ namespace Dal.Migrations
                 name: "student_group_link");
 
             migrationBuilder.DropTable(
-                name: "lesson_policy_violation");
+                name: "teacher_preference");
+
+            migrationBuilder.DropTable(
+                name: "lesson");
 
             migrationBuilder.DropTable(
                 name: "user");
 
             migrationBuilder.DropTable(
                 name: "student_group");
-
-            migrationBuilder.DropTable(
-                name: "teacher_preference");
-
-            migrationBuilder.DropTable(
-                name: "lesson");
 
             migrationBuilder.DropTable(
                 name: "room");

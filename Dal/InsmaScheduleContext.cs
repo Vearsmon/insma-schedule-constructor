@@ -30,7 +30,6 @@ public class InsmaScheduleContext(DbContextOptions options) : DbContextBase(opti
         builder.Entity<DbLessonStudentGroup>(LessonStudentGroupConfigure);
         builder.Entity<DbLessonTeacher>(LessonTeacherConfigure);
         builder.Entity<DbLessonRoom>(LessonRoomConfigure);
-        builder.Entity<DbLessonPolicyViolationLink>(LessonPolicyViolationLinkConfigure);
         builder.Entity<DbLessonPolicyViolation>(LessonPolicyViolationConfigure);
 
         base.OnModelCreating(builder);
@@ -95,11 +94,13 @@ public class InsmaScheduleContext(DbContextOptions options) : DbContextBase(opti
 
         builder.HasOne(lr => lr.LessonBatchInfo)
             .WithMany(l => l.StudentGroups)
-            .HasForeignKey(lr => lr.LessonBatchInfoId);
+            .HasForeignKey(lr => lr.LessonBatchInfoId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(lr => lr.StudentGroup)
             .WithMany()
-            .HasForeignKey(lr => lr.StudentGroupId);
+            .HasForeignKey(lr => lr.StudentGroupId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 
     private void LessonBatchInfoTeacherConfigure(EntityTypeBuilder<DbLessonBatchInfoTeacher> builder)
@@ -108,11 +109,13 @@ public class InsmaScheduleContext(DbContextOptions options) : DbContextBase(opti
 
         builder.HasOne(lr => lr.LessonBatchInfo)
             .WithMany(l => l.Teachers)
-            .HasForeignKey(lr => lr.LessonBatchInfoId);
+            .HasForeignKey(lr => lr.LessonBatchInfoId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(lr => lr.Teacher)
             .WithMany()
-            .HasForeignKey(lr => lr.TeacherId);
+            .HasForeignKey(lr => lr.TeacherId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 
     private void LessonBatchInfoRoomConfigure(EntityTypeBuilder<DbLessonBatchInfoRoom> builder)
@@ -121,11 +124,13 @@ public class InsmaScheduleContext(DbContextOptions options) : DbContextBase(opti
 
         builder.HasOne(lr => lr.LessonBatchInfo)
             .WithMany(l => l.Rooms)
-            .HasForeignKey(lr => lr.LessonBatchInfoId);
+            .HasForeignKey(lr => lr.LessonBatchInfoId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(lr => lr.Room)
             .WithMany()
-            .HasForeignKey(lr => lr.RoomId);
+            .HasForeignKey(lr => lr.RoomId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 
     private void LessonConfigure(EntityTypeBuilder<DbLesson> builder)
@@ -163,11 +168,13 @@ public class InsmaScheduleContext(DbContextOptions options) : DbContextBase(opti
 
         builder.HasOne(lr => lr.Lesson)
             .WithMany(l => l.StudentGroups)
-            .HasForeignKey(lr => lr.LessonId);
+            .HasForeignKey(lr => lr.LessonId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(lr => lr.StudentGroup)
             .WithMany()
-            .HasForeignKey(lr => lr.StudentGroupId);
+            .HasForeignKey(lr => lr.StudentGroupId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 
     private void LessonTeacherConfigure(EntityTypeBuilder<DbLessonTeacher> builder)
@@ -176,11 +183,13 @@ public class InsmaScheduleContext(DbContextOptions options) : DbContextBase(opti
 
         builder.HasOne(lr => lr.Lesson)
             .WithMany(l => l.Teachers)
-            .HasForeignKey(lr => lr.LessonId);
+            .HasForeignKey(lr => lr.LessonId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(lr => lr.Teacher)
             .WithMany()
-            .HasForeignKey(lr => lr.TeacherId);
+            .HasForeignKey(lr => lr.TeacherId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 
     private void LessonRoomConfigure(EntityTypeBuilder<DbLessonRoom> builder)
@@ -189,27 +198,13 @@ public class InsmaScheduleContext(DbContextOptions options) : DbContextBase(opti
 
         builder.HasOne(lr => lr.Lesson)
             .WithMany(l => l.Rooms)
-            .HasForeignKey(lr => lr.LessonId);
+            .HasForeignKey(lr => lr.LessonId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(lr => lr.Room)
             .WithMany()
-            .HasForeignKey(lr => lr.RoomId);
-    }
-
-    private void LessonPolicyViolationLinkConfigure(EntityTypeBuilder<DbLessonPolicyViolationLink> builder)
-    {
-        builder.HasKey(x => new { x.LessonId, x.LessonPolicyViolationId });
-
-        builder.HasOne(lr => lr.Lesson)
-            .WithMany(l => l.Violations)
-            .HasForeignKey(lr => lr.LessonId);
-
-        builder.HasOne(lr => lr.LessonPolicyViolation)
-            .WithOne()
-            .HasPrincipalKey<DbLessonPolicyViolation>(lpv => lpv.Id)
-            .HasForeignKey<DbLessonPolicyViolationLink>(lr => lr.LessonPolicyViolationId);
-
-        builder.HasIndex(x => x.LessonPolicyViolationId).IsUnique();
+            .HasForeignKey(lr => lr.RoomId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 
     private void LessonPolicyViolationConfigure(EntityTypeBuilder<DbLessonPolicyViolation> builder)
@@ -223,7 +218,7 @@ public class InsmaScheduleContext(DbContextOptions options) : DbContextBase(opti
         builder.HasOne(x => x.AffectedByAcademicDiscipline)
             .WithMany()
             .HasForeignKey(x => x.AffectedByAcademicDisciplineId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.Property(x => x.AffectedByAcademicDisciplineType)
             .HasConversion(new EnumToStringConverter<AcademicDisciplineType>());
@@ -231,22 +226,22 @@ public class InsmaScheduleContext(DbContextOptions options) : DbContextBase(opti
         builder.HasOne(x => x.AffectedByLesson)
             .WithMany()
             .HasForeignKey(x => x.AffectedByLessonId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(x => x.AffectedByStudentGroup)
             .WithMany()
             .HasForeignKey(x => x.AffectedByStudentGroupId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(x => x.AffectedByTeacher)
             .WithMany()
             .HasForeignKey(x => x.AffectedByTeacherId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(x => x.AffectedByTeacherPreference)
             .WithMany()
             .HasForeignKey(x => x.AffectedByTeacherPreferenceId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
     }
 
     private void RoomConfigure(EntityTypeBuilder<DbRoom> builder)

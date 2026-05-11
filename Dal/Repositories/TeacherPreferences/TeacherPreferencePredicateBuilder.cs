@@ -21,10 +21,13 @@ internal class TeacherPreferencePredicateBuilder : IPredicateBuilder<DbTeacherPr
                 .AndIf(searchModel.ScheduleId.HasValue, f => f.ScheduleId == searchModel.ScheduleId)
                 .AndIf(searchModel.TeacherIds.Length > 0, f => searchModel.TeacherIds.Contains(f.TeacherId))
                 .AndIf(searchModel.TeacherPreferenceTypes.Length > 0, f => f.TeacherPreferenceType != null && searchModel.TeacherPreferenceTypes.Contains(f.TeacherPreferenceType!.Value))
-                .AndIf(orBlocksAllowed, PredicateBuilderExtensions.False<DbTeacherPreference>()
-                    .OrIf(searchModel.RoomIds.Length > 0, f => f.RoomId.HasValue && searchModel.RoomIds.Contains(f.RoomId!.Value))
-                    .OrIf(searchModel.DaysOfWeek.Length > 0, f => f.DayOfWeek != null && searchModel.DaysOfWeek.Contains(f.DayOfWeek!.Value))
-                    .OrIf(searchModel.TimeInterval != null, f => f.TimeFrom != null && f.TimeTo != null && f.TimeFrom <= timeTo && f.TimeTo >= timeFrom))
+                .AndIf(orBlocksAllowed,
+                    PredicateBuilderExtensions.False<DbTeacherPreference>()
+                        .OrIf(searchModel.RoomIds.Length > 0, f => f.RoomId.HasValue && searchModel.RoomIds.Contains(f.RoomId!.Value))
+                        .OrIf(searchModel.DaysOfWeek.Length > 0 || searchModel.TimeInterval != null,
+                            PredicateBuilderExtensions.True<DbTeacherPreference>()
+                                .AndIf(searchModel.DaysOfWeek.Length > 0, f => f.DayOfWeek != null && searchModel.DaysOfWeek.Contains(f.DayOfWeek!.Value))
+                                .AndIf(searchModel.TimeInterval != null, f => f.TimeFrom != null && f.TimeTo != null && f.TimeFrom <= timeTo && f.TimeTo >= timeFrom)))
             ;
     }
 }

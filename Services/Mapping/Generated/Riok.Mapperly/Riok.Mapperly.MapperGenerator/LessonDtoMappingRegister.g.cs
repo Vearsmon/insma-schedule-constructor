@@ -87,5 +87,20 @@ namespace Services.Mapping
             target.CurrentErrorsMaxLevel = GetViolationsMaxLevel(model.Violations);
             return target;
         }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        private static partial void AutoUpdateModelWithSaveDto(global::Domain.Dto.SaveDto.LessonSaveDto? dto, global::Domain.Models.Lesson? model)
+        {
+            if (dto == null || model == null)
+                return;
+            model.Id = dto.Id;
+            model.ScheduleId = dto.ScheduleId;
+            model.AcademicDisciplineId = dto.AcademicDisciplineId;
+            model.AcademicDisciplineType = dto.AcademicDisciplineType;
+            model.DateWithTimeInterval = dto.DateWithTimeInterval;
+            model.FlexibilityType = dto.FlexibilityType;
+            model.HoursCost = dto.HoursCost;
+            model.AllowCombining = dto.AllowCombining;
+        }
     }
 }

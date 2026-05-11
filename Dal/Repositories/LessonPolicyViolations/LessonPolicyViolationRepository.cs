@@ -2,6 +2,7 @@
 using Dal.Transactions;
 using Domain.Models;
 using Domain.Models.SearchModels;
+using Microsoft.EntityFrameworkCore;
 
 namespace Dal.Repositories.LessonPolicyViolations;
 
@@ -14,13 +15,7 @@ public class LessonPolicyViolationRepository(
 {
     public async Task DeleteViolationLinksAsync(Guid[] ids, CancellationToken cancellationToken = default)
     {
-        var violations = await SelectAsync(ids, cancellationToken);
-        var violationLinks = violations.Select(x => new DbLessonPolicyViolationLink
-        {
-            LessonId = x.LessonId,
-            LessonPolicyViolationId = x.Id!.Value,
-        });
-        Context.Set<DbLessonPolicyViolationLink>().RemoveRange(violationLinks);
+        await Context.Set<DbLessonPolicyViolation>().Where(x => ids.Contains(x.Id)).ExecuteDeleteAsync(cancellationToken);
         await Context.SaveChangesAsync(cancellationToken);
     }
 

@@ -18,6 +18,17 @@ public class LessonRepository(
         return await base.SearchAsync(predicateBuilder, searchModel);
     }
 
+    public override async Task<Guid> SaveAsync(Lesson model, CancellationToken cancellationToken = default)
+    {
+        var previousLesson = model.Id.HasValue ? await GetAsync(model.Id!.Value, cancellationToken) : null;
+        if (previousLesson != null)
+        {
+            await Context.Set<DbLessonPolicyViolation>().Where(x => x.LessonId == previousLesson.Id).ExecuteDeleteAsync(cancellationToken);
+            await Context.SaveChangesAsync(cancellationToken);
+        }
+        return await base.SaveAsync(model, cancellationToken);
+    }
+
     protected override IQueryable<DbLesson> Query()
     {
         return Context.Set<DbLesson>()
@@ -29,7 +40,6 @@ public class LessonRepository(
             .Include(x => x.Rooms)
             .ThenInclude(x => x.Room)
             .Include(x => x.LessonBatchInfo)
-            .Include(x => x.Violations)
-            .ThenInclude(x => x.LessonPolicyViolation);
+            .Include(x => x.Violations);
     }
 }

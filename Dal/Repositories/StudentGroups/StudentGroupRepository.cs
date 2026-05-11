@@ -59,6 +59,7 @@ public class StudentGroupRepository(
 
     public override async Task<Guid[]> SaveAllAsync(StudentGroup[] models, CancellationToken cancellationToken = default)
     {
+        var totalRemovedChildIds = new List<Guid>();
         foreach (var model in models)
         {
             var previousStudentGroup = model.Id.HasValue ? await GetAsync(model.Id!.Value, cancellationToken) : null;
@@ -66,7 +67,12 @@ public class StudentGroupRepository(
 
             var removedChildIds = previousStudentGroup.Children
                 .Where(x => model.Children.All(y => y.Id != x.Id))
-                .Select(x => x.Id!.Value);
+                .Select(x => x.Id!.Value)
+                .ToArray();
+            if (model.StudentGroupType == StudentGroupType.Group)
+            {
+                totalRemovedChildIds.AddRange(removedChildIds);
+            }
             var removedParentIds = previousStudentGroup.Parents
                 .Where(x => model.Parents.All(y => y.Id != x.Id))
                 .Select(x => x.Id!.Value);
@@ -81,6 +87,7 @@ public class StudentGroupRepository(
             model.Parents = model.Parents.Where(x => previousStudentGroup.Parents.All(y => y.Id != x.Id)).ToArray();
         }
         await Context.SaveChangesAsync(cancellationToken);
+        await base.DeleteAsync(totalRemovedChildIds.ToArray(), cancellationToken);
         return await base.SaveAllAsync(models, cancellationToken);
     }
 

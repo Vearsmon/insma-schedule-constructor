@@ -79,13 +79,40 @@ public class LessonService(
 
     public async Task SaveAsync(LessonSaveDto lessonSaveDto)
     {
-        var lesson = LessonDtoMappingRegister.MapSaveDtoToModel(lessonSaveDto)!;
-        lesson.Id ??= await lessonRepository.SaveAsync(lesson);
-        var violations = await lessonValidationService.ValidateAsync(lesson);
-        lesson.Violations = lesson.Violations.Concat(violations.Where(x => x.LessonId == (lesson.Id ?? Guid.Empty))).ToArray();
-        var conflictingLessons = await lessonRepository.SelectAsync(violations.Where(x => x.LessonId != (lesson.Id ?? Guid.Empty)).Select(x => x.LessonId).Distinct().ToArray());
+        Lesson lesson;
+        var id = lessonSaveDto.Id;
+        if (id.HasValue)
+        {
+            lesson = await lessonRepository.GetAsync(id.Value);
+            LessonDtoMappingRegister.UpdateModelWithSaveDto(lessonSaveDto, lesson);
+            lesson.Violations = [];
+            await lessonRepository.SaveAsync(lesson);
+        }
+        else
+        {
+            lesson = LessonDtoMappingRegister.MapSaveDtoToModel(lessonSaveDto)!;
+            id = await lessonRepository.SaveAsync(lesson);
+        }
 
-        var lessonsWithConflict = UpdateLessonsPolicyViolations(violations.Where(x => x.LessonId != (lesson.Id ?? Guid.Empty)).ToList(), conflictingLessons);
+        lesson.Id ??= id;
+        var violations = await lessonValidationService.ValidateAsync([lesson]);
+        var lessonToSaveViolations = violations
+            .Where(x => x.LessonId == (lesson.Id ?? Guid.Empty))
+            .ToArray();
+        var otherLessonsViolations = violations
+            .Where(x => x.LessonId != (lesson.Id ?? Guid.Empty))
+            .ToArray();
+        lesson.Violations = lesson.Violations.Concat(lessonToSaveViolations).ToArray();
+        var conflictingLessons = await lessonRepository.SelectAsync(otherLessonsViolations
+            .Select(x => x.LessonId)
+            .Distinct()
+            .ToArray());
+
+        foreach (var conflictingLesson in conflictingLessons)
+        {
+            conflictingLesson.Violations = [];
+        }
+        var lessonsWithConflict = UpdateLessonsPolicyViolations(otherLessonsViolations, conflictingLessons);
         await lessonValidationService.DeleteViolationLinksAsync(lessonsWithConflict.SelectMany(x => x.Violations)
             .Where(x => x.Id.HasValue).Select(x => x.Id!.Value).ToArray());
         await lessonRepository.SaveAllAsync(lessonsWithConflict.Concat([lesson]).ToArray());
@@ -107,13 +134,13 @@ public class LessonService(
                 academicDiscipline, lesson.AcademicDisciplineType!.Value);
         }
 
-        var lessonsWithConflict = UpdateLessonsPolicyViolations(lessonPolicyViolations,
-            lessons.DistinctBy(x => x.Id!.Value).ToArray());
-
-        foreach (var lesson in lessonsWithConflict)
+        var conflictingLessons = lessons.DistinctBy(x => x.Id!.Value).ToArray();
+        foreach (var conflictingLesson in conflictingLessons)
         {
-            lesson.AcademicDiscipline = null;
+            conflictingLesson.Violations = [];
         }
+        var lessonsWithConflict = UpdateLessonsPolicyViolations(lessonPolicyViolations.ToArray(), conflictingLessons);
+
         await lessonRepository.SaveAllAsync(lessonsWithConflict);
     }
 
@@ -122,14 +149,39 @@ public class LessonService(
         var previousAcademicDisciplineVersion = academicDiscipline.Id.HasValue
             ? await academicDisciplineRepository.GetAsync(academicDiscipline.Id!.Value)
             : null;
-        var lessonTypesToDelete = previousAcademicDisciplineVersion?.AllowedLessonTypes
-            .Except(academicDiscipline.AllowedLessonTypes)
-            .ToArray() ?? [];
-        var lessonTypesToAdd = academicDiscipline.AllowedLessonTypes
-            .Except(previousAcademicDisciplineVersion?.AllowedLessonTypes ?? []);
-        var lessonTypesToUpdate = previousAcademicDisciplineVersion?.AllowedLessonTypes
-            .Intersect(academicDiscipline.AllowedLessonTypes)
-            .ToArray() ?? [];
+        var previousAllowedLessonTypes = previousAcademicDisciplineVersion?.AllowedLessonTypes ?? [];
+
+        var lessonTypesToDelete = previousAllowedLessonTypes.Except(academicDiscipline.AllowedLessonTypes).ToArray();
+        var lessonTypesToAdd = academicDiscipline.AllowedLessonTypes.Except(previousAllowedLessonTypes);
+        var lessonTypesToUpdate = previousAllowedLessonTypes.Intersect(academicDiscipline.AllowedLessonTypes).ToArray();
+
+        var lessonTypesToSave = lessonTypesToAdd.Concat(lessonTypesToUpdate).Distinct().ToArray();
+        var lessonBatchInfoLinkedEntityIds = lessonTypesToSave
+            .SelectMany(academicDiscipline.GetBatchInfosByType)
+            .Select(lessonBatchInfo => new
+            {
+                StudentGroupIds = lessonBatchInfo.StudentGroups.Select(studentGroup => studentGroup.Id!.Value),
+                TeacherIds = lessonBatchInfo.Teachers.Select(teacher => teacher.Id!.Value),
+                RoomIds = lessonBatchInfo.Rooms.Select(room => room.Id!.Value),
+            })
+            .ToArray();
+
+        var schedule = await scheduleRepository.GetAsync(academicDiscipline.ScheduleId);
+
+        var lessonBatchInfoStudentGroups = await studentGroupRepository.SelectAsync(lessonBatchInfoLinkedEntityIds.SelectMany(x => x.StudentGroupIds).ToArray());
+        var lessonBatchInfoTeachers = await teacherRepository.SelectAsync(lessonBatchInfoLinkedEntityIds.SelectMany(x => x.TeacherIds).ToArray());
+        var lessonBatchInfoRooms = await roomRepository.SelectAsync(lessonBatchInfoLinkedEntityIds.SelectMany(x => x.RoomIds).ToArray());
+
+        var lessonBatchInfoStudentGroupsById = lessonBatchInfoStudentGroups.ToDictionary(x => x.Id!.Value);
+        var lessonBatchInfoTeachersById = lessonBatchInfoTeachers.ToDictionary(x => x.Id!.Value);
+        var lessonBatchInfoRoomsById = lessonBatchInfoRooms.ToDictionary(x => x.Id!.Value);
+
+        var lessonsToSave = lessonTypesToSave
+            .SelectMany(lessonTypeToSave =>
+            {
+                var lessonBatchInfos = academicDiscipline.GetBatchInfosByType(lessonTypeToSave);
+                return GetBatchLessonsToAdd( lessonBatchInfos, lessonTypeToSave);
+            });
 
         if (academicDiscipline.Id.HasValue && (lessonTypesToDelete.Length > 0 || lessonTypesToUpdate.Length > 0))
         {
@@ -142,33 +194,24 @@ public class LessonService(
 
             await lessonRepository.DeleteAsync(lessonsToDelete.Select(x => x.Id!.Value).ToArray());
         }
-
-        var lessonsToSave = new List<Lesson>();
-        var schedule = await scheduleRepository.GetAsync(academicDiscipline.ScheduleId);
-        foreach (var lessonTypeToSave in lessonTypesToAdd.Concat(lessonTypesToUpdate).Distinct().ToArray())
-        {
-            var lessonBatchInfos = academicDiscipline.GetBatchInfosByType(lessonTypeToSave);
-            lessonsToSave.AddRange(await GetBatchLessonsToAdd(lessonBatchInfos, lessonTypeToSave));
-        }
-
         await SaveLessonBatchAsync(lessonsToSave.ToArray());
 
         return;
 
-        async Task<Lesson[]> GetBatchLessonsToAdd(LessonBatchInfo[] lessonBatchInfos, AcademicDisciplineType type)
+        Lesson[] GetBatchLessonsToAdd(LessonBatchInfo[] lessonBatchInfos, AcademicDisciplineType type)
         {
             var result = new List<Lesson>();
             foreach (var lessonBatchInfo in lessonBatchInfos)
             {
-                var groups = await studentGroupRepository.SelectAsync(lessonBatchInfo.StudentGroups.Select(x => x.Id!.Value).ToArray());
+                var groups = lessonBatchInfo.StudentGroups.Select(studentGroup => lessonBatchInfoStudentGroupsById[studentGroup.Id!.Value]).ToArray();
                 var rootGroups = groups
                     .Where(l => groups
                         .Where(x => x.Id != l.Id)
                         .All(r => l.Parents
                             .All(x => x.Id!.Value != r.Id!.Value)))
                     .ToArray();
-                var teachers = await teacherRepository.SelectAsync(lessonBatchInfo.Teachers.Select(x => x.Id!.Value).ToArray());
-                var rooms = await roomRepository.SelectAsync(lessonBatchInfo.Rooms.Select(x => x.Id!.Value).ToArray());
+                var teachers = lessonBatchInfo.Teachers.Select(teacher => lessonBatchInfoTeachersById[teacher.Id!.Value]).ToArray();
+                var rooms = lessonBatchInfo.Rooms.Select(room => lessonBatchInfoRoomsById[room.Id!.Value]).ToArray();
                 var dates = DateOnlyHelper.GetDatesInIntervalByDaysOfWeek(
                     lessonBatchInfo.DateInterval,
                     lessonBatchInfo.DayOfWeekTimeIntervals.Select(x => x.DayOfWeek).ToArray(),
@@ -190,7 +233,7 @@ public class LessonService(
                             Date = date,
                             TimeInterval = timeIntervalsByDayOfWeek[date.DayOfWeek].TimeInterval,
                         },
-                        FlexibilityType = LessonFlexibilityType.Fixed,
+                        FlexibilityType = LessonFlexibilityType.Flexible,
                         HoursCost = lessonBatchInfo.HoursCost,
                         AllowCombining = lessonBatchInfo.AllowCombining,
                         LessonBatchInfoId = lessonBatchInfo.Id!.Value,
@@ -239,8 +282,12 @@ public class LessonService(
                 lessonPolicyViolations);
         }
 
-        var lessonsWithConflict = UpdateLessonsPolicyViolations(lessonPolicyViolations,
-            conflictingByTimeLessons.Concat(conflictingByRoomLessons).DistinctBy(x => x.Id).ToArray());
+        var conflictingLessons = conflictingByTimeLessons.Concat(conflictingByRoomLessons).DistinctBy(x => x.Id).ToArray();
+        foreach (var lesson in conflictingLessons)
+        {
+            lesson.Violations = [];
+        }
+        var lessonsWithConflict = UpdateLessonsPolicyViolations(lessonPolicyViolations.ToArray(), conflictingLessons);
         await lessonRepository.SaveAllAsync(lessonsWithConflict);
     }
 
@@ -290,9 +337,8 @@ public class LessonService(
                          .Where(x => x.StudentGroups.Any(y => y.Id == studentGroup.Id)))
             {
                 var conflictingByGroupLessons = lessonsOnDate
-                    .Where(x =>
-                        x.Id != newStudentGroupLesson.Id
-                        && x.DateWithTimeInterval!.HasIntersection(newStudentGroupLesson.DateWithTimeInterval!))
+                    .Where(x => x.Id != newStudentGroupLesson.Id
+                                && x.DateWithTimeInterval!.HasIntersection(newStudentGroupLesson.DateWithTimeInterval!))
                     .ToArray();
 
                 lessonValidationService.ValidateLessonConflictByGroup(newStudentGroupLesson,
@@ -304,7 +350,7 @@ public class LessonService(
         {
             lesson.Violations = [];
         }
-        var lessonsWithConflict = UpdateLessonsPolicyViolations(lessonPolicyViolations, studentGroupHierarchyAttachmentLessons);
+        var lessonsWithConflict = UpdateLessonsPolicyViolations(lessonPolicyViolations.ToArray(), studentGroupHierarchyAttachmentLessons);
         await lessonRepository.SaveAllAsync(lessonsWithConflict);
     }
 
@@ -344,22 +390,23 @@ public class LessonService(
             conflictingLessons, null, teacherIds, roomIds, conflictingTeacherPreferences, includeTiming: true);
 
         var messages = await lessonValidationService.GetValidationResultMessageAsync(lessonPolicyViolations.ToArray());
-        return lessonPolicyViolations.Select((validationMessage, index) => new LessonSeriesConflictDto
+        var messagesFlat = messages.SelectMany(message => message.Messages).ToArray();
+        return lessonPolicyViolations.Select((violation, index) => new LessonSeriesConflictDto
         {
-            DayOfWeekTimeInterval = validationMessage.Payload.DateWithTimeInterval != null
+            DayOfWeekTimeInterval = violation.Payload.DateWithTimeInterval != null
                 ? new DayOfWeekTimeInterval
                 {
-                    DayOfWeek = validationMessage.Payload.DateWithTimeInterval!.Date.DayOfWeek,
-                    TimeInterval = validationMessage.Payload.DateWithTimeInterval.TimeInterval,
+                    DayOfWeek = violation.Payload.DateWithTimeInterval!.Date.DayOfWeek,
+                    TimeInterval = violation.Payload.DateWithTimeInterval.TimeInterval,
                 }
-                : validationMessage.Payload.DayOfWeekTimeInterval!,
+                : violation.Payload.DayOfWeekTimeInterval!,
             Messages = [new LessonSeriesConflictMessageDto
             {
-                TimeInterval = validationMessage.Payload.DateWithTimeInterval?.TimeInterval
-                    ?? validationMessage.Payload.DayOfWeekTimeInterval!.TimeInterval,
-                Message = messages[index],
+                TimeInterval = violation.Payload.DateWithTimeInterval?.TimeInterval
+                    ?? violation.Payload.DayOfWeekTimeInterval!.TimeInterval,
+                Message = messagesFlat[index],
             }],
-            ErrorType = validationMessage.ErrorType,
+            ErrorType = violation.ErrorType,
         }).ToArray();
     }
 
@@ -378,26 +425,27 @@ public class LessonService(
     {
         var ids = await lessonRepository.SaveAllAsync(lessons);
         lessons = await lessonRepository.SelectAsync(ids);
-        foreach (var lesson in lessons)
-        {
-            var lessonPolicyViolations = await lessonValidationService.ValidateAsync(lesson);
-            var conflictingLessons = (await lessonRepository.SelectAsync(lessonPolicyViolations.Select(x => x.LessonId).ToArray())).Concat([lesson]).ToArray();
+        var lessonPolicyViolations = await lessonValidationService.ValidateAsync(lessons);
 
-            var lessonsWithConflict = UpdateLessonsPolicyViolations(lessonPolicyViolations.ToList(), conflictingLessons);
-            await lessonRepository.SaveAllAsync(lessonsWithConflict);
-        }
+        var conflictingLessons = await lessonRepository.SelectAsync(lessonPolicyViolations.Select(x => x.LessonId).ToArray());
+        conflictingLessons = conflictingLessons.Concat(lessons).ToArray();
+        var lessonsWithConflict = UpdateLessonsPolicyViolations(lessonPolicyViolations.ToArray(), conflictingLessons);
+        await lessonRepository.SaveAllAsync(lessonsWithConflict);
     }
 
-    private Lesson[] UpdateLessonsPolicyViolations(List<LessonPolicyViolation> lessonPolicyViolations, Lesson[] lessonsWithConflict)
+    private Lesson[] UpdateLessonsPolicyViolations(LessonPolicyViolation[] lessonPolicyViolations, Lesson[] lessonsWithConflict)
     {
         foreach (var lesson in lessonsWithConflict)
         {
             lesson.Id ??= Guid.Empty;
         }
-        var lessonsWithConflictById = lessonsWithConflict.DistinctBy(x => x.Id).ToDictionary(x => x.Id!.Value);
         var affectedLessonNewViolationsByLessonId = lessonPolicyViolations
             .GroupBy(x => x.LessonId)
             .ToDictionary(x => x.Key);
+        var lessonsWithConflictById = lessonsWithConflict
+            .DistinctBy(x => x.Id)
+            .Where(x => affectedLessonNewViolationsByLessonId.ContainsKey(x.Id!.Value))
+            .ToDictionary(x => x.Id!.Value);
         foreach (var (lessonId, affectedLessonPolicyViolations) in affectedLessonNewViolationsByLessonId)
         {
             lessonsWithConflictById[lessonId].Violations = affectedLessonPolicyViolations.ToArray();

@@ -14,7 +14,6 @@ namespace Dal.Mapping
             target.Id = entity.Id;
             target.ScheduleId = entity.ScheduleId;
             target.AcademicDisciplineId = entity.AcademicDisciplineId;
-            target.AcademicDiscipline = global::Dal.Mapping.AcademicDisciplineMappingRegister.MapEntityToModel(entity.AcademicDiscipline);
             target.AcademicDisciplineType = entity.AcademicDisciplineType;
             target.FlexibilityType = entity.FlexibilityType;
             target.HoursCost = entity.HoursCost;
@@ -57,7 +56,6 @@ namespace Dal.Mapping
             }
             entity.ScheduleId = model.ScheduleId;
             entity.AcademicDisciplineId = model.AcademicDisciplineId;
-            entity.AcademicDiscipline = global::Dal.Mapping.AcademicDisciplineMappingRegister.MapModelToEntity(model.AcademicDiscipline);
             entity.AcademicDisciplineType = model.AcademicDisciplineType;
             entity.FlexibilityType = model.FlexibilityType;
             entity.HoursCost = model.HoursCost;

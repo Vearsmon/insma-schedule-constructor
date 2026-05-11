@@ -6,7 +6,7 @@ namespace Domain.Services;
 
 public interface ILessonValidationService
 {
-    Task<LessonPolicyViolation[]> ValidateAsync(Lesson lesson);
+    Task<LessonPolicyViolation[]> ValidateAsync(Lesson[] lessons);
 
     Task DeleteViolationLinksAsync(Guid[] ids);
 
@@ -56,8 +56,8 @@ public interface ILessonValidationService
         List<LessonPolicyViolation> violations,
         bool includeTiming = false);
 
-    Task<string[]> GetValidationResultMessageAsync(LessonPolicyViolation[] violations,
-        Lesson? lesson = null, Dictionary<Guid, int>? currentBatchLessonsTotalHoursByLessonId = null);
+    Task<LessonValidationMessageBatchDto[]> GetValidationResultMessageAsync(LessonPolicyViolation[] violations,
+        Dictionary<Guid, int>? currentBatchLessonsTotalHoursByLessonId = null);
 
     Task RemovePolicyViolations(Guid[] lessonIds, LessonPolicyViolationCode[] validationCodes);
 

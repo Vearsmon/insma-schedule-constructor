@@ -96,5 +96,5 @@ public class DbLesson : IDbEntityWithId
     /// <summary>
     /// Сообщения валидации
     /// </summary>
-    public ICollection<DbLessonPolicyViolationLink> Violations { get; set; } = [];
+    public ICollection<DbLessonPolicyViolation> Violations { get; set; } = [];
 }
