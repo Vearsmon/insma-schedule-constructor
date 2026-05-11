@@ -1,3 +1,4 @@
+using Domain.Dto;
 using Domain.Models.Common;
 using Domain.Models.Enums;
 
@@ -69,6 +70,51 @@ public static class DateOnlyHelper
             {
                 skipUntilDate = date.AddDays(8);
             }
+        }
+
+        return result.ToArray();
+    }
+
+    public static LessonSeriesConflictDto[] MergeIntersections(this LessonSeriesConflictDto[] seriesConflicts)
+    {
+        var result = new List<LessonSeriesConflictDto>();
+        var seriesConflictsGroupByDayOfWeek = seriesConflicts.GroupBy(x => x.DayOfWeekTimeInterval.DayOfWeek);
+        foreach (var group in seriesConflictsGroupByDayOfWeek)
+        {
+            var sortedConflicts = group.OrderBy(x => x.DayOfWeekTimeInterval.TimeInterval.TimeFrom).ToArray();
+            var dayOfWeekMergedIntersections = new List<LessonSeriesConflictDto> { sortedConflicts.First() };
+            for (var i = 1; i < sortedConflicts.Length; i++)
+            {
+                var lastConflict = dayOfWeekMergedIntersections.Last();
+                var current = sortedConflicts[i];
+
+                if (lastConflict.DayOfWeekTimeInterval.TimeInterval.TimeTo >= current.DayOfWeekTimeInterval.TimeInterval.TimeFrom)
+                {
+                    dayOfWeekMergedIntersections.Remove(lastConflict);
+                    dayOfWeekMergedIntersections.Add(new LessonSeriesConflictDto
+                    {
+                        LessonIds = lastConflict.LessonIds.Concat(current.LessonIds).ToArray(),
+                        DayOfWeekTimeInterval = new DayOfWeekTimeInterval
+                        {
+                            DayOfWeek = current.DayOfWeekTimeInterval.DayOfWeek,
+                            TimeInterval = new TimeInterval
+                            {
+                                TimeFrom = lastConflict.DayOfWeekTimeInterval.TimeInterval.TimeFrom,
+                                TimeTo = lastConflict.DayOfWeekTimeInterval.TimeInterval.TimeTo > current.DayOfWeekTimeInterval.TimeInterval.TimeTo
+                                    ? lastConflict.DayOfWeekTimeInterval.TimeInterval.TimeTo
+                                    : current.DayOfWeekTimeInterval.TimeInterval.TimeTo,
+                            },
+                        },
+                        Messages = lastConflict.Messages.Concat(current.Messages).ToArray(),
+                        ErrorType = new[] { lastConflict.ErrorType, current.ErrorType }.Max(),
+                    });
+                }
+                else
+                {
+                    dayOfWeekMergedIntersections.Add(current);
+                }
+            }
+            result.AddRange(dayOfWeekMergedIntersections);
         }
 
         return result.ToArray();

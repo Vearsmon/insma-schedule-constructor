@@ -16,5 +16,6 @@ public class LessonShortDto
     public bool AllowCombining { get; set; }
     public int HoursCost { get; set; }
     public string? LessonPolicyViolationDescription { get; set; }
+    public Guid? LessonBatchInfoId { get; set; }
     public LessonValidationErrorType? CurrentErrorsMaxLevel { get; set; }
 }

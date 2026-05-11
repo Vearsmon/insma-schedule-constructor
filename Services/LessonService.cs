@@ -391,7 +391,7 @@ public class LessonService(
 
         var messages = await lessonValidationService.GetValidationResultMessageAsync(lessonPolicyViolations.ToArray());
         var messagesFlat = messages.SelectMany(message => message.Messages).ToArray();
-        return lessonPolicyViolations.Select((violation, index) => new LessonSeriesConflictDto
+        var lessonSeriesConflicts = lessonPolicyViolations.Select((violation, index) => new LessonSeriesConflictDto
         {
             DayOfWeekTimeInterval = violation.Payload.DateWithTimeInterval != null
                 ? new DayOfWeekTimeInterval
@@ -408,6 +408,8 @@ public class LessonService(
             }],
             ErrorType = violation.ErrorType,
         }).ToArray();
+
+        return lessonSeriesConflicts.MergeIntersections();
     }
 
     public async Task DeleteAsync(Guid scheduleId, Guid lessonId)

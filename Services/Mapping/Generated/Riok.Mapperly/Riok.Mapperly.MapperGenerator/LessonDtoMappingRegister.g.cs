@@ -84,6 +84,7 @@ namespace Services.Mapping
             {
                 target.HoursCost = model.HoursCost.Value;
             }
+            target.LessonBatchInfoId = model.LessonBatchInfoId;
             target.CurrentErrorsMaxLevel = GetViolationsMaxLevel(model.Violations);
             return target;
         }

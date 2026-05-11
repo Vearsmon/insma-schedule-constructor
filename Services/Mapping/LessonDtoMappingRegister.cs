@@ -91,7 +91,6 @@ public static partial class LessonDtoMappingRegister
     [MapperIgnoreSource(nameof(Lesson.StudentGroups))]
     [MapperIgnoreSource(nameof(Lesson.Teachers))]
     [MapperIgnoreSource(nameof(Lesson.Rooms))]
-    [MapperIgnoreSource(nameof(Lesson.LessonBatchInfoId))]
     [MapperIgnoreSource(nameof(Lesson.LessonBatchInfo))]
     [MapperIgnoreTarget(nameof(LessonShortDto.StudentGroups))]
     [MapperIgnoreTarget(nameof(LessonShortDto.Teachers))]
