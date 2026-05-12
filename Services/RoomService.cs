@@ -23,6 +23,7 @@ public class RoomService(
 {
     public async Task<RoomTreeDto[]> SearchTreeAsync()
     {
+        // todo: вернуть поле campus в room
         var items = await roomRepository.SelectAllAsync();
         var campuses = (await campusRepository.SelectAllAsync()).ToDictionary(x => x.Id!.Value);
         return items.GroupBy(x => x.CampusId)
@@ -57,6 +58,7 @@ public class RoomService(
 
     public async Task<RoomTreeDto[]> GetRoomTreeAsync(RoomSearchModel searchModel)
     {
+        // todo: неправильный campusName
         var rooms = await roomRepository.SearchAsync(searchModel);
         return rooms
             .GroupBy(room => room.CampusId)
@@ -73,6 +75,28 @@ public class RoomService(
     }
 
     public async Task SaveAsync(RoomSaveDto roomSaveDto)
+    {
+        await ValidateAsync(roomSaveDto);
+
+        if (roomSaveDto.Id.HasValue)
+        {
+            var room = await roomRepository.GetAsync(roomSaveDto.Id!.Value);
+            RoomDtoMappingRegister.UpdateModelWithSaveDto(roomSaveDto, room);
+            await roomRepository.SaveAsync(room);
+        }
+        else
+        {
+            var room = RoomDtoMappingRegister.MapSaveDtoToModel(roomSaveDto)!;
+            await roomRepository.SaveAsync(room);
+        }
+    }
+
+    public async Task DeleteAsync(Guid roomId)
+    {
+        await roomRepository.DeleteAsync(roomId);
+    }
+
+    private async Task ValidateAsync(RoomSaveDto roomSaveDto)
     {
         var validationMessages = new List<ValidationMessage>();
         if (roomSaveDto.Name == null!)
@@ -92,22 +116,5 @@ public class RoomService(
         {
             throw new ServiceException(validationMessages.ToArray());
         }
-
-        if (roomSaveDto.Id.HasValue)
-        {
-            var room = await roomRepository.GetAsync(roomSaveDto.Id!.Value);
-            RoomDtoMappingRegister.UpdateModelWithSaveDto(roomSaveDto, room);
-            await roomRepository.SaveAsync(room);
-        }
-        else
-        {
-            var room = RoomDtoMappingRegister.MapSaveDtoToModel(roomSaveDto)!;
-            await roomRepository.SaveAsync(room);
-        }
-    }
-
-    public async Task DeleteAsync(Guid roomId)
-    {
-        await roomRepository.DeleteAsync(roomId);
     }
 }

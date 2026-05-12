@@ -26,7 +26,7 @@ public interface ILessonService
 
     Task RecalculateConflictsForNewStudentGroup(StudentGroup studentGroup);
 
-    Task<LessonSeriesConflictDto[]> GetLessonSeriesConflictsAsync(LessonBatchInfo lessonBatchInfo, Guid scheduleId);
+    Task<LessonSeriesConflictDto[]> GetLessonSeriesConflictsAsync(Lesson lesson, LessonBatchInfo lessonBatchInfo, Guid scheduleId);
 
-    Task DeleteAsync(Guid scheduleId, Guid lessonId);
+    Task DeleteAsync(Guid lessonId);
 }

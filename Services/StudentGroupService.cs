@@ -80,7 +80,6 @@ public class StudentGroupService(
             id = await studentGroupRepository.SaveAsync(studentGroup);
         }
 
-        var subgroupsToSave = new List<StudentGroup>();
         if (studentGroupSaveDto.StudentGroupType == StudentGroupType.Group)
         {
             var newSemiGroups = studentGroupSaveDto.Children
@@ -93,7 +92,6 @@ public class StudentGroupService(
                     StudentGroupType = StudentGroupType.SemiGroup,
                     Parents = [new StudentGroup { Id = id!.Value }],
                 }).ToArray();
-            subgroupsToSave.AddRange(newSemiGroups);
 
             var previousSemiGroupsSaveDto = studentGroupSaveDto.Children
                 .Where(x => x.Id.HasValue)
@@ -104,18 +102,11 @@ public class StudentGroupService(
             {
                 previousSemiGroup.Name = previousSemiGroupsSaveDto.Single(x => x.Id == previousSemiGroup.Id).Name;
             }
-            subgroupsToSave.AddRange(previousSemiGroups);
+
+            await studentGroupRepository.SaveAllAsync(newSemiGroups.Concat(previousSemiGroups).ToArray());
         }
 
-        if (subgroupsToSave.Count > 0)
-        {
-            await studentGroupRepository.SaveAllAsync(subgroupsToSave.ToArray());
-        }
-
-        if (studentGroupSaveDto.Id.HasValue)
-        {
-            await lessonService.RecalculateConflictsForNewStudentGroup(studentGroup);
-        }
+        await lessonService.RecalculateConflictsForNewStudentGroup(studentGroup);
     }
 
     public async Task DeleteAsync(Guid studentGroupId)

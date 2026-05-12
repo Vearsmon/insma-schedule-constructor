@@ -4,7 +4,6 @@ using Dal.Repositories.Rooms;
 using Dal.Repositories.Schedules;
 using Dal.Repositories.TeacherPreferences;
 using Dal.Repositories.Teachers;
-using Domain.Dto;
 using Domain.Dto.SaveDto;
 using Domain.Exceptions;
 using Domain.Models;
@@ -45,9 +44,9 @@ public class TeacherPreferenceServiceTests
         var teacherPreferenceToSave = _fixture.Build<TeacherPreferenceSaveDto>()
             .With(x => x.ScheduleId, Guid.NewGuid())
             .With(x => x.TeacherId, Guid.NewGuid())
-            .With(x => x.TeacherTimeAvailabilities,
+            .With(x => x.TeacherTimePreferences,
                 [
-                    new TeacherTimeAvailabilityDto
+                    new TeacherTimePreferenceSaveDto
                     {
                         TeacherPreferenceType = TeacherPreferenceType.Restricted,
                         DayOfWeekTimeInterval = new DayOfWeekTimeInterval
@@ -60,7 +59,7 @@ public class TeacherPreferenceServiceTests
                             },
                         },
                     },
-                    new TeacherTimeAvailabilityDto
+                    new TeacherTimePreferenceSaveDto
                     {
                         TeacherPreferenceType = TeacherPreferenceType.Preferred,
                         DayOfWeekTimeInterval = new DayOfWeekTimeInterval
@@ -76,12 +75,12 @@ public class TeacherPreferenceServiceTests
                 ])
             .With(x => x.TeacherRoomPreferences,
                 [
-                    new TeacherRoomPreferenceDto
+                    new TeacherRoomPreferenceSaveDto
                     {
                         TeacherPreferenceType = TeacherPreferenceType.Restricted,
                         RoomId = roomId,
                     },
-                    new TeacherRoomPreferenceDto
+                    new TeacherRoomPreferenceSaveDto
                     {
                         TeacherPreferenceType = TeacherPreferenceType.Preferred,
                         RoomId = roomId,
@@ -114,8 +113,8 @@ public class TeacherPreferenceServiceTests
         var preferencesToSave = _fixture.Build<TeacherPreferenceSaveDto>()
             .With(x => x.ScheduleId, Guid.NewGuid())
             .With(x => x.TeacherId, Guid.NewGuid())
-            .With(x => x.TeacherTimeAvailabilities, [
-                new TeacherTimeAvailabilityDto
+            .With(x => x.TeacherTimePreferences, [
+                new TeacherTimePreferenceSaveDto
                 {
                     TeacherPreferenceType = TeacherPreferenceType.Restricted,
                     DayOfWeekTimeInterval = new DayOfWeekTimeInterval
@@ -128,7 +127,7 @@ public class TeacherPreferenceServiceTests
                         },
                     },
                 },
-                new TeacherTimeAvailabilityDto
+                new TeacherTimePreferenceSaveDto
                 {
                     TeacherPreferenceType = TeacherPreferenceType.Restricted,
                     DayOfWeekTimeInterval = new DayOfWeekTimeInterval

@@ -1,5 +1,6 @@
 ﻿using Dal.RegistryRepositories.AcademicDiscipline;
 using Dal.Repositories.AcademicDisciplines;
+using Dal.Repositories.Lessons;
 using Dal.Repositories.Schedules;
 using Domain.Dto;
 using Domain.Dto.RegistryDto;
@@ -24,7 +25,7 @@ public class AcademicDisciplineService(
     IAcademicDisciplineRegistryRepository academicDisciplineRegistryRepository,
     IScheduleRepository scheduleRepository,
     ILessonService lessonService,
-    ILessonValidationService lessonValidationService) : IAcademicDisciplineService
+    ILessonRepository lessonRepository) : IAcademicDisciplineService
 {
     public async Task<AcademicDisciplineShortDto[]> SearchShortAsync(Guid scheduleId)
     {
@@ -69,28 +70,32 @@ public class AcademicDisciplineService(
             id = await academicDisciplineRepository.SaveAsync(academicDiscipline);
         }
 
-        await lessonValidationService.RemovePolicyViolations(id.Value);
         var savedAcademicDiscipline = await academicDisciplineRepository.GetAsync(id.Value);
 
         await lessonService.UpdateAcademicDisciplineLessons(savedAcademicDiscipline);
-
-        if (academicDisciplineSaveDto.Id.HasValue)
-        {
-            await lessonService.RecalculateConflictsForUpdatedAcademicDiscipline(savedAcademicDiscipline);
-        }
+        await lessonService.RecalculateConflictsForUpdatedAcademicDiscipline(savedAcademicDiscipline);
     }
 
-    public async Task<LessonSeriesConflictDto[]> GetLessonSeriesConflictsAsync(Guid academicDisciplineId,
-        AcademicDisciplineType academicDisciplineType, Guid lessonBatchInfoId)
+    public async Task<LessonSeriesConflictDto[]> GetLessonSeriesConflictsAsync(Guid lessonId)
     {
-        var academicDiscipline = await academicDisciplineRepository.GetAsync(academicDisciplineId);
-        if (!academicDiscipline.AllowedLessonTypes.Contains(academicDisciplineType))
+        var validationMessages = new List<ValidationMessage>();
+        var lesson = await lessonRepository.GetAsync(lessonId);
+        if (!lesson.AcademicDisciplineId.HasValue)
         {
-            throw new ServiceException(new ValidationMessage($"Выбранная академическая дисциплина не поддерживает проведение занятий вида \"{academicDisciplineType.GetDescription()}\""));
+            validationMessages.Add(new ValidationMessage("Для выбранного занятия не была найдена академическая дисциплина"));
         }
 
-        var lessonBatchInfo = academicDiscipline.GetBatchInfosByType(academicDisciplineType).Single(x => x.Id == lessonBatchInfoId);
-        return await lessonService.GetLessonSeriesConflictsAsync(lessonBatchInfo, academicDiscipline.ScheduleId);
+        if (validationMessages.Count > 0)
+        {
+            throw new ServiceException(validationMessages.ToArray());
+        }
+
+        var academicDiscipline = await academicDisciplineRepository.GetAsync(lesson.AcademicDisciplineId!.Value);
+        var lessonBatchInfo = Enum.GetValues<AcademicDisciplineType>()
+            .SelectMany(type => academicDiscipline.GetBatchInfosByType(type))
+            .Single(lessonBatchInfo => lessonBatchInfo.Id == lesson.LessonBatchInfoId);
+
+        return await lessonService.GetLessonSeriesConflictsAsync(lesson, lessonBatchInfo, academicDiscipline.ScheduleId);
     }
 
     public async Task DeleteAsync(Guid academicDisciplineId)

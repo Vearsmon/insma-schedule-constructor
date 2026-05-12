@@ -55,9 +55,9 @@ public class LessonServiceTests
             .With(x => x.SemesterNumber, 5)
             .With(x => x.AcademicDisciplineTargetType, AcademicDisciplineTargetType.ByChoice)
             .With(x => x.AllowedLessonTypes, [AcademicDisciplineType.Lecture])
-            .Without(x => x.LecturePayload)
-            .Without(x => x.PracticePayload)
-            .Without(x => x.LabPayload)
+            .Without(x => x.LectureLessonBatchInfos)
+            .Without(x => x.PracticeLessonBatchInfos)
+            .Without(x => x.LabLessonBatchInfos)
             .Without(x => x.Comment)
             .Create();
 
@@ -113,31 +113,27 @@ public class LessonServiceTests
             .With(x => x.SemesterNumber, 5)
             .With(x => x.AcademicDisciplineTargetType, AcademicDisciplineTargetType.ByChoice)
             .With(x => x.AllowedLessonTypes, [AcademicDisciplineType.Lecture])
-            .With(x => x.LecturePayload, _fixture
-                .Build<AcademicDisciplinePayload>()
+            .With(x => x.LectureLessonBatchInfos, [_fixture
+                .Build<LessonBatchInfo>()
+                .Without(x => x.Id)
+                .With(x => x.StudentGroups, [new StudentGroup { Id = Guid.NewGuid() }])
+                .Without(x => x.Teachers)
+                .Without(x => x.Rooms)
+                .With(x => x.DayOfWeekTimeIntervals,
+                [
+                    new DayOfWeekTimeInterval { DayOfWeek = DayOfWeek.Tuesday, TimeInterval = firstTimeInterval },
+                    new DayOfWeekTimeInterval { DayOfWeek = DayOfWeek.Thursday, TimeInterval = secondTimeInterval },
+                ])
+                .With(x => x.RepeatType, DisciplineLessonRepeatType.Weekly)
+                .With(x => x.DateInterval,
+                    // три недели - с понедельника 07.09 по понедельник 28.09 включительно
+                    new DateInterval { DateFrom = new DateOnly(2026, 9, 7), DateTo = new DateOnly(2026, 9, 28) })
+                .Without(x => x.AllowCombining)
+                .With(x => x.HoursCost, _fixture.Create<int>())
                 .With(x => x.TotalHoursCount, _fixture.Create<int>())
-                .With(x => x.LessonBatchInfos, [_fixture
-                    .Build<LessonBatchInfo>()
-                    .Without(x => x.Id)
-                    .With(x => x.StudentGroups, [new StudentGroup { Id = Guid.NewGuid() }])
-                    .Without(x => x.Teachers)
-                    .Without(x => x.Rooms)
-                    .With(x => x.DayOfWeekTimeIntervals,
-                    [
-                        new DayOfWeekTimeInterval { DayOfWeek = DayOfWeek.Tuesday, TimeInterval = firstTimeInterval },
-                        new DayOfWeekTimeInterval { DayOfWeek = DayOfWeek.Thursday, TimeInterval = secondTimeInterval },
-                    ])
-                    .With(x => x.RepeatType, DisciplineLessonRepeatType.Weekly)
-                    .With(x => x.DateInterval,
-                        // три недели - с понедельника 07.09 по понедельник 28.09 включительно
-                        new DateInterval { DateFrom = new DateOnly(2026, 9, 7), DateTo = new DateOnly(2026, 9, 28) })
-                    .Without(x => x.AllowCombining)
-                    .With(x => x.HoursCost, _fixture.Create<int>())
-                    .Create()]
-                )
-                .Create())
-            .Without(x => x.PracticePayload)
-            .Without(x => x.LabPayload)
+                .Create()])
+            .Without(x => x.PracticeLessonBatchInfos)
+            .Without(x => x.LabLessonBatchInfos)
             .Without(x => x.Comment)
             .Create();
 
@@ -161,7 +157,7 @@ public class LessonServiceTests
                 }
             });
 
-        _lessonValidationServiceMock.Setup(x => x.ValidateAsync(It.IsAny<Lesson>()))
+        _lessonValidationServiceMock.Setup(x => x.ValidateAsync(It.IsAny<Lesson[]>()))
             .ReturnsAsync([]);
 
         var service = CreateService();
@@ -191,10 +187,9 @@ public class LessonServiceTests
         // Arrange
         var firstTimeInterval = new TimeInterval { TimeFrom = new TimeOnly(9, 0), TimeTo = new TimeOnly(10, 30) };
         var secondTimeInterval = new TimeInterval { TimeFrom = new TimeOnly(10, 0), TimeTo = new TimeOnly(11, 30) };
-        var payloadFixture = _fixture
-            .Build<AcademicDisciplinePayload>()
-            .With(x => x.TotalHoursCount, _fixture.Create<int>())
-            .With(x => x.LessonBatchInfos, [_fixture
+        var payloadFixture = new[]
+        {
+            _fixture
                 .Build<LessonBatchInfo>()
                 .Without(x => x.Id)
                 .With(x => x.StudentGroups, [new StudentGroup { Id = Guid.NewGuid() }])
@@ -211,9 +206,9 @@ public class LessonServiceTests
                     new DateInterval { DateFrom = new DateOnly(2026, 9, 7), DateTo = new DateOnly(2026, 9, 28) })
                 .Without(x => x.AllowCombining)
                 .With(x => x.HoursCost, _fixture.Create<int>())
-                .Create()]
-            )
-            .Create();
+                .With(x => x.TotalHoursCount, _fixture.Create<int>())
+                .Create()
+        };
 
         var academicDiscipline = _fixture.Build<AcademicDiscipline>()
             .With(x => x.Id, Guid.NewGuid())
@@ -223,9 +218,9 @@ public class LessonServiceTests
             .With(x => x.SemesterNumber, 5)
             .With(x => x.AcademicDisciplineTargetType, AcademicDisciplineTargetType.ByChoice)
             .With(x => x.AllowedLessonTypes, [AcademicDisciplineType.Practice, AcademicDisciplineType.Lab])
-            .Without(x => x.LecturePayload)
-            .With(x => x.PracticePayload, payloadFixture)
-            .With(x => x.LabPayload, payloadFixture)
+            .Without(x => x.LectureLessonBatchInfos)
+            .With(x => x.PracticeLessonBatchInfos, payloadFixture)
+            .With(x => x.LabLessonBatchInfos, payloadFixture)
             .Without(x => x.Comment)
             .Create();
 
@@ -253,7 +248,7 @@ public class LessonServiceTests
                     },
                 });
 
-        _lessonValidationServiceMock.Setup(x => x.ValidateAsync(It.IsAny<Lesson>()))
+        _lessonValidationServiceMock.Setup(x => x.ValidateAsync(It.IsAny<Lesson[]>()))
             .ReturnsAsync([]);
 
         var service = CreateService();

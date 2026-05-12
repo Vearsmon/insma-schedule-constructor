@@ -1,6 +1,7 @@
 ﻿using AutoFixture;
 using Dal.RegistryRepositories.AcademicDiscipline;
 using Dal.Repositories.AcademicDisciplines;
+using Dal.Repositories.Lessons;
 using Dal.Repositories.Schedules;
 using Domain.Dto.SaveDto;
 using Domain.Exceptions;
@@ -19,14 +20,14 @@ public class AcademicDisciplineServiceTests
     private readonly Mock<IAcademicDisciplineRegistryRepository> _academicDisciplineRegistryRepositoryMock = new();
     private readonly Mock<IScheduleRepository> _scheduleRepositoryMock = new();
     private readonly Mock<ILessonService> _lessonServiceMock = new();
-    private readonly Mock<ILessonValidationService> _lessonValidationServiceMock = new();
+    private readonly Mock<ILessonRepository> _lessonRepositoryMock = new();
 
     private AcademicDisciplineService CreateService() => new(
         _academicDisciplineRepositoryMock.Object,
         _academicDisciplineRegistryRepositoryMock.Object,
         _scheduleRepositoryMock.Object,
         _lessonServiceMock.Object,
-        _lessonValidationServiceMock.Object
+        _lessonRepositoryMock.Object
     );
 
     [Fact]
@@ -40,11 +41,11 @@ public class AcademicDisciplineServiceTests
             .With(x => x.SemesterNumber, 0)
             .With(x => x.AcademicDisciplineTargetType, AcademicDisciplineTargetType.ByChoice)
             .With(x => x.AllowedLessonTypes, [])
-            .With(x => x.LecturePayload)
-            .With(x => x.PracticePayload)
-            .With(x => x.LabPayload)
-            .With(x => x.ExamPayload)
-            .With(x => x.TestPayload)
+            .With(x => x.LectureLessonBatchInfos)
+            .With(x => x.PracticeLessonBatchInfos)
+            .With(x => x.LabLessonBatchInfos)
+            .With(x => x.ExamLessonBatchInfos)
+            .With(x => x.TestLessonBatchInfos)
             .Without(x => x.Comment)
             .Create();
 

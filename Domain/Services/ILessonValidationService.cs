@@ -6,14 +6,16 @@ namespace Domain.Services;
 
 public interface ILessonValidationService
 {
+    Task SaveAllAsync(LessonPolicyViolation[] violations);
+
     Task<LessonPolicyViolation[]> ValidateAsync(Lesson[] lessons);
 
-    Task DeleteViolationLinksAsync(Guid[] ids);
+    Task DeleteViolationsAsync(Guid[] ids);
 
     void BuildPolicyViolations(List<LessonPolicyViolation> lessonPolicyViolations,
         Dictionary<Guid, List<Guid>> studentGroupHierarchyIdsByStudentGroupId,
         Lesson[] conflictingLessons,
-        Lesson? lesson,
+        Lesson lesson,
         Guid[] teacherIds,
         Guid[] roomIds,
         TeacherPreference[] conflictingTeacherPreferences,
@@ -31,26 +33,28 @@ public interface ILessonValidationService
         AcademicDiscipline academicDiscipline,
         AcademicDisciplineType lessonAcademicDisciplineType);
 
-    void ValidateLessonConflictByGroup(Lesson? lesson,
+    void ValidateLessonConflictByGroup(
+        Lesson lesson,
         Lesson[] conflictingByGroupLessons,
         List<LessonPolicyViolation> violations,
         Guid[] hierarchyIds,
         bool includeTiming = false);
 
     void ValidateLessonConflictByTeacher(
-        Lesson? lesson,
+        Lesson lesson,
         Guid[] teacherIds,
         Lesson[] conflictingByTeacherLessons,
         List<LessonPolicyViolation> violations,
         bool includeTiming = false);
 
     void ValidateTeacherPreferenceConflict(
-        Lesson? lesson,
+        Lesson lesson,
         TeacherPreference[] conflictingTeacherPreferences,
         List<LessonPolicyViolation> violations,
         bool includeTiming = false);
 
-    void ValidateLessonConflictByRoom(Lesson? lesson,
+    void ValidateLessonConflictByRoom(
+        Lesson lesson,
         Guid[] roomIds,
         Lesson[] conflictingByRoomLessons,
         List<LessonPolicyViolation> violations,

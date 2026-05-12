@@ -41,6 +41,19 @@ public class TeacherService(
 
     public async Task SaveAsync(TeacherSaveDto teacherSaveDto)
     {
+        await ValidateAsync(teacherSaveDto);
+
+        var teacher = TeacherDtoMappingRegister.MapSaveDtoToModel(teacherSaveDto)!;
+        await teacherRepository.SaveAsync(teacher);
+    }
+
+    public async Task DeleteAsync(Guid teacherId)
+    {
+        await teacherRepository.DeleteAsync([teacherId]);
+    }
+
+    private async Task ValidateAsync(TeacherSaveDto teacherSaveDto)
+    {
         var validationMessages = new List<ValidationMessage>();
         if (teacherSaveDto.Fullname == null!)
         {
@@ -55,13 +68,5 @@ public class TeacherService(
         {
             throw new ServiceException(validationMessages.ToArray());
         }
-
-        var teacher = TeacherDtoMappingRegister.MapSaveDtoToModel(teacherSaveDto)!;
-        await teacherRepository.SaveAsync(teacher);
-    }
-
-    public async Task DeleteAsync(Guid teacherId)
-    {
-        await teacherRepository.DeleteAsync([teacherId]);
     }
 }

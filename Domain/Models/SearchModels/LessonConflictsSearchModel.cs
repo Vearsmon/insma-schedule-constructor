@@ -1,0 +1,12 @@
+﻿using Domain.Models.Common;
+
+namespace Domain.Models.SearchModels;
+
+public class LessonConflictsSearchModel
+{
+    public Guid? ScheduleId { get; set; }
+    public Guid[] StudentGroupIds { get; set; } = [];
+    public Guid[] TeacherIds { get; set; } = [];
+    public Guid[] RoomIds { get; set; } = [];
+    public DateWithTimeInterval[] DateWithTimeIntervals { get; set; } = [];
+}

@@ -60,6 +60,8 @@ public class LessonValidationServiceTests
             .Without(x => x.FlexibilityType)
             .Without(x => x.AllowCombining)
             .Without(x => x.HoursCost)
+            .Without(x => x.LessonBatchInfoId)
+            .Without(x => x.LessonBatchInfo)
             .Without(x => x.Violations);
         var lessonToSave = lessonToSaveFixture
             .With(x => x.ScheduleId, Guid.NewGuid())
@@ -77,7 +79,7 @@ public class LessonValidationServiceTests
             .ReturnsAsync(false);
 
         var service = CreateService();
-        var serviceFunc = () => service.ValidateAsync(lessonToSave);
+        var serviceFunc = () => service.ValidateAsync([lessonToSave]);
 
         // Act & Assert
         var actualException = await Assert.ThrowsAsync<ServiceException>(serviceFunc);
@@ -102,6 +104,8 @@ public class LessonValidationServiceTests
             .With(x => x.FlexibilityType, LessonFlexibilityType.Flexible)
             .Without(x => x.AllowCombining)
             .Without(x => x.HoursCost)
+            .Without(x => x.LessonBatchInfoId)
+            .Without(x => x.LessonBatchInfo)
             .Without(x => x.Violations)
             .Create();
 
@@ -128,7 +132,7 @@ public class LessonValidationServiceTests
         var service = CreateService();
 
         // Act
-        var violations = await service.ValidateAsync(lessonToSave);
+        var violations = await service.ValidateAsync([lessonToSave]);
 
         // Assert
         Assert.Single(violations);
@@ -153,6 +157,8 @@ public class LessonValidationServiceTests
             .With(x => x.FlexibilityType, LessonFlexibilityType.Flexible)
             .Without(x => x.AllowCombining)
             .Without(x => x.HoursCost)
+            .Without(x => x.LessonBatchInfoId)
+            .Without(x => x.LessonBatchInfo)
             .Without(x => x.Violations)
             .Create();
 
@@ -175,7 +181,7 @@ public class LessonValidationServiceTests
         var service = CreateService();
 
         // Act
-        var violations = await service.ValidateAsync(lessonToSave);
+        var violations = await service.ValidateAsync([lessonToSave]);
 
         // Assert
         Assert.Single(violations);
@@ -208,6 +214,8 @@ public class LessonValidationServiceTests
             .With(x => x.FlexibilityType, LessonFlexibilityType.Flexible)
             .Without(x => x.AllowCombining)
             .Without(x => x.HoursCost)
+            .Without(x => x.LessonBatchInfoId)
+            .Without(x => x.LessonBatchInfo)
             .Without(x => x.Violations)
             .Create();
 
@@ -255,7 +263,7 @@ public class LessonValidationServiceTests
         var service = CreateService();
 
         // Act
-        var violations= await service.ValidateAsync(lessonToSave);
+        var violations= await service.ValidateAsync([lessonToSave]);
 
         // Assert
         Assert.Equal(2, violations.Length);
@@ -289,6 +297,8 @@ public class LessonValidationServiceTests
             .With(x => x.FlexibilityType, LessonFlexibilityType.Fixed)
             .Without(x => x.AllowCombining)
             .Without(x => x.HoursCost)
+            .Without(x => x.LessonBatchInfoId)
+            .Without(x => x.LessonBatchInfo)
             .Without(x => x.Violations)
             .Create();
 
@@ -336,7 +346,7 @@ public class LessonValidationServiceTests
         var service = CreateService();
 
         // Act
-        var violations = await service.ValidateAsync(lessonToSave);
+        var violations = await service.ValidateAsync([lessonToSave]);
 
         // Assert
         Assert.Equal(2, violations.Length);
@@ -370,6 +380,8 @@ public class LessonValidationServiceTests
             .With(x => x.FlexibilityType, LessonFlexibilityType.Fixed)
             .Without(x => x.AllowCombining)
             .Without(x => x.HoursCost)
+            .Without(x => x.LessonBatchInfoId)
+            .Without(x => x.LessonBatchInfo)
             .Without(x => x.Violations)
             .Create();
 
@@ -422,7 +434,7 @@ public class LessonValidationServiceTests
         var service = CreateService();
 
         // Act
-        var violations = await service.ValidateAsync(lessonToSave);
+        var violations = await service.ValidateAsync([lessonToSave]);
 
         // Assert
         Assert.Single(violations);
@@ -455,6 +467,8 @@ public class LessonValidationServiceTests
             .With(x => x.FlexibilityType, LessonFlexibilityType.Fixed)
             .Without(x => x.AllowCombining)
             .Without(x => x.HoursCost)
+            .Without(x => x.LessonBatchInfoId)
+            .Without(x => x.LessonBatchInfo)
             .Without(x => x.Violations)
             .Create();
 
@@ -507,7 +521,7 @@ public class LessonValidationServiceTests
         var service = CreateService();
 
         // Act
-        var violations = await service.ValidateAsync(lessonToSave);
+        var violations = await service.ValidateAsync([lessonToSave]);
 
         // Assert
         Assert.Single(violations);
@@ -540,6 +554,8 @@ public class LessonValidationServiceTests
             .With(x => x.FlexibilityType, LessonFlexibilityType.Fixed)
             .Without(x => x.AllowCombining)
             .Without(x => x.HoursCost)
+            .Without(x => x.LessonBatchInfoId)
+            .Without(x => x.LessonBatchInfo)
             .Without(x => x.Violations)
             .Create();
 
@@ -592,7 +608,7 @@ public class LessonValidationServiceTests
         var service = CreateService();
 
         // Act
-        var violations = await service.ValidateAsync(lessonToSave);
+        var violations = await service.ValidateAsync([lessonToSave]);
 
         // Assert
         Assert.Single(violations);
@@ -625,6 +641,8 @@ public class LessonValidationServiceTests
             .With(x => x.FlexibilityType, LessonFlexibilityType.Fixed)
             .Without(x => x.AllowCombining)
             .Without(x => x.HoursCost)
+            .Without(x => x.LessonBatchInfoId)
+            .Without(x => x.LessonBatchInfo)
             .Without(x => x.Violations)
             .Create();
 
@@ -677,7 +695,7 @@ public class LessonValidationServiceTests
         var service = CreateService();
 
         // Act
-        var violations = await service.ValidateAsync(lessonToSave);
+        var violations = await service.ValidateAsync([lessonToSave]);
 
         // Assert
         Assert.Single(violations);
@@ -710,6 +728,8 @@ public class LessonValidationServiceTests
             .With(x => x.FlexibilityType, LessonFlexibilityType.Fixed)
             .Without(x => x.AllowCombining)
             .Without(x => x.HoursCost)
+            .Without(x => x.LessonBatchInfoId)
+            .Without(x => x.LessonBatchInfo)
             .Without(x => x.Violations)
             .Create();
 
@@ -761,7 +781,7 @@ public class LessonValidationServiceTests
         var service = CreateService();
 
         // Act
-        var violations = await service.ValidateAsync(lessonToSave);
+        var violations = await service.ValidateAsync([lessonToSave]);
 
         // Assert
         Assert.Equal(2, violations.Length);
@@ -795,6 +815,8 @@ public class LessonValidationServiceTests
             .With(x => x.FlexibilityType, LessonFlexibilityType.Flexible)
             .Without(x => x.AllowCombining)
             .Without(x => x.HoursCost)
+            .Without(x => x.LessonBatchInfoId)
+            .Without(x => x.LessonBatchInfo)
             .Without(x => x.Violations)
             .Create();
 
@@ -845,7 +867,7 @@ public class LessonValidationServiceTests
         var service = CreateService();
 
         // Act
-        var violations = await service.ValidateAsync(lessonToSave);
+        var violations = await service.ValidateAsync([lessonToSave]);
 
         // Assert
         Assert.Equal(2, violations.Length);
@@ -892,6 +914,8 @@ public class LessonValidationServiceTests
             .Without(x => x.FlexibilityType)
             .Without(x => x.AllowCombining)
             .Without(x => x.HoursCost)
+            .Without(x => x.LessonBatchInfoId)
+            .Without(x => x.LessonBatchInfo)
             .With(x => x.Violations,
             [
                 new LessonPolicyViolation
@@ -958,6 +982,8 @@ public class LessonValidationServiceTests
             .Without(x => x.FlexibilityType)
             .Without(x => x.AllowCombining)
             .Without(x => x.HoursCost)
+            .Without(x => x.LessonBatchInfoId)
+            .Without(x => x.LessonBatchInfo)
             .With(x => x.Violations,
             [
                 new LessonPolicyViolation
@@ -1031,6 +1057,8 @@ public class LessonValidationServiceTests
             .Without(x => x.FlexibilityType)
             .Without(x => x.AllowCombining)
             .Without(x => x.HoursCost)
+            .Without(x => x.LessonBatchInfoId)
+            .Without(x => x.LessonBatchInfo)
             .With(x => x.Violations,
             [
                 new LessonPolicyViolation
@@ -1149,6 +1177,8 @@ public class LessonValidationServiceTests
             .Without(x => x.FlexibilityType)
             .Without(x => x.AllowCombining)
             .Without(x => x.HoursCost)
+            .Without(x => x.LessonBatchInfoId)
+            .Without(x => x.LessonBatchInfo)
             .With(x => x.Violations,
             [
                 new LessonPolicyViolation
@@ -1230,6 +1260,8 @@ public class LessonValidationServiceTests
             .Without(x => x.FlexibilityType)
             .Without(x => x.AllowCombining)
             .Without(x => x.HoursCost)
+            .Without(x => x.LessonBatchInfoId)
+            .Without(x => x.LessonBatchInfo)
             .With(x => x.Violations,
             [
                 new LessonPolicyViolation
@@ -1263,7 +1295,7 @@ public class LessonValidationServiceTests
             {
                 Id = lesson.Violations.First().Payload.AffectedByAcademicDisciplineId!.Value,
                 Name = academicDisciplineName,
-                LecturePayload = new AcademicDisciplinePayload { TotalHoursCount = expectedTotalHoursCount },
+                LectureLessonBatchInfos = [new LessonBatchInfo { TotalHoursCount = expectedTotalHoursCount }],
             }]);
 
         _studentGroupRepositoryMock.Setup(r => r.SelectAsync(new[] { lesson.Violations.First().Payload.AffectedByStudentGroupId!.Value }, CancellationToken.None))

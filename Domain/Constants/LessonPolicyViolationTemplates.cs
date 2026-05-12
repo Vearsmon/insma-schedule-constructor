@@ -41,5 +41,5 @@ public static class LessonPolicyViolationTemplates
     public const string MismatchedAcademicDisciplineTypeTotalHoursCountTemplate =
         "Общее количество часов занятий вида \"{0}\" по дисциплине \"{1}\" ({2}ч) не совпадает с необходимым ({3}ч) для группы \"{4}\".";
 
-    public const string LessonPolicyViolationDefaultTemplate = "Занятие имеет {0} ошибок";
+    public const string LessonPolicyViolationDefaultTemplate = "Количество ошибок занятия: {0}";
 }

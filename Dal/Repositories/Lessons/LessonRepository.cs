@@ -10,12 +10,18 @@ public class LessonRepository(
     InsmaScheduleContext context,
     IRepositoryMapper<DbLesson, Lesson> mapper,
     ITransactionalService transactionalService,
-    IPredicateBuilder<DbLesson, LessonSearchModel> predicateBuilder)
+    IPredicateBuilder<DbLesson, LessonSearchModel> predicateBuilder,
+    IPredicateBuilder<DbLesson, LessonConflictsSearchModel> conflictsPredicateBuilder)
     : Repository<InsmaScheduleContext, DbLesson, Lesson>(context, mapper, transactionalService), ILessonRepository
 {
     public async Task<Lesson[]> SearchAsync(LessonSearchModel searchModel)
     {
         return await base.SearchAsync(predicateBuilder, searchModel);
+    }
+
+    public async Task<Lesson[]> SearchConflictsAsync(LessonConflictsSearchModel searchModel)
+    {
+        return await base.SearchAsync(conflictsPredicateBuilder, searchModel);
     }
 
     public override async Task<Guid> SaveAsync(Lesson model, CancellationToken cancellationToken = default)

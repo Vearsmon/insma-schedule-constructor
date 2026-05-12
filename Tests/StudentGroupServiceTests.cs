@@ -39,7 +39,7 @@ public class StudentGroupServiceTests
             .With(x => x.SemesterNumber, 0)
             .With(x => x.StudentGroupType, StudentGroupType.Thread)
             .With(x => x.ParentIds, [Guid.NewGuid()])
-            .With(x => x.ChildIds, [Guid.NewGuid()])
+            .With(x => x.Children, [new StudentSemiGroupSaveDto { Id = Guid.NewGuid() }])
             .Create();
 
         _scheduleRepositoryMock.Setup(r => r.ExistsAsync(studentGroupToSave.ScheduleId))
@@ -51,7 +51,7 @@ public class StudentGroupServiceTests
         _studentGroupRepositoryMock.Setup(r => r.SelectAsync(studentGroupToSave.ParentIds, CancellationToken.None))
             .ReturnsAsync([]);
 
-        _studentGroupRepositoryMock.Setup(r => r.SelectAsync(studentGroupToSave.ChildIds, CancellationToken.None))
+        _studentGroupRepositoryMock.Setup(r => r.SelectAsync(studentGroupToSave.Children.Select(x => x.Id!.Value).ToArray(), CancellationToken.None))
             .ReturnsAsync([]);
 
         var service = CreateService();
@@ -73,7 +73,7 @@ public class StudentGroupServiceTests
             .With(x => x.SemesterNumber, 0)
             .With(x => x.StudentGroupType, StudentGroupType.SemiGroup)
             .With(x => x.ParentIds, [Guid.NewGuid()])
-            .With(x => x.ChildIds, [Guid.NewGuid()])
+            .With(x => x.Children, [new StudentSemiGroupSaveDto { Id = Guid.NewGuid() }])
             .Create();
 
         _scheduleRepositoryMock.Setup(r => r.ExistsAsync(studentGroupToSave.ScheduleId))
@@ -85,7 +85,7 @@ public class StudentGroupServiceTests
         _studentGroupRepositoryMock.Setup(r => r.SelectAsync(studentGroupToSave.ParentIds, CancellationToken.None))
             .ReturnsAsync([]);
 
-        _studentGroupRepositoryMock.Setup(r => r.SelectAsync(studentGroupToSave.ChildIds, CancellationToken.None))
+        _studentGroupRepositoryMock.Setup(r => r.SelectAsync(studentGroupToSave.Children.Select(x => x.Id!.Value).ToArray(), CancellationToken.None))
             .ReturnsAsync([]);
 
         var service = CreateService();

@@ -34,6 +34,19 @@ public class ScheduleService(
 
     public async Task SaveAsync(ScheduleSaveDto scheduleSaveDto)
     {
+        await ValidateAsync(scheduleSaveDto);
+
+        var schedule = ScheduleDtoMappingRegister.MapSaveDtoToModel(scheduleSaveDto)!;
+        await scheduleRepository.SaveAsync(schedule);
+    }
+
+    public async Task DeleteAsync(Guid scheduleId)
+    {
+        await scheduleRepository.DeleteAsync(scheduleId);
+    }
+
+    private async Task ValidateAsync(ScheduleSaveDto scheduleSaveDto)
+    {
         var validationMessages = new List<ValidationMessage>();
         if (scheduleSaveDto.Name == null!)
         {
@@ -48,13 +61,5 @@ public class ScheduleService(
         {
             throw new ServiceException(validationMessages.ToArray());
         }
-
-        var schedule = ScheduleDtoMappingRegister.MapSaveDtoToModel(scheduleSaveDto)!;
-        await scheduleRepository.SaveAsync(schedule);
-    }
-
-    public async Task DeleteAsync(Guid scheduleId)
-    {
-        await scheduleRepository.DeleteAsync(scheduleId);
     }
 }

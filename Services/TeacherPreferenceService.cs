@@ -66,7 +66,7 @@ public class TeacherPreferenceService(
                     TeacherPreferenceType = x.TeacherPreferenceType!.Value,
                 })
                 .ToArray(),
-            Comment = teacherPreferences.FirstOrDefault(x => x.Comment != null)?.Comment,
+            Comment = teacherPreferences.SingleOrDefault(x => x.Comment != null)?.Comment,
         };
     }
 
@@ -86,66 +86,48 @@ public class TeacherPreferenceService(
         }
 
         var mergedTimeAvailabilities = new List<TeacherTimePreferenceViewDto>();
-        var mergedTimeAvailabilitiesByDayOfWeek =
-            new Dictionary<DayOfWeek, List<(TeacherPreferenceType, List<TimeInterval>)>>();
-        var dayOfWeekTimeIntervalsByPreferenceType = teacherPreferenceSaveDto.TeacherTimePreferences
-            .GroupBy(x => x.TeacherPreferenceType);
-        foreach (var groupByPreferenceType in dayOfWeekTimeIntervalsByPreferenceType)
+        var mergedTimeAvailabilitiesByDayOfWeek = new Dictionary<DayOfWeek, List<(TeacherPreferenceType, IEnumerable<TimeInterval>)>>();
+
+        var grouped = teacherPreferenceSaveDto.TeacherTimePreferences
+            .GroupBy(x => new { x.TeacherPreferenceType, x.DayOfWeekTimeInterval.DayOfWeek });
+        foreach (var group in grouped)
         {
-            var timeIntervalsByDayOfWeek = groupByPreferenceType
-                .GroupBy(x => x.DayOfWeekTimeInterval.DayOfWeek);
-            foreach (var groupByDayOfWeek in timeIntervalsByDayOfWeek)
+            var mergedIntervals = group
+                .Select(x => x.DayOfWeekTimeInterval.TimeInterval)
+                .MergeIntersections();
+
+            if (!mergedTimeAvailabilitiesByDayOfWeek.TryGetValue(group.Key.DayOfWeek, out var timeAvailabilities))
             {
-                var unmergedIntervals = groupByDayOfWeek
-                    .Select(x => x.DayOfWeekTimeInterval.TimeInterval)
-                    .ToArray();
-                var mergedIntervals = unmergedIntervals.MergeIntersections();
-
-                if (!mergedTimeAvailabilitiesByDayOfWeek.TryGetValue(groupByDayOfWeek.Key,
-                        out var timeAvailabilities))
-                {
-                    timeAvailabilities = [];
-                    mergedTimeAvailabilitiesByDayOfWeek[groupByDayOfWeek.Key] = timeAvailabilities;
-                }
-
-                timeAvailabilities.Add((groupByPreferenceType.Key, mergedIntervals.ToList()));
-
-                mergedTimeAvailabilities.AddRange(mergedIntervals
-                    .Select(mergedInterval => new TeacherTimePreferenceViewDto
-                    {
-                        TeacherPreferenceType = groupByPreferenceType.Key,
-                        DayOfWeekTimeInterval = new DayOfWeekTimeInterval
-                        {
-                            DayOfWeek = groupByDayOfWeek.Key,
-                            TimeInterval = mergedInterval,
-                        },
-                    }));
+                timeAvailabilities = [];
+                mergedTimeAvailabilitiesByDayOfWeek[group.Key.DayOfWeek] = timeAvailabilities;
             }
-        }
+            timeAvailabilities.Add((group.Key.TeacherPreferenceType, mergedIntervals));
 
-        foreach (var (dayOfWeek, preferenceTypeTimeIntervalsPairs) in mergedTimeAvailabilitiesByDayOfWeek)
-        {
-            for (var i = 0; i < preferenceTypeTimeIntervalsPairs.Count - 1; i++)
-            {
-                for (var j = i + 1; j < preferenceTypeTimeIntervalsPairs.Count; j++)
+            mergedTimeAvailabilities.AddRange(
+                mergedIntervals.Select(interval => new TeacherTimePreferenceViewDto
                 {
-                    foreach (var firstTimeInterval in preferenceTypeTimeIntervalsPairs[i].Item2)
+                    TeacherPreferenceType = group.Key.TeacherPreferenceType,
+                    DayOfWeekTimeInterval = new DayOfWeekTimeInterval
                     {
-                        foreach (var secondTimeInterval in preferenceTypeTimeIntervalsPairs[j].Item2)
-                        {
-                            if (firstTimeInterval.HasIntersection(secondTimeInterval))
-                            {
-                                validationMessages.Add(
-                                    new ValidationMessage($"Отрезок времени {firstTimeInterval} с видом пожелания" +
-                                                          $" \"{preferenceTypeTimeIntervalsPairs[i].Item1.GetDescription()}\"" +
-                                                          $" пересекается с отрезком времени {secondTimeInterval} с видом пожелания " +
-                                                          $"\"{preferenceTypeTimeIntervalsPairs[j].Item1.GetDescription()}\""));
-                            }
-                        }
+                        DayOfWeek = group.Key.DayOfWeek,
+                        TimeInterval = interval
                     }
-                }
-            }
+                }));
         }
+
+        var messages = mergedTimeAvailabilitiesByDayOfWeek.Values
+            .SelectMany(pairs => pairs
+                .SelectMany((pair1, i) => pairs
+                    .Skip(i + 1)
+                    .SelectMany(pair2 =>
+                        pair1.Item2.SelectMany(interval1 =>
+                            pair2.Item2.Where(interval1.HasIntersection)
+                                .Select(interval2 =>
+                                    new ValidationMessage(
+                                        $"Отрезок времени {interval1} с видом пожелания \"{pair1.Item1.GetDescription()}\" " +
+                                        $"пересекается с отрезком времени {interval2} с видом пожелания \"{pair2.Item1.GetDescription()}\""))))));
+
+        validationMessages.AddRange(messages);
 
         var teacherPreferenceRoomIds = teacherPreferenceSaveDto.TeacherRoomPreferences
             .Select(x => x.RoomId)
@@ -167,53 +149,46 @@ public class TeacherPreferenceService(
                 x => x.Key,
                 x => x.Select(y => y.RoomId).ToArray())
             .ToArray();
-        for (var i = 0; i < teacherRoomPreferencesByType.Length - 1; i++)
-        {
-            for (var j = i + 1; j < teacherRoomPreferencesByType.Length; j++)
-            {
-                if (teacherRoomPreferencesByType[i].Value.Intersect(teacherRoomPreferencesByType[j].Value).Any())
-                {
-                    validationMessages.Add(
-                        new ValidationMessage($"Одна и та же аудитория не может быть указана для пожеланий вида " +
-                                              $"\"{teacherRoomPreferencesByType[i].Key.GetDescription()}\" " +
-                                              $"и \"{teacherRoomPreferencesByType[j].Key.GetDescription()}\""));
-                }
-            }
-        }
+
+        var roomMessages = teacherRoomPreferencesByType
+            .SelectMany((typeRoomIdsPair1, i) => teacherRoomPreferencesByType
+                .Skip(i + 1)
+                .Where(timeRoomIdsPair2 => typeRoomIdsPair1.Value.Intersect(timeRoomIdsPair2.Value).Any())
+                .Select(timeRoomIdsPair2 => new ValidationMessage(
+                    $"Одна и та же аудитория не может быть указана для пожеланий вида " +
+                    $"\"{typeRoomIdsPair1.Key.GetDescription()}\" " +
+                    $"и \"{timeRoomIdsPair2.Key.GetDescription()}\"")));
+        validationMessages.AddRange(roomMessages);
 
         if (validationMessages.Count > 0)
         {
             throw new ServiceException(validationMessages.ToArray());
         }
 
-        var teacherPreferences =
-            mergedTimeAvailabilities
+        var teacherPreferences = mergedTimeAvailabilities
+            .Select(x => new TeacherPreference
+            {
+                ScheduleId = teacherPreferenceSaveDto.ScheduleId,
+                TeacherId = teacherPreferenceSaveDto.TeacherId,
+                DayOfWeekTimeInterval = x.DayOfWeekTimeInterval,
+                TeacherPreferenceType = x.TeacherPreferenceType,
+            })
+            .Concat(teacherPreferenceSaveDto.TeacherRoomPreferences
                 .Select(x => new TeacherPreference
                 {
                     ScheduleId = teacherPreferenceSaveDto.ScheduleId,
                     TeacherId = teacherPreferenceSaveDto.TeacherId,
-                    DayOfWeekTimeInterval = x.DayOfWeekTimeInterval,
                     TeacherPreferenceType = x.TeacherPreferenceType,
-                })
-                .Concat(teacherPreferenceSaveDto.TeacherRoomPreferences
-                    .Select(x => new TeacherPreference
-                    {
-                        ScheduleId = teacherPreferenceSaveDto.ScheduleId,
-                        TeacherId = teacherPreferenceSaveDto.TeacherId,
-                        TeacherPreferenceType = x.TeacherPreferenceType,
-                        RoomId = x.RoomId,
-                    }));
-        if (!string.IsNullOrEmpty(teacherPreferenceSaveDto.Comment))
-        {
-            teacherPreferences = teacherPreferences.Concat([
-                new TeacherPreference
+                    RoomId = x.RoomId,
+                }))
+            .Concat(string.IsNullOrEmpty(teacherPreferenceSaveDto.Comment)
+                ? []
+                : [new TeacherPreference
                 {
                     ScheduleId = teacherPreferenceSaveDto.ScheduleId,
                     TeacherId = teacherPreferenceSaveDto.TeacherId,
                     Comment = teacherPreferenceSaveDto.Comment,
-                }
-            ]);
-        }
+                }]);
 
         var previousPreferences = await teacherPreferenceRepository.SearchAsync(new TeacherPreferenceSearchModel
         {

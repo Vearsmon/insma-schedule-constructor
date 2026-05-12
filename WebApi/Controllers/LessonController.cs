@@ -76,7 +76,6 @@ public class LessonController(ILessonService lessonService) : ApiController
     /// <summary>
     /// Удалить данные занятия
     /// </summary>
-    /// <param name="scheduleId">Идентификатор проекта расписания</param>
     /// <param name="lessonId">Идентификатор занятия</param>
     /// <response code="200">Удаление данных выполнилось успешно</response>
     /// <response code="400">Удаление данных завершилось с ошибкой валидации входных данных</response>
@@ -90,8 +89,8 @@ public class LessonController(ILessonService lessonService) : ApiController
     [ProducesResponseType(typeof(ErrorDto), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ErrorDto), StatusCodes.Status500InternalServerError)]
     [HttpDelete("delete")]
-    public async Task Delete(Guid scheduleId, Guid lessonId)
+    public async Task Delete(Guid lessonId)
     {
-        await lessonService.DeleteAsync(scheduleId, lessonId);
+        await lessonService.DeleteAsync(lessonId);
     }
 }

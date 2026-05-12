@@ -10,20 +10,18 @@ public class TeacherPreferenceRepository(
     InsmaScheduleContext context,
     IRepositoryMapper<DbTeacherPreference, TeacherPreference> mapper,
     ITransactionalService transactionalService,
-    IPredicateBuilder<DbTeacherPreference, TeacherPreferenceSearchModel> predicateBuilder)
+    IPredicateBuilder<DbTeacherPreference, TeacherPreferenceSearchModel> predicateBuilder,
+    IPredicateBuilder<DbTeacherPreference, TeacherPreferenceConflictsSearchModel> conflictsPredicateBuilder)
     : Repository<InsmaScheduleContext, DbTeacherPreference, TeacherPreference>(context, mapper, transactionalService), ITeacherPreferenceRepository
 {
     public async Task<TeacherPreference[]> SearchAsync(TeacherPreferenceSearchModel searchModel)
     {
-        var teacherPreferences = await base.SearchAsync(predicateBuilder, searchModel);
-        if (searchModel.TimeInterval != null)
-        {
-            return teacherPreferences
-                // .Where(f => f.TimeFrom <= searchModel.TimeInterval.TimeTo && f.TimeTo >= searchModel.TimeInterval.TimeFrom)
-                .ToArray();
-        }
+        return await base.SearchAsync(predicateBuilder, searchModel);
+    }
 
-        return teacherPreferences;
+    public async Task<TeacherPreference[]> SearchConflictsAsync(TeacherPreferenceConflictsSearchModel searchModel)
+    {
+        return await base.SearchAsync(conflictsPredicateBuilder, searchModel);
     }
 
     protected override IQueryable<DbTeacherPreference> Query() => Context.Set<DbTeacherPreference>()

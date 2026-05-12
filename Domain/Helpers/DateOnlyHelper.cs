@@ -106,7 +106,7 @@ public static class DateOnlyHelper
                             },
                         },
                         Messages = lastConflict.Messages.Concat(current.Messages).ToArray(),
-                        ErrorType = new[] { lastConflict.ErrorType, current.ErrorType }.Max(),
+                        MaxErrorType = new[] { lastConflict.MaxErrorType, current.MaxErrorType }.Max(),
                     });
                 }
                 else

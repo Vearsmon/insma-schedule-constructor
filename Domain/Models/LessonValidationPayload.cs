@@ -81,11 +81,6 @@ public class LessonValidationPayload
     public TeacherPreference? AffectedByTeacherPreference { get; set; }
 
     /// <summary>
-    /// Дата и отрезок времени, оказавшие влияние (реквизит в БД не сохраняется)
-    /// </summary>
-    public DateWithTimeInterval? DateWithTimeInterval { get; set; }
-
-    /// <summary>
     /// День недели и отрезок времени, оказавшие влияние (реквизит в БД не сохраняется)
     /// </summary>
     public DayOfWeekTimeInterval? DayOfWeekTimeInterval { get; set; }

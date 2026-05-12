@@ -6,4 +6,6 @@ namespace Dal.Repositories.TeacherPreferences;
 public interface ITeacherPreferenceRepository : IRepository<TeacherPreference>
 {
     Task<TeacherPreference[]> SearchAsync(TeacherPreferenceSearchModel searchModel);
+
+    Task<TeacherPreference[]> SearchConflictsAsync(TeacherPreferenceConflictsSearchModel searchModel);
 }

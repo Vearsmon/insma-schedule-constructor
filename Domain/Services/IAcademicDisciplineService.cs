@@ -3,7 +3,6 @@ using Domain.Dto.RegistryDto;
 using Domain.Dto.SaveDto;
 using Domain.Dto.ShortDto;
 using Domain.Dto.ViewDto;
-using Domain.Models.Enums;
 using Domain.Models.RegistrySearchModels;
 
 namespace Domain.Services;
@@ -18,8 +17,7 @@ public interface IAcademicDisciplineService
 
     Task SaveAsync(AcademicDisciplineSaveDto academicDisciplineSaveDto);
 
-    Task<LessonSeriesConflictDto[]> GetLessonSeriesConflictsAsync(Guid academicDisciplineId,
-        AcademicDisciplineType academicDisciplineType, Guid lessonBatchInfo);
+    Task<LessonSeriesConflictDto[]> GetLessonSeriesConflictsAsync(Guid lessonId);
 
     Task DeleteAsync(Guid academicDisciplineId);
 }

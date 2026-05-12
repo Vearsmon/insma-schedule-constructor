@@ -25,7 +25,7 @@ public static class TimeOnlyHelper
         return first.Date == second.Date && first.TimeInterval.HasIntersection(second.TimeInterval);
     }
 
-    public static TimeInterval[] MergeIntersections(this TimeInterval[] timeIntervals)
+    public static TimeInterval[] MergeIntersections(this IEnumerable<TimeInterval> timeIntervals)
     {
         var sortedIntervals = timeIntervals.OrderBy(x => x.TimeFrom).ToArray();
         var result = new List<TimeInterval> { sortedIntervals.First() };

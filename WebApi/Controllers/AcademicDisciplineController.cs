@@ -4,7 +4,6 @@ using Domain.Dto.RegistryDto;
 using Domain.Dto.SaveDto;
 using Domain.Dto.ShortDto;
 using Domain.Dto.ViewDto;
-using Domain.Models.Enums;
 using Domain.Models.RegistrySearchModels;
 using Domain.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -100,9 +99,7 @@ public class AcademicDisciplineController(IAcademicDisciplineService academicDis
     /// Получить список временных отрезков по дням недели, в которых возникнет конфликт при установке серии занятий
     /// по академической дисциплине
     /// </summary>
-    /// <param name="academicDisciplineId">Идентификатор академической дисциплины</param>
-    /// <param name="academicDisciplineType">Вид занятий, проводимых по академической дисциплине</param>
-    /// <param name="lessonBatchInfoId">Идентификатор набора сведений о занятиях по академической дисциплине указанного вида</param>
+    /// <param name="lessonId">Идентификатор занятия</param>
     /// <returns>Модель списка временных отрезков по дням недели с конфликтами</returns>
     /// <response code="200">Поиск данных выполнился успешно</response>
     /// <response code="400">Поиск данных завершился с ошибкой валидации входных данных</response>
@@ -116,10 +113,8 @@ public class AcademicDisciplineController(IAcademicDisciplineService academicDis
     [ProducesResponseType(typeof(ErrorDto), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ErrorDto), StatusCodes.Status500InternalServerError)]
     [HttpGet("week-conflicts")]
-    public async Task<LessonSeriesConflictDto[]> GetLessonConflicts(Guid academicDisciplineId,
-        AcademicDisciplineType academicDisciplineType, Guid lessonBatchInfoId) =>
-        await academicDisciplineService.GetLessonSeriesConflictsAsync(academicDisciplineId, academicDisciplineType,
-            lessonBatchInfoId);
+    public async Task<LessonSeriesConflictDto[]> GetLessonConflicts(Guid lessonId) =>
+        await academicDisciplineService.GetLessonSeriesConflictsAsync(lessonId);
 
     /// <summary>
     /// Удалить данные академической дисциплины

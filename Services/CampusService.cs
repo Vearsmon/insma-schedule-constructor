@@ -34,6 +34,14 @@ public class CampusService(
 
     public async Task SaveAsync(CampusSaveDto campusSaveDto)
     {
+        await ValidateAsync(campusSaveDto);
+
+        var campus = CampusDtoMappingRegister.MapSaveDtoToModel(campusSaveDto)!;
+        await campusRepository.SaveAsync(campus);
+    }
+
+    private async Task ValidateAsync(CampusSaveDto campusSaveDto)
+    {
         var validationMessages = new List<ValidationMessage>();
         if (campusSaveDto.Name == null!)
         {
@@ -48,8 +56,5 @@ public class CampusService(
         {
             throw new ServiceException(validationMessages.ToArray());
         }
-
-        var campus = CampusDtoMappingRegister.MapSaveDtoToModel(campusSaveDto)!;
-        await campusRepository.SaveAsync(campus);
     }
 }
