@@ -2,6 +2,7 @@ using Dal.Entities;
 using Dal.Repositories;
 using Domain.Models.RegistryItemModels;
 using Domain.Models.RegistrySearchModels;
+using Microsoft.EntityFrameworkCore;
 
 namespace Dal.RegistryRepositories.Room;
 
@@ -14,4 +15,7 @@ internal class RoomRegistryRepository(
             RoomRegistryInternalSearchModel>(context, mapper, orderer, predicateBuilder),
         IRoomRegistryRepository
 {
+    protected override IQueryable<DbRoom> Query => Context.Set<DbRoom>()
+        .AsNoTracking()
+        .Include(x => x.Campus);
 }

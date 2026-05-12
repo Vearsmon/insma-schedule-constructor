@@ -82,6 +82,7 @@ namespace Dal.Mapping
             target.Id = entity.Id;
             target.Name = entity.Name;
             target.CampusId = entity.CampusId;
+            target.CampusName = MapCampusName(entity.Campus);
             target.RoomType = entity.RoomType;
             target.Capacity = entity.Capacity;
             target.RoomBoardType = entity.RoomBoardType;

@@ -20,7 +20,8 @@ public static partial class RoomMappingRegister
     [MapperIgnoreSource(nameof(DbRoom.Campus))]
     public static partial void UpdateModelWithEntity(DbRoom? entity, Room? model);
 
-    [MapperIgnoreSource(nameof(DbRoom.Campus))]
-    [MapperIgnoreTarget(nameof(RoomRegistryItem.CampusName))]
+    [MapProperty(nameof(DbRoom.Campus), nameof(RoomRegistryItem.CampusName), Use = nameof(MapCampusName))]
     public static partial RoomRegistryItem? MapEntityToRegistryItem(DbRoom? entity);
+
+    private static string MapCampusName(DbCampus campus) => campus.Name;
 }
