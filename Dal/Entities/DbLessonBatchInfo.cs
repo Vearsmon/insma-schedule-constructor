@@ -12,19 +12,39 @@ public class DbLessonBatchInfo : IDbEntityWithId
     public Guid Id { get; set; }
 
     /// <summary>
+    /// Академическая дисциплина
+    /// </summary>
+    public Guid AcademicDisciplineId { get; set; }
+
+    /// <summary>
+    /// Академическая дисциплина
+    /// </summary>
+    public DbAcademicDiscipline AcademicDiscipline { get; set; } = null!;
+
+    /// <summary>
+    /// Вид дисциплины
+    /// </summary>
+    public AcademicDisciplineType Type { get; set; }
+
+    /// <summary>
     /// Академические группы
     /// </summary>
-    public ICollection<DbLessonBatchInfoStudentGroup> StudentGroups { get; set; } = [];
+    public ICollection<DbStudentGroup> StudentGroups { get; set; } = [];
 
     /// <summary>
     /// Преподаватели
     /// </summary>
-    public ICollection<DbLessonBatchInfoTeacher> Teachers { get; set; } = [];
+    public ICollection<DbTeacher> Teachers { get; set; } = [];
 
     /// <summary>
     /// Аудитории
     /// </summary>
-    public ICollection<DbLessonBatchInfoRoom> Rooms { get; set; } = [];
+    public ICollection<DbRoom> Rooms { get; set; } = [];
+
+    /// <summary>
+    /// Количество занятий в неделю
+    /// </summary>
+    public int LessonsPerWeekCount { get; set; }
 
     /// <summary>
     /// Отрезки времени занятий по дням недели
@@ -52,6 +72,11 @@ public class DbLessonBatchInfo : IDbEntityWithId
     /// Занятие допускает совмещение
     /// </summary>
     public bool AllowCombining { get; set; }
+
+    /// <summary>
+    /// Подвижность занятия
+    /// </summary>
+    public LessonFlexibilityType FlexibilityType { get; set; }
 
     /// <summary>
     /// Вес для всех занятий в часах

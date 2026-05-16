@@ -10,10 +10,12 @@ public class LessonBatchInfoDto
     public StudentGroupShortDto[] StudentGroups { get; set; } = [];
     public Guid[] TeacherIds { get; set; } = [];
     public Guid[] RoomIds { get; set; } = [];
+    public int LessonsPerWeekCount { get; set; }
     public DayOfWeekTimeInterval[] DayOfWeekTimeIntervals { get; set; } = [];
     public DisciplineLessonRepeatType RepeatType { get; set; }
     public DateInterval DateInterval { get; set; } = null!;
     public bool AllowCombining { get; set; }
+    public LessonFlexibilityType FlexibilityType { get; set; }
     public int? HoursCost { get; set; }
     public int? TotalHoursCount { get; set; }
 }

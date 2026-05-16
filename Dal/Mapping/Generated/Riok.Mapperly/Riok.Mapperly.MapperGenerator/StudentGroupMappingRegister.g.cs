@@ -5,6 +5,41 @@ namespace Dal.Mapping
     public static partial class StudentGroupMappingRegister
     {
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(model))]
+        public static partial global::Dal.Entities.DbStudentGroup? MapModelToEntity(global::Domain.Models.StudentGroup? model)
+        {
+            if (model == null)
+                return default;
+            var target = new global::Dal.Entities.DbStudentGroup();
+            if (model.Id != null)
+            {
+                target.Id = model.Id.Value;
+            }
+            target.ScheduleId = model.ScheduleId;
+            target.Name = model.Name;
+            target.SemesterNumber = model.SemesterNumber;
+            target.StudentsCount = model.StudentsCount;
+            target.StudentGroupType = model.StudentGroupType;
+            return target;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        public static partial void UpdateEntityWithModel(global::Domain.Models.StudentGroup? model, global::Dal.Entities.DbStudentGroup? entity)
+        {
+            if (model == null || entity == null)
+                return;
+            if (model.Id != null)
+            {
+                entity.Id = model.Id.Value;
+            }
+            entity.ScheduleId = model.ScheduleId;
+            entity.Name = model.Name;
+            entity.SemesterNumber = model.SemesterNumber;
+            entity.StudentsCount = model.StudentsCount;
+            entity.StudentGroupType = model.StudentGroupType;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
         [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(entity))]
         private static partial global::Domain.Models.StudentGroup? AutoMapEntityToModel(global::Dal.Entities.DbStudentGroup? entity)
         {
@@ -18,42 +53,6 @@ namespace Dal.Mapping
             target.StudentsCount = entity.StudentsCount;
             target.StudentGroupType = entity.StudentGroupType;
             return target;
-        }
-
-        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(model))]
-        private static partial global::Dal.Entities.DbStudentGroup? AutoMapModelToEntity(global::Domain.Models.StudentGroup? model)
-        {
-            if (model == null)
-                return default;
-            var target = new global::Dal.Entities.DbStudentGroup();
-            if (model.Id != null)
-            {
-                target.Id = model.Id.Value;
-            }
-            target.ScheduleId = model.ScheduleId;
-            target.Schedule = global::Dal.Mapping.ScheduleMappingRegister.MapModelToEntity(model.Schedule) ?? throw new global::System.NullReferenceException("global::Dal.Mapping.ScheduleMappingRegister.MapModelToEntity returned null");
-            target.Name = model.Name;
-            target.SemesterNumber = model.SemesterNumber;
-            target.StudentsCount = model.StudentsCount;
-            target.StudentGroupType = model.StudentGroupType;
-            return target;
-        }
-
-        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        private static partial void AutoUpdateEntityWithModel(global::Domain.Models.StudentGroup? model, global::Dal.Entities.DbStudentGroup? entity)
-        {
-            if (model == null || entity == null)
-                return;
-            if (model.Id != null)
-            {
-                entity.Id = model.Id.Value;
-            }
-            entity.ScheduleId = model.ScheduleId;
-            entity.Name = model.Name;
-            entity.SemesterNumber = model.SemesterNumber;
-            entity.StudentsCount = model.StudentsCount;
-            entity.StudentGroupType = model.StudentGroupType;
         }
 
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]

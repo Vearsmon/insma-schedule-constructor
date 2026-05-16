@@ -41,7 +41,8 @@ public static partial class LessonDtoMappingRegister
     {
         var shortDto = AutoMapModelToShortDto(model);
         if (model == null) return shortDto;
-        shortDto!.StudentGroups = model.StudentGroups.Select(StudentGroupDtoMappingRegister.MapModelToShortDto).ToArray()!;
+        shortDto!.AcademicDisciplineName = model.AcademicDiscipline?.Name;
+        shortDto.StudentGroups = model.StudentGroups.Select(StudentGroupDtoMappingRegister.MapModelToShortDto).ToArray()!;
         shortDto.Teachers = model.Teachers.Select(TeacherDtoMappingRegister.MapModelToShortDto).ToArray()!;
         shortDto.Rooms = model.Rooms.Select(RoomDtoMappingRegister.MapModelToShortDto).ToArray()!;
         return shortDto;
@@ -72,6 +73,7 @@ public static partial class LessonDtoMappingRegister
     [MapperIgnoreTarget(nameof(LessonViewDto.RoomIds))]
     private static partial LessonViewDto? AutoMapModelToViewDto(Lesson? model);
 
+    [MapperIgnoreSource(nameof(LessonSaveDto.UpdateBatch))]
     [MapperIgnoreSource(nameof(LessonSaveDto.StudentGroupIds))]
     [MapperIgnoreSource(nameof(LessonSaveDto.TeacherIds))]
     [MapperIgnoreSource(nameof(LessonSaveDto.RoomIds))]
@@ -91,7 +93,10 @@ public static partial class LessonDtoMappingRegister
     [MapperIgnoreSource(nameof(Lesson.StudentGroups))]
     [MapperIgnoreSource(nameof(Lesson.Teachers))]
     [MapperIgnoreSource(nameof(Lesson.Rooms))]
+    [MapperIgnoreSource(nameof(Lesson.HoursCost))]
+    [MapperIgnoreSource(nameof(Lesson.LessonBatchInfoId))]
     [MapperIgnoreSource(nameof(Lesson.LessonBatchInfo))]
+    [MapperIgnoreTarget(nameof(LessonShortDto.AcademicDisciplineName))]
     [MapperIgnoreTarget(nameof(LessonShortDto.StudentGroups))]
     [MapperIgnoreTarget(nameof(LessonShortDto.Teachers))]
     [MapperIgnoreTarget(nameof(LessonShortDto.Rooms))]
@@ -99,6 +104,7 @@ public static partial class LessonDtoMappingRegister
     [MapProperty(nameof(Lesson.Violations), nameof(LessonShortDto.CurrentErrorsMaxLevel), Use = nameof(GetViolationsMaxLevel))]
     private static partial LessonShortDto? AutoMapModelToShortDto(Lesson? model);
 
+    [MapperIgnoreSource(nameof(LessonSaveDto.UpdateBatch))]
     [MapperIgnoreSource(nameof(LessonSaveDto.StudentGroupIds))]
     [MapperIgnoreSource(nameof(LessonSaveDto.TeacherIds))]
     [MapperIgnoreSource(nameof(LessonSaveDto.RoomIds))]

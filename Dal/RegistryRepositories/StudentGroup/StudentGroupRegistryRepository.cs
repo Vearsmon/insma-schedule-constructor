@@ -16,9 +16,6 @@ internal class StudentGroupRegistryRepository(
         IStudentGroupRegistryRepository
 {
     protected override IQueryable<DbStudentGroup> Query => Context.Set<DbStudentGroup>()
-        .AsNoTracking()
         .Include(x => x.Children)
-        .ThenInclude(x => x.ChildStudentGroup)
-        .Include(x => x.Parents)
-        .ThenInclude(x => x.ParentStudentGroup);
+        .Include(x => x.Parents);
 }

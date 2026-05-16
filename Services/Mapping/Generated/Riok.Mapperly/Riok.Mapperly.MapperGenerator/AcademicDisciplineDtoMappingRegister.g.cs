@@ -117,10 +117,12 @@ namespace Services.Mapping
             target.StudentGroups = MapStudentGroupsCollection(dto.StudentGroups);
             target.TeacherIds = MapTeachersCollection(dto.Teachers);
             target.RoomIds = MapRoomsCollection(dto.Rooms);
+            target.LessonsPerWeekCount = dto.LessonsPerWeekCount;
             target.DayOfWeekTimeIntervals = dto.DayOfWeekTimeIntervals;
             target.RepeatType = dto.RepeatType;
             target.DateInterval = dto.DateInterval;
             target.AllowCombining = dto.AllowCombining;
+            target.FlexibilityType = dto.FlexibilityType;
             target.HoursCost = dto.HoursCost;
             target.TotalHoursCount = dto.TotalHoursCount;
             return target;
@@ -137,10 +139,12 @@ namespace Services.Mapping
             target.StudentGroups = MapStudentGroups(dto.StudentGroups);
             target.Teachers = MapTeacherIds(dto.TeacherIds);
             target.Rooms = MapRoomIds(dto.RoomIds);
+            target.LessonsPerWeekCount = dto.LessonsPerWeekCount;
             target.DayOfWeekTimeIntervals = dto.DayOfWeekTimeIntervals;
             target.RepeatType = dto.RepeatType;
             target.DateInterval = dto.DateInterval;
             target.AllowCombining = dto.AllowCombining;
+            target.FlexibilityType = dto.FlexibilityType;
             target.HoursCost = dto.HoursCost;
             target.TotalHoursCount = dto.TotalHoursCount;
             return target;

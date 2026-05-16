@@ -18,6 +18,7 @@ namespace Dal.Mapping
             target.FlexibilityType = entity.FlexibilityType;
             target.HoursCost = entity.HoursCost;
             target.AllowCombining = entity.AllowCombining;
+            target.DetachedFromBatch = entity.DetachedFromBatch;
             target.LessonBatchInfoId = entity.LessonBatchInfoId;
             return target;
         }
@@ -41,6 +42,7 @@ namespace Dal.Mapping
             target.FlexibilityType = model.FlexibilityType;
             target.HoursCost = model.HoursCost;
             target.AllowCombining = model.AllowCombining;
+            target.DetachedFromBatch = model.DetachedFromBatch;
             target.LessonBatchInfoId = model.LessonBatchInfoId;
             return target;
         }
@@ -60,6 +62,7 @@ namespace Dal.Mapping
             entity.FlexibilityType = model.FlexibilityType;
             entity.HoursCost = model.HoursCost;
             entity.AllowCombining = model.AllowCombining;
+            entity.DetachedFromBatch = model.DetachedFromBatch;
             entity.LessonBatchInfoId = model.LessonBatchInfoId;
         }
 

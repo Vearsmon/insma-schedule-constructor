@@ -60,11 +60,17 @@ public static partial class AcademicDisciplineDtoMappingRegister
     [MapperIgnoreSource(nameof(AcademicDiscipline.Comment))]
     public static partial AcademicDisciplineShortDto? MapModelToShortDto(AcademicDiscipline? model);
 
+    [MapperIgnoreSource(nameof(LessonBatchInfo.AcademicDisciplineId))]
+    [MapperIgnoreSource(nameof(LessonBatchInfo.AcademicDiscipline))]
+    [MapperIgnoreSource(nameof(LessonBatchInfo.Type))]
     [MapProperty(nameof(LessonBatchInfo.StudentGroups), nameof(LessonBatchInfoDto.StudentGroups), Use = nameof(MapStudentGroupsCollection))]
     [MapProperty(nameof(LessonBatchInfo.Teachers), nameof(LessonBatchInfoDto.TeacherIds), Use = nameof(MapTeachersCollection))]
     [MapProperty(nameof(LessonBatchInfo.Rooms), nameof(LessonBatchInfoDto.RoomIds), Use = nameof(MapRoomsCollection))]
     private static partial LessonBatchInfoDto? AutoMapModelToDto(LessonBatchInfo? dto);
 
+    [MapperIgnoreTarget(nameof(LessonBatchInfo.AcademicDisciplineId))]
+    [MapperIgnoreTarget(nameof(LessonBatchInfo.AcademicDiscipline))]
+    [MapperIgnoreTarget(nameof(LessonBatchInfo.Type))]
     [MapProperty(nameof(LessonBatchInfoDto.StudentGroups), nameof(LessonBatchInfo.StudentGroups), Use = nameof(MapStudentGroups))]
     [MapProperty(nameof(LessonBatchInfoDto.TeacherIds), nameof(LessonBatchInfo.Teachers), Use = nameof(MapTeacherIds))]
     [MapProperty(nameof(LessonBatchInfoDto.RoomIds), nameof(LessonBatchInfo.Rooms), Use = nameof(MapRoomIds))]

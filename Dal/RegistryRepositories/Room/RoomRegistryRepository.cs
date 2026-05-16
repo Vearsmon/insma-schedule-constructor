@@ -16,6 +16,5 @@ internal class RoomRegistryRepository(
         IRoomRegistryRepository
 {
     protected override IQueryable<DbRoom> Query => Context.Set<DbRoom>()
-        .AsNoTracking()
         .Include(x => x.Campus);
 }

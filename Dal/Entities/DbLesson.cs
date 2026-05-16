@@ -38,17 +38,17 @@ public class DbLesson : IDbEntityWithId
     /// <summary>
     /// Академические группы
     /// </summary>
-    public ICollection<DbLessonStudentGroup> StudentGroups { get; set; } = [];
+    public ICollection<DbStudentGroup> StudentGroups { get; set; } = [];
 
     /// <summary>
     /// Преподаватели
     /// </summary>
-    public ICollection<DbLessonTeacher> Teachers { get; set; } = [];
+    public ICollection<DbTeacher> Teachers { get; set; } = [];
 
     /// <summary>
     /// Аудитории
     /// </summary>
-    public ICollection<DbLessonRoom> Rooms { get; set; } = [];
+    public ICollection<DbRoom> Rooms { get; set; } = [];
 
     /// <summary>
     /// Дата проведения занятия
@@ -82,6 +82,11 @@ public class DbLesson : IDbEntityWithId
     /// Занятие допускает совмещение
     /// </summary>
     public bool AllowCombining { get; set; }
+
+    /// <summary>
+    /// Занятие откреплено от своего шаблона
+    /// </summary>
+    public bool DetachedFromBatch { get; set; }
 
     /// <summary>
     /// Сведения о созданных занятиях, к которым относится данное

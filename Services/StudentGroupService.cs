@@ -1,4 +1,5 @@
 ﻿using Dal.RegistryRepositories.StudentGroup;
+using Dal.Repositories.Lessons;
 using Dal.Repositories.Schedules;
 using Dal.Repositories.StudentGroups;
 using Domain.Dto;
@@ -22,7 +23,8 @@ public class StudentGroupService(
     IStudentGroupRepository studentGroupRepository,
     IStudentGroupRegistryRepository studentGroupRegistryRepository,
     IScheduleRepository scheduleRepository,
-    ILessonService lessonService) : IStudentGroupService
+    ILessonService lessonService,
+    ILessonRepository lessonRepository) : IStudentGroupService
 {
     public async Task<StudentGroupShortDto[]> SearchRootAsync(Guid scheduleId)
     {
@@ -78,11 +80,13 @@ public class StudentGroupService(
         {
             studentGroup = StudentGroupDtoMappingRegister.MapSaveDtoToModel(studentGroupSaveDto)!;
             id = await studentGroupRepository.SaveAsync(studentGroup);
+            studentGroup.Id = id;
         }
 
+        var newSemiGroups = Array.Empty<StudentGroup>();
         if (studentGroupSaveDto.StudentGroupType == StudentGroupType.Group)
         {
-            var newSemiGroups = studentGroupSaveDto.Children
+            newSemiGroups = studentGroupSaveDto.Children
                 .Where(x => !x.Id.HasValue)
                 .Select(semiGroup => new StudentGroup
                 {
@@ -92,19 +96,23 @@ public class StudentGroupService(
                     StudentGroupType = StudentGroupType.SemiGroup,
                     Parents = [new StudentGroup { Id = id!.Value }],
                 }).ToArray();
+        }
 
-            var previousSemiGroupsSaveDto = studentGroupSaveDto.Children
-                .Where(x => x.Id.HasValue)
-                .ToArray();
-            var previousSemiGroups =
-                await studentGroupRepository.SelectAsync(previousSemiGroupsSaveDto.Select(x => x.Id!.Value).ToArray());
-            foreach (var previousSemiGroup in previousSemiGroups)
+        var previousSemiGroupsSaveDto = studentGroupSaveDto.Children
+            .Where(x => x.Id.HasValue)
+            .ToArray();
+        var previousSemiGroups =
+            await studentGroupRepository.SelectAsync(previousSemiGroupsSaveDto.Select(x => x.Id!.Value).ToArray());
+        foreach (var previousSemiGroup in previousSemiGroups)
+        {
+            if (studentGroupSaveDto.StudentGroupType == StudentGroupType.Group)
             {
                 previousSemiGroup.Name = previousSemiGroupsSaveDto.Single(x => x.Id == previousSemiGroup.Id).Name;
             }
-
-            await studentGroupRepository.SaveAllAsync(newSemiGroups.Concat(previousSemiGroups).ToArray());
+            previousSemiGroup.Parents = previousSemiGroup.Parents.Concat([new StudentGroup { Id = id.Value }]).ToArray();
         }
+
+        await studentGroupRepository.SaveAllAsync(newSemiGroups.Concat(previousSemiGroups).ToArray());
 
         await lessonService.RecalculateConflictsForNewStudentGroup(studentGroup);
     }
@@ -112,6 +120,18 @@ public class StudentGroupService(
     public async Task DeleteAsync(Guid studentGroupId)
     {
         var studentGroup = await studentGroupRepository.GetAsync(studentGroupId);
+
+        var studentGroupLessons = await lessonRepository.SearchAsync(new LessonSearchModel
+        {
+            ScheduleId = studentGroup.ScheduleId,
+            StudentGroupIds = [studentGroupId]
+        });
+        var singleStudentGroupLessonIds = studentGroupLessons
+            .Where(lesson => lesson.StudentGroups.Length == 1)
+            .Select(lesson => lesson.Id!.Value)
+            .ToArray();
+        await lessonRepository.DeleteAsync(singleStudentGroupLessonIds);
+
         switch (studentGroup.StudentGroupType)
         {
             case StudentGroupType.Thread:

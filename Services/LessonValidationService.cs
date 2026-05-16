@@ -216,11 +216,6 @@ public class LessonValidationService(
             .ToArray();
     }
 
-    public async Task DeleteViolationsAsync(Guid[] ids)
-    {
-        await lessonPolicyViolationRepository.DeleteAsync(ids);
-    }
-
     public void BuildPolicyViolations(List<LessonPolicyViolation> lessonPolicyViolations,
         Dictionary<Guid,List<Guid>> studentGroupHierarchyIdsByStudentGroupId,
         Lesson[] conflictingLessons,
@@ -546,7 +541,47 @@ public class LessonValidationService(
         }
     }
 
-    public void ValidateLessonConflictByTeacher(Lesson lesson,
+    public void ValidateTeacherPreferenceConflict(Lesson lesson,
+        TeacherPreference[] conflictingTeacherPreferences,
+        List<LessonPolicyViolation> violations,
+        bool includeTiming = false)
+    {
+        foreach (var conflictingTeacherPreference in conflictingTeacherPreferences)
+        {
+            var payload = new LessonValidationPayload
+            {
+                AffectedByTeacherPreferenceId = conflictingTeacherPreference.Id,
+                AffectedByTeacherId = conflictingTeacherPreference.TeacherId,
+                DayOfWeekTimeInterval = includeTiming ? conflictingTeacherPreference.DayOfWeekTimeInterval : null,
+            };
+            violations
+                .AddWarningIf(
+                    conflictingTeacherPreference is { DayOfWeekTimeInterval: not null, TeacherPreferenceType: TeacherPreferenceType.Undesirable },
+                    payload,
+                    LessonPolicyViolationCode.UndesirableTimeTeacherPreferenceTypeConflict,
+                    lesson.Id);
+            violations
+                .AddErrorIf(
+                    conflictingTeacherPreference is { DayOfWeekTimeInterval: not null, TeacherPreferenceType: TeacherPreferenceType.Restricted },
+                    payload,
+                    LessonPolicyViolationCode.RestrictedTimeTeacherPreferenceTypeConflict,
+                    lesson.Id);
+            violations
+                .AddWarningIf(
+                    conflictingTeacherPreference is { RoomId: not null, TeacherPreferenceType: TeacherPreferenceType.Undesirable },
+                    payload,
+                    LessonPolicyViolationCode.UndesirableRoomTeacherPreferenceTypeConflict,
+                    lesson.Id);
+            violations
+                .AddErrorIf(
+                    conflictingTeacherPreference is { RoomId: not null, TeacherPreferenceType: TeacherPreferenceType.Restricted },
+                    payload,
+                    LessonPolicyViolationCode.RestrictedRoomTeacherPreferenceTypeConflict,
+                    lesson.Id);
+        }
+    }
+
+    private void ValidateLessonConflictByTeacher(Lesson lesson,
         Guid[] teacherIds,
         Lesson[] conflictingByTeacherLessons,
         List<LessonPolicyViolation> violations,
@@ -592,47 +627,7 @@ public class LessonValidationService(
         }
     }
 
-    public void ValidateTeacherPreferenceConflict(Lesson lesson,
-        TeacherPreference[] conflictingTeacherPreferences,
-        List<LessonPolicyViolation> violations,
-        bool includeTiming = false)
-    {
-        foreach (var conflictingTeacherPreference in conflictingTeacherPreferences)
-        {
-            var payload = new LessonValidationPayload
-            {
-                AffectedByTeacherPreferenceId = conflictingTeacherPreference.Id,
-                AffectedByTeacherId = conflictingTeacherPreference.TeacherId,
-                DayOfWeekTimeInterval = includeTiming ? conflictingTeacherPreference.DayOfWeekTimeInterval : null,
-            };
-            violations
-                .AddWarningIf(
-                    conflictingTeacherPreference is { DayOfWeekTimeInterval: not null, TeacherPreferenceType: TeacherPreferenceType.Undesirable },
-                    payload,
-                    LessonPolicyViolationCode.UndesirableTimeTeacherPreferenceTypeConflict,
-                    lesson.Id);
-            violations
-                .AddErrorIf(
-                    conflictingTeacherPreference is { DayOfWeekTimeInterval: not null, TeacherPreferenceType: TeacherPreferenceType.Restricted },
-                    payload,
-                    LessonPolicyViolationCode.RestrictedTimeTeacherPreferenceTypeConflict,
-                    lesson.Id);
-            violations
-                .AddWarningIf(
-                    conflictingTeacherPreference is { RoomId: not null, TeacherPreferenceType: TeacherPreferenceType.Undesirable },
-                    payload,
-                    LessonPolicyViolationCode.UndesirableRoomTeacherPreferenceTypeConflict,
-                    lesson.Id);
-            violations
-                .AddErrorIf(
-                    conflictingTeacherPreference is { RoomId: not null, TeacherPreferenceType: TeacherPreferenceType.Restricted },
-                    payload,
-                    LessonPolicyViolationCode.RestrictedRoomTeacherPreferenceTypeConflict,
-                    lesson.Id);
-        }
-    }
-
-    public void ValidateLessonConflictByRoom(Lesson lesson,
+    private void ValidateLessonConflictByRoom(Lesson lesson,
         Guid[] roomIds,
         Lesson[] conflictingByRoomLessons,
         List<LessonPolicyViolation> violations,

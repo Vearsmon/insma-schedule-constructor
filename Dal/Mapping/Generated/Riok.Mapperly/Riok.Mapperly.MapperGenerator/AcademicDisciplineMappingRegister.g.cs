@@ -5,25 +5,8 @@ namespace Dal.Mapping
     public static partial class AcademicDisciplineMappingRegister
     {
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(entity))]
-        private static partial global::Domain.Models.AcademicDiscipline? AutoMapEntityToModel(global::Dal.Entities.DbAcademicDiscipline? entity)
-        {
-            if (entity == null)
-                return default;
-            var target = new global::Domain.Models.AcademicDiscipline();
-            target.Id = entity.Id;
-            target.ScheduleId = entity.ScheduleId;
-            target.Name = entity.Name;
-            target.AssociatedNames = entity.AssociatedNames;
-            target.SemesterNumber = entity.SemesterNumber;
-            target.AcademicDisciplineTargetType = entity.AcademicDisciplineTargetType;
-            target.Comment = entity.Comment;
-            return target;
-        }
-
-        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
         [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(model))]
-        private static partial global::Dal.Entities.DbAcademicDiscipline? AutoMapModelToEntity(global::Domain.Models.AcademicDiscipline? model)
+        public static partial global::Dal.Entities.DbAcademicDiscipline? MapModelToEntity(global::Domain.Models.AcademicDiscipline? model)
         {
             if (model == null)
                 return default;
@@ -37,12 +20,13 @@ namespace Dal.Mapping
             target.AssociatedNames = model.AssociatedNames;
             target.SemesterNumber = model.SemesterNumber;
             target.AcademicDisciplineTargetType = model.AcademicDisciplineTargetType;
+            target.AllowedLessonTypes = model.AllowedLessonTypes;
             target.Comment = model.Comment;
             return target;
         }
 
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        private static partial void AutoUpdateEntityWithModel(global::Domain.Models.AcademicDiscipline? model, global::Dal.Entities.DbAcademicDiscipline? entity)
+        public static partial void UpdateEntityWithModel(global::Domain.Models.AcademicDiscipline? model, global::Dal.Entities.DbAcademicDiscipline? entity)
         {
             if (model == null || entity == null)
                 return;
@@ -55,7 +39,26 @@ namespace Dal.Mapping
             entity.AssociatedNames = model.AssociatedNames;
             entity.SemesterNumber = model.SemesterNumber;
             entity.AcademicDisciplineTargetType = model.AcademicDisciplineTargetType;
+            entity.AllowedLessonTypes = model.AllowedLessonTypes;
             entity.Comment = model.Comment;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(entity))]
+        private static partial global::Domain.Models.AcademicDiscipline? AutoMapEntityToModel(global::Dal.Entities.DbAcademicDiscipline? entity)
+        {
+            if (entity == null)
+                return default;
+            var target = new global::Domain.Models.AcademicDiscipline();
+            target.Id = entity.Id;
+            target.ScheduleId = entity.ScheduleId;
+            target.Name = entity.Name;
+            target.AssociatedNames = entity.AssociatedNames;
+            target.SemesterNumber = entity.SemesterNumber;
+            target.AcademicDisciplineTargetType = entity.AcademicDisciplineTargetType;
+            target.AllowedLessonTypes = entity.AllowedLessonTypes;
+            target.Comment = entity.Comment;
+            return target;
         }
 
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
@@ -70,6 +73,7 @@ namespace Dal.Mapping
             target.AssociatedNames = entity.AssociatedNames;
             target.SemesterNumber = entity.SemesterNumber;
             target.AcademicDisciplineTargetType = entity.AcademicDisciplineTargetType;
+            target.AllowedLessonTypes = entity.AllowedLessonTypes;
             target.Comment = entity.Comment;
             return target;
         }

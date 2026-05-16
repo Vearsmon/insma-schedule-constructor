@@ -26,26 +26,116 @@ public class LessonRepository(
 
     public override async Task<Guid> SaveAsync(Lesson model, CancellationToken cancellationToken = default)
     {
-        var previousLesson = model.Id.HasValue ? await GetAsync(model.Id!.Value, cancellationToken) : null;
-        if (previousLesson != null)
+        var id = model.Id;
+        var previousLesson = id.HasValue ? await GetAsync(id.Value, cancellationToken) : null;
+        if (previousLesson == null)
         {
-            await Context.Set<DbLessonPolicyViolation>().Where(x => x.LessonId == previousLesson.Id).ExecuteDeleteAsync(cancellationToken);
-            await Context.SaveChangesAsync(cancellationToken);
+            id = await base.SaveAsync(model, cancellationToken);
+            model.Id = id;
+            await SaveReferencesAsync(model);
+            return id.Value;
         }
-        return await base.SaveAsync(model, cancellationToken);
+
+        await Context.Set<DbLessonPolicyViolation>().Where(x => x.LessonId == previousLesson.Id).ExecuteDeleteAsync(cancellationToken);
+
+        var removedStudentGroups = previousLesson.StudentGroups
+            .Where(x => model.StudentGroups.All(y => y.Id != x.Id))
+            .ToArray();
+        var removedTeachers = previousLesson.Teachers
+            .Where(x => model.Teachers.All(y => y.Id != x.Id))
+            .ToArray();
+        var removedRooms = previousLesson.Rooms
+            .Where(x => model.Rooms.All(y => y.Id != x.Id))
+            .ToArray();
+
+        await DeleteReferencesAsync(id!.Value, removedStudentGroups, removedTeachers, removedRooms);
+        await base.SaveAsync(model, cancellationToken);
+        await SaveReferencesAsync(model);
+
+        return id.Value;
     }
 
-    protected override IQueryable<DbLesson> Query()
+    public override async Task<Guid[]> SaveAllAsync(Lesson[] models, CancellationToken cancellationToken = default)
     {
-        return Context.Set<DbLesson>()
-            .Include(x => x.AcademicDiscipline)
-            .Include(x => x.StudentGroups)
-            .ThenInclude(x => x.StudentGroup)
-            .Include(x => x.Teachers)
-            .ThenInclude(x => x.Teacher)
-            .Include(x => x.Rooms)
-            .ThenInclude(x => x.Room)
-            .Include(x => x.LessonBatchInfo)
-            .Include(x => x.Violations);
+        var result = new List<Guid>();
+        foreach (var model in models)
+        {
+            var id = await SaveAsync(model, cancellationToken);
+            result.Add(id);
+        }
+        return result.ToArray();
+    }
+
+    protected override IQueryable<DbLesson> Query() => Context.Set<DbLesson>()
+        .Include(x => x.AcademicDiscipline)
+        .Include(x => x.StudentGroups)
+        .Include(x => x.Teachers)
+        .Include(x => x.Rooms)
+        .Include(x => x.LessonBatchInfo)
+        .ThenInclude(x => x!.StudentGroups)
+        .Include(x => x.LessonBatchInfo)
+        .ThenInclude(x => x!.Teachers)
+        .Include(x => x.LessonBatchInfo)
+        .ThenInclude(x => x!.Rooms)
+        .Include(x => x.Violations);
+
+    private async Task SaveReferencesAsync(Lesson model)
+    {
+        foreach (var studentGroup in model.StudentGroups)
+        {
+            await Context.Database.ExecuteSqlInterpolatedAsync(
+                $"""
+                 INSERT INTO public.lesson_student_group (lesson_id, student_group_id)
+                 VALUES ({model.Id!.Value}, {studentGroup.Id!.Value})
+                 ON CONFLICT (lesson_id, student_group_id) DO NOTHING
+                 """);
+        }
+        foreach (var teacher in model.Teachers)
+        {
+            await Context.Database.ExecuteSqlInterpolatedAsync(
+                $"""
+                 INSERT INTO public.lesson_teacher (lesson_id, teacher_id)
+                 VALUES ({model.Id!.Value}, {teacher.Id!.Value})
+                 ON CONFLICT (lesson_id, teacher_id) DO NOTHING
+                 """);
+        }
+        foreach (var room in model.Rooms)
+        {
+            await Context.Database.ExecuteSqlInterpolatedAsync(
+                $"""
+                 INSERT INTO public.lesson_room (lesson_id, room_id)
+                 VALUES ({model.Id!.Value}, {room.Id!.Value})
+                 ON CONFLICT (lesson_id, room_id) DO NOTHING
+                 """);
+        }
+    }
+
+    private async Task DeleteReferencesAsync(Guid modelId,
+        StudentGroup[] studentGroups, Teacher[] teachers, Room[] rooms)
+    {
+        foreach (var studentGroup in studentGroups)
+        {
+            await Context.Database.ExecuteSqlInterpolatedAsync(
+                $"""
+                 DELETE FROM public.lesson_student_group
+                 WHERE (lesson_id = {modelId} AND student_group_id = {studentGroup.Id!.Value})
+                 """);
+        }
+        foreach (var teacher in teachers)
+        {
+            await Context.Database.ExecuteSqlInterpolatedAsync(
+                $"""
+                 DELETE FROM public.lesson_teacher
+                 WHERE (lesson_id = {modelId} AND teacher_id = {teacher.Id!.Value})
+                 """);
+        }
+        foreach (var room in rooms)
+        {
+            await Context.Database.ExecuteSqlInterpolatedAsync(
+                $"""
+                 DELETE FROM public.lesson_room
+                 WHERE (lesson_id = {modelId} AND room_id = {room.Id!.Value})
+                 """);
+        }
     }
 }

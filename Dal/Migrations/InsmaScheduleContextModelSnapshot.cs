@@ -34,6 +34,11 @@ namespace Dal.Migrations
                         .HasColumnType("text")
                         .HasColumnName("academic_discipline_target_type");
 
+                    b.Property<string>("AllowedLessonTypes")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("allowed_lesson_types");
+
                     b.PrimitiveCollection<string[]>("AssociatedNames")
                         .IsRequired()
                         .HasColumnType("text[]")
@@ -43,26 +48,6 @@ namespace Dal.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)")
                         .HasColumnName("comment");
-
-                    b.Property<bool>("IsExamLessonsAllowed")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_exam_lessons_allowed");
-
-                    b.Property<bool>("IsLabLessonsAllowed")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_lab_lessons_allowed");
-
-                    b.Property<bool>("IsLectureLessonsAllowed")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_lecture_lessons_allowed");
-
-                    b.Property<bool>("IsPracticeLessonsAllowed")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_practice_lessons_allowed");
-
-                    b.Property<bool>("IsTestLessonsAllowed")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_test_lessons_allowed");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -141,6 +126,10 @@ namespace Dal.Migrations
                         .HasColumnType("Date")
                         .HasColumnName("date");
 
+                    b.Property<bool>("DetachedFromBatch")
+                        .HasColumnType("boolean")
+                        .HasColumnName("detached_from_batch");
+
                     b.Property<string>("FlexibilityType")
                         .IsRequired()
                         .HasColumnType("text")
@@ -188,6 +177,10 @@ namespace Dal.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<Guid>("AcademicDisciplineId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("academic_discipline_id");
+
                     b.Property<bool>("AllowCombining")
                         .HasColumnType("boolean")
                         .HasColumnName("allow_combining");
@@ -205,9 +198,18 @@ namespace Dal.Migrations
                         .HasColumnType("text")
                         .HasColumnName("day_of_week_time_intervals");
 
+                    b.Property<string>("FlexibilityType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("flexibility_type");
+
                     b.Property<int?>("HoursCost")
                         .HasColumnType("integer")
                         .HasColumnName("hours_cost");
+
+                    b.Property<int>("LessonsPerWeekCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("lessons_per_week_count");
 
                     b.Property<string>("RepeatType")
                         .IsRequired()
@@ -218,102 +220,17 @@ namespace Dal.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("total_hours_count");
 
-                    b.Property<Guid?>("exam_academic_discipline_id")
-                        .HasColumnType("uuid")
-                        .HasColumnName("exam_academic_discipline_id");
-
-                    b.Property<Guid?>("lab_academic_discipline_id")
-                        .HasColumnType("uuid")
-                        .HasColumnName("lab_academic_discipline_id");
-
-                    b.Property<Guid?>("lecture_academic_discipline_id")
-                        .HasColumnType("uuid")
-                        .HasColumnName("lecture_academic_discipline_id");
-
-                    b.Property<Guid?>("practice_academic_discipline_id")
-                        .HasColumnType("uuid")
-                        .HasColumnName("practice_academic_discipline_id");
-
-                    b.Property<Guid?>("test_academic_discipline_id")
-                        .HasColumnType("uuid")
-                        .HasColumnName("test_academic_discipline_id");
+                    b.Property<int>("Type")
+                        .HasColumnType("integer")
+                        .HasColumnName("type");
 
                     b.HasKey("Id")
                         .HasName("pk_lesson_batch_info");
 
-                    b.HasIndex("exam_academic_discipline_id")
-                        .HasDatabaseName("ix_lesson_batch_info_exam_academic_discipline_id");
-
-                    b.HasIndex("lab_academic_discipline_id")
-                        .HasDatabaseName("ix_lesson_batch_info_lab_academic_discipline_id");
-
-                    b.HasIndex("lecture_academic_discipline_id")
-                        .HasDatabaseName("ix_lesson_batch_info_lecture_academic_discipline_id");
-
-                    b.HasIndex("practice_academic_discipline_id")
-                        .HasDatabaseName("ix_lesson_batch_info_practice_academic_discipline_id");
-
-                    b.HasIndex("test_academic_discipline_id")
-                        .HasDatabaseName("ix_lesson_batch_info_test_academic_discipline_id");
+                    b.HasIndex("AcademicDisciplineId")
+                        .HasDatabaseName("ix_lesson_batch_info_academic_discipline_id");
 
                     b.ToTable("lesson_batch_info", (string)null);
-                });
-
-            modelBuilder.Entity("Dal.Entities.DbLessonBatchInfoRoom", b =>
-                {
-                    b.Property<Guid>("LessonBatchInfoId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("lesson_batch_info_id");
-
-                    b.Property<Guid>("RoomId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("room_id");
-
-                    b.HasKey("LessonBatchInfoId", "RoomId")
-                        .HasName("pk_lesson_batch_info_room");
-
-                    b.HasIndex("RoomId")
-                        .HasDatabaseName("ix_lesson_batch_info_room_room_id");
-
-                    b.ToTable("lesson_batch_info_room", (string)null);
-                });
-
-            modelBuilder.Entity("Dal.Entities.DbLessonBatchInfoStudentGroup", b =>
-                {
-                    b.Property<Guid>("LessonBatchInfoId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("lesson_batch_info_id");
-
-                    b.Property<Guid>("StudentGroupId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("student_group_id");
-
-                    b.HasKey("LessonBatchInfoId", "StudentGroupId")
-                        .HasName("pk_lesson_batch_info_student_group");
-
-                    b.HasIndex("StudentGroupId")
-                        .HasDatabaseName("ix_lesson_batch_info_student_group_student_group_id");
-
-                    b.ToTable("lesson_batch_info_student_group", (string)null);
-                });
-
-            modelBuilder.Entity("Dal.Entities.DbLessonBatchInfoTeacher", b =>
-                {
-                    b.Property<Guid>("LessonBatchInfoId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("lesson_batch_info_id");
-
-                    b.Property<Guid>("TeacherId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("teacher_id");
-
-                    b.HasKey("LessonBatchInfoId", "TeacherId")
-                        .HasName("pk_lesson_batch_info_teacher");
-
-                    b.HasIndex("TeacherId")
-                        .HasDatabaseName("ix_lesson_batch_info_teacher_teacher_id");
-
-                    b.ToTable("lesson_batch_info_teacher", (string)null);
                 });
 
             modelBuilder.Entity("Dal.Entities.DbLessonPolicyViolation", b =>
@@ -383,63 +300,6 @@ namespace Dal.Migrations
                         .HasDatabaseName("ix_lesson_policy_violation_lesson_id");
 
                     b.ToTable("lesson_policy_violation", (string)null);
-                });
-
-            modelBuilder.Entity("Dal.Entities.DbLessonRoom", b =>
-                {
-                    b.Property<Guid>("LessonId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("lesson_id");
-
-                    b.Property<Guid>("RoomId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("room_id");
-
-                    b.HasKey("LessonId", "RoomId")
-                        .HasName("pk_lesson_room");
-
-                    b.HasIndex("RoomId")
-                        .HasDatabaseName("ix_lesson_room_room_id");
-
-                    b.ToTable("lesson_room", (string)null);
-                });
-
-            modelBuilder.Entity("Dal.Entities.DbLessonStudentGroup", b =>
-                {
-                    b.Property<Guid>("LessonId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("lesson_id");
-
-                    b.Property<Guid>("StudentGroupId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("student_group_id");
-
-                    b.HasKey("LessonId", "StudentGroupId")
-                        .HasName("pk_lesson_student_group");
-
-                    b.HasIndex("StudentGroupId")
-                        .HasDatabaseName("ix_lesson_student_group_student_group_id");
-
-                    b.ToTable("lesson_student_group", (string)null);
-                });
-
-            modelBuilder.Entity("Dal.Entities.DbLessonTeacher", b =>
-                {
-                    b.Property<Guid>("LessonId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("lesson_id");
-
-                    b.Property<Guid>("TeacherId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("teacher_id");
-
-                    b.HasKey("LessonId", "TeacherId")
-                        .HasName("pk_lesson_teacher");
-
-                    b.HasIndex("TeacherId")
-                        .HasDatabaseName("ix_lesson_teacher_teacher_id");
-
-                    b.ToTable("lesson_teacher", (string)null);
                 });
 
             modelBuilder.Entity("Dal.Entities.DbRoom", b =>
@@ -583,25 +443,6 @@ namespace Dal.Migrations
                     b.ToTable("student_group", (string)null);
                 });
 
-            modelBuilder.Entity("Dal.Entities.DbStudentGroupLink", b =>
-                {
-                    b.Property<Guid>("ChildStudentGroupId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("child_student_group_id");
-
-                    b.Property<Guid>("ParentStudentGroupId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("parent_student_group_id");
-
-                    b.HasKey("ChildStudentGroupId", "ParentStudentGroupId")
-                        .HasName("pk_student_group_link");
-
-                    b.HasIndex("ParentStudentGroupId")
-                        .HasDatabaseName("ix_student_group_link_parent_student_group_id");
-
-                    b.ToTable("student_group_link", (string)null);
-                });
-
             modelBuilder.Entity("Dal.Entities.DbTeacher", b =>
                 {
                     b.Property<Guid>("Id")
@@ -708,6 +549,157 @@ namespace Dal.Migrations
                     b.ToTable("user", (string)null);
                 });
 
+            modelBuilder.Entity("lesson_batch_info_room", b =>
+                {
+                    b.Property<Guid>("lesson_batch_info_id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("lesson_batch_info_id");
+
+                    b.Property<Guid>("room_id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("room_id");
+
+                    b.HasKey("lesson_batch_info_id", "room_id")
+                        .HasName("pk_lesson_batch_info_room");
+
+                    b.HasIndex("lesson_batch_info_id")
+                        .HasDatabaseName("ix_lesson_batch_info_room_batch_id");
+
+                    b.HasIndex("room_id")
+                        .HasDatabaseName("ix_lesson_batch_info_room_room_id");
+
+                    b.ToTable("lesson_batch_info_room", (string)null);
+                });
+
+            modelBuilder.Entity("lesson_batch_info_student_group", b =>
+                {
+                    b.Property<Guid>("lesson_batch_info_id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("lesson_batch_info_id");
+
+                    b.Property<Guid>("student_group_id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("student_group_id");
+
+                    b.HasKey("lesson_batch_info_id", "student_group_id")
+                        .HasName("pk_lesson_batch_info_student_group");
+
+                    b.HasIndex("lesson_batch_info_id")
+                        .HasDatabaseName("ix_lesson_batch_info_student_group_batch_id");
+
+                    b.HasIndex("student_group_id")
+                        .HasDatabaseName("ix_lesson_batch_info_student_group_student_group_id");
+
+                    b.ToTable("lesson_batch_info_student_group", (string)null);
+                });
+
+            modelBuilder.Entity("lesson_batch_info_teacher", b =>
+                {
+                    b.Property<Guid>("lesson_batch_info_id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("lesson_batch_info_id");
+
+                    b.Property<Guid>("teacher_id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("teacher_id");
+
+                    b.HasKey("lesson_batch_info_id", "teacher_id")
+                        .HasName("pk_lesson_batch_info_teacher");
+
+                    b.HasIndex("lesson_batch_info_id")
+                        .HasDatabaseName("ix_lesson_batch_info_teacher_batch_id");
+
+                    b.HasIndex("teacher_id")
+                        .HasDatabaseName("ix_lesson_batch_info_teacher_teacher_id");
+
+                    b.ToTable("lesson_batch_info_teacher", (string)null);
+                });
+
+            modelBuilder.Entity("lesson_room", b =>
+                {
+                    b.Property<Guid>("lesson_id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("lesson_id");
+
+                    b.Property<Guid>("room_id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("room_id");
+
+                    b.HasKey("lesson_id", "room_id")
+                        .HasName("pk_lesson_room");
+
+                    b.HasIndex("lesson_id")
+                        .HasDatabaseName("ix_lesson_room_lesson_id");
+
+                    b.HasIndex("room_id")
+                        .HasDatabaseName("ix_lesson_room_room_id");
+
+                    b.ToTable("lesson_room", (string)null);
+                });
+
+            modelBuilder.Entity("lesson_student_group", b =>
+                {
+                    b.Property<Guid>("lesson_id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("lesson_id");
+
+                    b.Property<Guid>("student_group_id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("student_group_id");
+
+                    b.HasKey("lesson_id", "student_group_id")
+                        .HasName("pk_lesson_student_group");
+
+                    b.HasIndex("lesson_id")
+                        .HasDatabaseName("ix_lesson_student_group_lesson_id");
+
+                    b.HasIndex("student_group_id")
+                        .HasDatabaseName("ix_lesson_student_group_student_group_id");
+
+                    b.ToTable("lesson_student_group", (string)null);
+                });
+
+            modelBuilder.Entity("lesson_teacher", b =>
+                {
+                    b.Property<Guid>("lesson_id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("lesson_id");
+
+                    b.Property<Guid>("teacher_id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("teacher_id");
+
+                    b.HasKey("lesson_id", "teacher_id")
+                        .HasName("pk_lesson_teacher");
+
+                    b.HasIndex("lesson_id")
+                        .HasDatabaseName("ix_lesson_teacher_lesson_id");
+
+                    b.HasIndex("teacher_id")
+                        .HasDatabaseName("ix_lesson_teacher_teacher_id");
+
+                    b.ToTable("lesson_teacher", (string)null);
+                });
+
+            modelBuilder.Entity("student_group_link", b =>
+                {
+                    b.Property<Guid>("parent_id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("parent_id");
+
+                    b.Property<Guid>("child_id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("child_id");
+
+                    b.HasKey("parent_id", "child_id")
+                        .HasName("pk_student_group_link");
+
+                    b.HasIndex("child_id")
+                        .HasDatabaseName("ix_student_group_link_child_id");
+
+                    b.ToTable("student_group_link", (string)null);
+                });
+
             modelBuilder.Entity("Dal.Entities.DbAcademicDiscipline", b =>
                 {
                     b.HasOne("Dal.Entities.DbSchedule", "Schedule")
@@ -750,98 +742,14 @@ namespace Dal.Migrations
 
             modelBuilder.Entity("Dal.Entities.DbLessonBatchInfo", b =>
                 {
-                    b.HasOne("Dal.Entities.DbAcademicDiscipline", null)
-                        .WithMany("AcademicDisciplineExamLessonBatchInfos")
-                        .HasForeignKey("exam_academic_discipline_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .HasConstraintName("fk_lesson_batch_info_exam");
-
-                    b.HasOne("Dal.Entities.DbAcademicDiscipline", null)
-                        .WithMany("AcademicDisciplineLabLessonBatchInfos")
-                        .HasForeignKey("lab_academic_discipline_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .HasConstraintName("fk_lesson_batch_info_lab");
-
-                    b.HasOne("Dal.Entities.DbAcademicDiscipline", null)
-                        .WithMany("AcademicDisciplineLectureLessonBatchInfos")
-                        .HasForeignKey("lecture_academic_discipline_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .HasConstraintName("fk_lesson_batch_info_lecture");
-
-                    b.HasOne("Dal.Entities.DbAcademicDiscipline", null)
-                        .WithMany("AcademicDisciplinePracticeLessonBatchInfos")
-                        .HasForeignKey("practice_academic_discipline_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .HasConstraintName("fk_lesson_batch_info_practice");
-
-                    b.HasOne("Dal.Entities.DbAcademicDiscipline", null)
-                        .WithMany("AcademicDisciplineTestLessonBatchInfos")
-                        .HasForeignKey("test_academic_discipline_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .HasConstraintName("fk_lesson_batch_info_test");
-                });
-
-            modelBuilder.Entity("Dal.Entities.DbLessonBatchInfoRoom", b =>
-                {
-                    b.HasOne("Dal.Entities.DbLessonBatchInfo", "LessonBatchInfo")
-                        .WithMany("Rooms")
-                        .HasForeignKey("LessonBatchInfoId")
+                    b.HasOne("Dal.Entities.DbAcademicDiscipline", "AcademicDiscipline")
+                        .WithMany("LessonBatchInfos")
+                        .HasForeignKey("AcademicDisciplineId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_lesson_batch_info_room_lesson_batch_info_lesson_batch_info_");
+                        .HasConstraintName("fk_lesson_batch_info_academic_discipline_academic_discipline_id");
 
-                    b.HasOne("Dal.Entities.DbRoom", "Room")
-                        .WithMany()
-                        .HasForeignKey("RoomId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_lesson_batch_info_room_db_room_room_id");
-
-                    b.Navigation("LessonBatchInfo");
-
-                    b.Navigation("Room");
-                });
-
-            modelBuilder.Entity("Dal.Entities.DbLessonBatchInfoStudentGroup", b =>
-                {
-                    b.HasOne("Dal.Entities.DbLessonBatchInfo", "LessonBatchInfo")
-                        .WithMany("StudentGroups")
-                        .HasForeignKey("LessonBatchInfoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_lesson_batch_info_student_group_lesson_batch_info_lesson_ba");
-
-                    b.HasOne("Dal.Entities.DbStudentGroup", "StudentGroup")
-                        .WithMany()
-                        .HasForeignKey("StudentGroupId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_lesson_batch_info_student_group_db_student_group_student_gr");
-
-                    b.Navigation("LessonBatchInfo");
-
-                    b.Navigation("StudentGroup");
-                });
-
-            modelBuilder.Entity("Dal.Entities.DbLessonBatchInfoTeacher", b =>
-                {
-                    b.HasOne("Dal.Entities.DbLessonBatchInfo", "LessonBatchInfo")
-                        .WithMany("Teachers")
-                        .HasForeignKey("LessonBatchInfoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_lesson_batch_info_teacher_lesson_batch_info_lesson_batch_in");
-
-                    b.HasOne("Dal.Entities.DbTeacher", "Teacher")
-                        .WithMany()
-                        .HasForeignKey("TeacherId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_lesson_batch_info_teacher_db_teacher_teacher_id");
-
-                    b.Navigation("LessonBatchInfo");
-
-                    b.Navigation("Teacher");
+                    b.Navigation("AcademicDiscipline");
                 });
 
             modelBuilder.Entity("Dal.Entities.DbLessonPolicyViolation", b =>
@@ -896,69 +804,6 @@ namespace Dal.Migrations
                     b.Navigation("Lesson");
                 });
 
-            modelBuilder.Entity("Dal.Entities.DbLessonRoom", b =>
-                {
-                    b.HasOne("Dal.Entities.DbLesson", "Lesson")
-                        .WithMany("Rooms")
-                        .HasForeignKey("LessonId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_lesson_room_lesson_lesson_id");
-
-                    b.HasOne("Dal.Entities.DbRoom", "Room")
-                        .WithMany()
-                        .HasForeignKey("RoomId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_lesson_room_db_room_room_id");
-
-                    b.Navigation("Lesson");
-
-                    b.Navigation("Room");
-                });
-
-            modelBuilder.Entity("Dal.Entities.DbLessonStudentGroup", b =>
-                {
-                    b.HasOne("Dal.Entities.DbLesson", "Lesson")
-                        .WithMany("StudentGroups")
-                        .HasForeignKey("LessonId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_lesson_student_group_lesson_lesson_id");
-
-                    b.HasOne("Dal.Entities.DbStudentGroup", "StudentGroup")
-                        .WithMany()
-                        .HasForeignKey("StudentGroupId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_lesson_student_group_db_student_group_student_group_id");
-
-                    b.Navigation("Lesson");
-
-                    b.Navigation("StudentGroup");
-                });
-
-            modelBuilder.Entity("Dal.Entities.DbLessonTeacher", b =>
-                {
-                    b.HasOne("Dal.Entities.DbLesson", "Lesson")
-                        .WithMany("Teachers")
-                        .HasForeignKey("LessonId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_lesson_teacher_lesson_lesson_id");
-
-                    b.HasOne("Dal.Entities.DbTeacher", "Teacher")
-                        .WithMany()
-                        .HasForeignKey("TeacherId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_lesson_teacher_db_teacher_teacher_id");
-
-                    b.Navigation("Lesson");
-
-                    b.Navigation("Teacher");
-                });
-
             modelBuilder.Entity("Dal.Entities.DbRoom", b =>
                 {
                     b.HasOne("Dal.Entities.DbCampus", "Campus")
@@ -1004,27 +849,6 @@ namespace Dal.Migrations
                     b.Navigation("Schedule");
                 });
 
-            modelBuilder.Entity("Dal.Entities.DbStudentGroupLink", b =>
-                {
-                    b.HasOne("Dal.Entities.DbStudentGroup", "ChildStudentGroup")
-                        .WithMany("Parents")
-                        .HasForeignKey("ChildStudentGroupId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_student_group_link_student_group_child_student_group_id");
-
-                    b.HasOne("Dal.Entities.DbStudentGroup", "ParentStudentGroup")
-                        .WithMany("Children")
-                        .HasForeignKey("ParentStudentGroupId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_student_group_link_student_group_parent_student_group_id");
-
-                    b.Navigation("ChildStudentGroup");
-
-                    b.Navigation("ParentStudentGroup");
-                });
-
             modelBuilder.Entity("Dal.Entities.DbTeacherPreference", b =>
                 {
                     b.HasOne("Dal.Entities.DbRoom", "Room")
@@ -1054,44 +878,133 @@ namespace Dal.Migrations
                     b.Navigation("Teacher");
                 });
 
+            modelBuilder.Entity("lesson_batch_info_room", b =>
+                {
+                    b.HasOne("Dal.Entities.DbLessonBatchInfo", null)
+                        .WithMany()
+                        .HasForeignKey("lesson_batch_info_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_lesson_batch_info_room_batch");
+
+                    b.HasOne("Dal.Entities.DbRoom", null)
+                        .WithMany()
+                        .HasForeignKey("room_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_lesson_batch_info_room_room");
+                });
+
+            modelBuilder.Entity("lesson_batch_info_student_group", b =>
+                {
+                    b.HasOne("Dal.Entities.DbLessonBatchInfo", null)
+                        .WithMany()
+                        .HasForeignKey("lesson_batch_info_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_lesson_batch_info_student_group_batch");
+
+                    b.HasOne("Dal.Entities.DbStudentGroup", null)
+                        .WithMany()
+                        .HasForeignKey("student_group_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_lesson_batch_info_student_group_student_group");
+                });
+
+            modelBuilder.Entity("lesson_batch_info_teacher", b =>
+                {
+                    b.HasOne("Dal.Entities.DbLessonBatchInfo", null)
+                        .WithMany()
+                        .HasForeignKey("lesson_batch_info_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_lesson_batch_info_teacher_batch");
+
+                    b.HasOne("Dal.Entities.DbTeacher", null)
+                        .WithMany()
+                        .HasForeignKey("teacher_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_lesson_batch_info_teacher_teacher");
+                });
+
+            modelBuilder.Entity("lesson_room", b =>
+                {
+                    b.HasOne("Dal.Entities.DbLesson", null)
+                        .WithMany()
+                        .HasForeignKey("lesson_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_lesson_room_lesson");
+
+                    b.HasOne("Dal.Entities.DbRoom", null)
+                        .WithMany()
+                        .HasForeignKey("room_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_lesson_room_room");
+                });
+
+            modelBuilder.Entity("lesson_student_group", b =>
+                {
+                    b.HasOne("Dal.Entities.DbLesson", null)
+                        .WithMany()
+                        .HasForeignKey("lesson_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_lesson_student_group_lesson");
+
+                    b.HasOne("Dal.Entities.DbStudentGroup", null)
+                        .WithMany()
+                        .HasForeignKey("student_group_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_lesson_student_group_student_group");
+                });
+
+            modelBuilder.Entity("lesson_teacher", b =>
+                {
+                    b.HasOne("Dal.Entities.DbLesson", null)
+                        .WithMany()
+                        .HasForeignKey("lesson_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_lesson_teacher_lesson");
+
+                    b.HasOne("Dal.Entities.DbTeacher", null)
+                        .WithMany()
+                        .HasForeignKey("teacher_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_lesson_teacher_teacher");
+                });
+
+            modelBuilder.Entity("student_group_link", b =>
+                {
+                    b.HasOne("Dal.Entities.DbStudentGroup", null)
+                        .WithMany()
+                        .HasForeignKey("child_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_student_group_link_child");
+
+                    b.HasOne("Dal.Entities.DbStudentGroup", null)
+                        .WithMany()
+                        .HasForeignKey("parent_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_student_group_link_parent");
+                });
+
             modelBuilder.Entity("Dal.Entities.DbAcademicDiscipline", b =>
                 {
-                    b.Navigation("AcademicDisciplineExamLessonBatchInfos");
-
-                    b.Navigation("AcademicDisciplineLabLessonBatchInfos");
-
-                    b.Navigation("AcademicDisciplineLectureLessonBatchInfos");
-
-                    b.Navigation("AcademicDisciplinePracticeLessonBatchInfos");
-
-                    b.Navigation("AcademicDisciplineTestLessonBatchInfos");
+                    b.Navigation("LessonBatchInfos");
                 });
 
             modelBuilder.Entity("Dal.Entities.DbLesson", b =>
                 {
-                    b.Navigation("Rooms");
-
-                    b.Navigation("StudentGroups");
-
-                    b.Navigation("Teachers");
-
                     b.Navigation("Violations");
-                });
-
-            modelBuilder.Entity("Dal.Entities.DbLessonBatchInfo", b =>
-                {
-                    b.Navigation("Rooms");
-
-                    b.Navigation("StudentGroups");
-
-                    b.Navigation("Teachers");
-                });
-
-            modelBuilder.Entity("Dal.Entities.DbStudentGroup", b =>
-                {
-                    b.Navigation("Children");
-
-                    b.Navigation("Parents");
                 });
 #pragma warning restore 612, 618
         }

@@ -19,17 +19,10 @@ public class InsmaScheduleContext(DbContextOptions options) : DbContextBase(opti
         builder.Entity<DbTeacher>(TeacherConfigure);
         builder.Entity<DbTeacherPreference>(TeacherPreferenceConfigure);
         builder.Entity<DbStudentGroup>(StudentGroupConfigure);
-        builder.Entity<DbStudentGroupLink>(StudentGroupLinkConfigure);
         builder.Entity<DbStudent>(StudentConfigure);
         builder.Entity<DbAcademicDiscipline>(AcademicDisciplineConfigure);
         builder.Entity<DbLessonBatchInfo>(LessonBatchInfoConfigure);
-        builder.Entity<DbLessonBatchInfoStudentGroup>(LessonBatchInfoStudentGroupConfigure);
-        builder.Entity<DbLessonBatchInfoTeacher>(LessonBatchInfoTeacherConfigure);
-        builder.Entity<DbLessonBatchInfoRoom>(LessonBatchInfoRoomConfigure);
         builder.Entity<DbLesson>(LessonConfigure);
-        builder.Entity<DbLessonStudentGroup>(LessonStudentGroupConfigure);
-        builder.Entity<DbLessonTeacher>(LessonTeacherConfigure);
-        builder.Entity<DbLessonRoom>(LessonRoomConfigure);
         builder.Entity<DbLessonPolicyViolation>(LessonPolicyViolationConfigure);
 
         base.OnModelCreating(builder);
@@ -42,35 +35,11 @@ public class InsmaScheduleContext(DbContextOptions options) : DbContextBase(opti
             .HasForeignKey(x => x.ScheduleId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasMany(x => x.AcademicDisciplineLectureLessonBatchInfos)
-            .WithOne()
-            .HasForeignKey("lecture_academic_discipline_id")
-            .HasConstraintName("fk_lesson_batch_info_lecture")
-            .OnDelete(DeleteBehavior.Cascade);
-
-        builder.HasMany(x => x.AcademicDisciplinePracticeLessonBatchInfos)
-            .WithOne()
-            .HasForeignKey("practice_academic_discipline_id")
-            .HasConstraintName("fk_lesson_batch_info_practice")
-            .OnDelete(DeleteBehavior.Cascade);
-
-        builder.HasMany(x => x.AcademicDisciplineLabLessonBatchInfos)
-            .WithOne()
-            .HasForeignKey("lab_academic_discipline_id")
-            .HasConstraintName("fk_lesson_batch_info_lab")
-            .OnDelete(DeleteBehavior.Cascade);
-
-        builder.HasMany(x => x.AcademicDisciplineExamLessonBatchInfos)
-            .WithOne()
-            .HasForeignKey("exam_academic_discipline_id")
-            .HasConstraintName("fk_lesson_batch_info_exam")
-            .OnDelete(DeleteBehavior.Cascade);
-
-        builder.HasMany(x => x.AcademicDisciplineTestLessonBatchInfos)
-            .WithOne()
-            .HasForeignKey("test_academic_discipline_id")
-            .HasConstraintName("fk_lesson_batch_info_test")
-            .OnDelete(DeleteBehavior.Cascade);
+        builder.Property(e => e.AllowedLessonTypes)
+            .HasConversion(
+                v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null!),
+                v => JsonSerializer.Deserialize<AcademicDisciplineType[]>(v, (JsonSerializerOptions)null!)!
+            );
 
         builder.Property(x => x.AcademicDisciplineTargetType)
             .HasConversion(new EnumToStringConverter<AcademicDisciplineTargetType>());
@@ -84,53 +53,71 @@ public class InsmaScheduleContext(DbContextOptions options) : DbContextBase(opti
                 v => JsonSerializer.Deserialize<DayOfWeekTimeInterval[]>(v, (JsonSerializerOptions)null!)!
             );
 
+        builder.HasMany(x => x.StudentGroups)
+            .WithMany()
+            .UsingEntity<Dictionary<string, object>>("lesson_batch_info_student_group",
+                l => l.HasOne<DbStudentGroup>()
+                    .WithMany()
+                    .HasForeignKey("student_group_id")
+                    .HasConstraintName("fk_lesson_batch_info_student_group_student_group")
+                    .OnDelete(DeleteBehavior.Cascade),
+                r => r.HasOne<DbLessonBatchInfo>()
+                    .WithMany()
+                    .HasForeignKey("lesson_batch_info_id")
+                    .HasConstraintName("fk_lesson_batch_info_student_group_batch")
+                    .OnDelete(DeleteBehavior.Cascade),
+                j =>
+                {
+                    j.HasKey("lesson_batch_info_id", "student_group_id").HasName("pk_lesson_batch_info_student_group");
+                    j.HasIndex("lesson_batch_info_id").HasDatabaseName("ix_lesson_batch_info_student_group_batch_id");
+                    j.ToTable("lesson_batch_info_student_group");
+                });
+
+        builder.HasMany(x => x.Teachers)
+            .WithMany()
+            .UsingEntity<Dictionary<string, object>>("lesson_batch_info_teacher",
+                l => l.HasOne<DbTeacher>()
+                    .WithMany()
+                    .HasForeignKey("teacher_id")
+                    .HasConstraintName("fk_lesson_batch_info_teacher_teacher")
+                    .OnDelete(DeleteBehavior.Cascade),
+                r => r.HasOne<DbLessonBatchInfo>()
+                    .WithMany()
+                    .HasForeignKey("lesson_batch_info_id")
+                    .HasConstraintName("fk_lesson_batch_info_teacher_batch")
+                    .OnDelete(DeleteBehavior.Cascade),
+                j =>
+                {
+                    j.HasKey("lesson_batch_info_id", "teacher_id").HasName("pk_lesson_batch_info_teacher");
+                    j.HasIndex("lesson_batch_info_id").HasDatabaseName("ix_lesson_batch_info_teacher_batch_id");
+                    j.ToTable("lesson_batch_info_teacher");
+                });
+
+        builder.HasMany(x => x.Rooms)
+            .WithMany()
+            .UsingEntity<Dictionary<string, object>>("lesson_batch_info_room",
+                l => l.HasOne<DbRoom>()
+                    .WithMany()
+                    .HasForeignKey("room_id")
+                    .HasConstraintName("fk_lesson_batch_info_room_room")
+                    .OnDelete(DeleteBehavior.Cascade),
+                r => r.HasOne<DbLessonBatchInfo>()
+                    .WithMany()
+                    .HasForeignKey("lesson_batch_info_id")
+                    .HasConstraintName("fk_lesson_batch_info_room_batch")
+                    .OnDelete(DeleteBehavior.Cascade),
+                j =>
+                {
+                    j.HasKey("lesson_batch_info_id", "room_id").HasName("pk_lesson_batch_info_room");
+                    j.HasIndex("lesson_batch_info_id").HasDatabaseName("ix_lesson_batch_info_room_batch_id");
+                    j.ToTable("lesson_batch_info_room");
+                });
+
         builder.Property(x => x.RepeatType)
             .HasConversion(new EnumToStringConverter<DisciplineLessonRepeatType>());
-    }
 
-    private void LessonBatchInfoStudentGroupConfigure(EntityTypeBuilder<DbLessonBatchInfoStudentGroup> builder)
-    {
-        builder.HasKey(x => new { x.LessonBatchInfoId, x.StudentGroupId });
-
-        builder.HasOne(lr => lr.LessonBatchInfo)
-            .WithMany(l => l.StudentGroups)
-            .HasForeignKey(lr => lr.LessonBatchInfoId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        builder.HasOne(lr => lr.StudentGroup)
-            .WithMany()
-            .HasForeignKey(lr => lr.StudentGroupId)
-            .OnDelete(DeleteBehavior.Cascade);
-    }
-
-    private void LessonBatchInfoTeacherConfigure(EntityTypeBuilder<DbLessonBatchInfoTeacher> builder)
-    {
-        builder.HasKey(x => new { x.LessonBatchInfoId, x.TeacherId });
-
-        builder.HasOne(lr => lr.LessonBatchInfo)
-            .WithMany(l => l.Teachers)
-            .HasForeignKey(lr => lr.LessonBatchInfoId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        builder.HasOne(lr => lr.Teacher)
-            .WithMany()
-            .HasForeignKey(lr => lr.TeacherId)
-            .OnDelete(DeleteBehavior.Cascade);
-    }
-
-    private void LessonBatchInfoRoomConfigure(EntityTypeBuilder<DbLessonBatchInfoRoom> builder)
-    {
-        builder.HasKey(x => new { x.LessonBatchInfoId, x.RoomId });
-
-        builder.HasOne(lr => lr.LessonBatchInfo)
-            .WithMany(l => l.Rooms)
-            .HasForeignKey(lr => lr.LessonBatchInfoId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        builder.HasOne(lr => lr.Room)
-            .WithMany()
-            .HasForeignKey(lr => lr.RoomId)
-            .OnDelete(DeleteBehavior.Cascade);
+        builder.Property(x => x.FlexibilityType)
+            .HasConversion(new EnumToStringConverter<LessonFlexibilityType>());
     }
 
     private void LessonConfigure(EntityTypeBuilder<DbLesson> builder)
@@ -144,6 +131,66 @@ public class InsmaScheduleContext(DbContextOptions options) : DbContextBase(opti
             .WithMany()
             .HasForeignKey(x => x.AcademicDisciplineId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany(x => x.StudentGroups)
+            .WithMany()
+            .UsingEntity<Dictionary<string, object>>("lesson_student_group",
+                l => l.HasOne<DbStudentGroup>()
+                    .WithMany()
+                    .HasForeignKey("student_group_id")
+                    .HasConstraintName("fk_lesson_student_group_student_group")
+                    .OnDelete(DeleteBehavior.Cascade),
+                r => r.HasOne<DbLesson>()
+                    .WithMany()
+                    .HasForeignKey("lesson_id")
+                    .HasConstraintName("fk_lesson_student_group_lesson")
+                    .OnDelete(DeleteBehavior.Cascade),
+                j =>
+                {
+                    j.HasKey("lesson_id", "student_group_id").HasName("pk_lesson_student_group");
+                    j.HasIndex("lesson_id").HasDatabaseName("ix_lesson_student_group_lesson_id");
+                    j.ToTable("lesson_student_group");
+                });
+
+        builder.HasMany(x => x.Teachers)
+            .WithMany()
+            .UsingEntity<Dictionary<string, object>>("lesson_teacher",
+                l => l.HasOne<DbTeacher>()
+                    .WithMany()
+                    .HasForeignKey("teacher_id")
+                    .HasConstraintName("fk_lesson_teacher_teacher")
+                    .OnDelete(DeleteBehavior.Cascade),
+                r => r.HasOne<DbLesson>()
+                    .WithMany()
+                    .HasForeignKey("lesson_id")
+                    .HasConstraintName("fk_lesson_teacher_lesson")
+                    .OnDelete(DeleteBehavior.Cascade),
+                j =>
+                {
+                    j.HasKey("lesson_id", "teacher_id").HasName("pk_lesson_teacher");
+                    j.HasIndex("lesson_id").HasDatabaseName("ix_lesson_teacher_lesson_id");
+                    j.ToTable("lesson_teacher");
+                });
+
+        builder.HasMany(x => x.Rooms)
+            .WithMany()
+            .UsingEntity<Dictionary<string, object>>("lesson_room",
+                l => l.HasOne<DbRoom>()
+                    .WithMany()
+                    .HasForeignKey("room_id")
+                    .HasConstraintName("fk_lesson_room_room")
+                    .OnDelete(DeleteBehavior.Cascade),
+                r => r.HasOne<DbLesson>()
+                    .WithMany()
+                    .HasForeignKey("lesson_id")
+                    .HasConstraintName("fk_lesson_room_lesson")
+                    .OnDelete(DeleteBehavior.Cascade),
+                j =>
+                {
+                    j.HasKey("lesson_id", "room_id").HasName("pk_lesson_room");
+                    j.HasIndex("lesson_id").HasDatabaseName("ix_lesson_room_lesson_id");
+                    j.ToTable("lesson_room");
+                });
 
         builder.Property(x => x.AcademicDisciplineType)
             .HasConversion(new EnumToStringConverter<AcademicDisciplineType>());
@@ -159,51 +206,6 @@ public class InsmaScheduleContext(DbContextOptions options) : DbContextBase(opti
         builder.HasMany(x => x.Violations)
             .WithOne(x => x.Lesson)
             .HasForeignKey(x => x.LessonId)
-            .OnDelete(DeleteBehavior.Cascade);
-    }
-
-    private void LessonStudentGroupConfigure(EntityTypeBuilder<DbLessonStudentGroup> builder)
-    {
-        builder.HasKey(x => new { x.LessonId, x.StudentGroupId });
-
-        builder.HasOne(lr => lr.Lesson)
-            .WithMany(l => l.StudentGroups)
-            .HasForeignKey(lr => lr.LessonId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        builder.HasOne(lr => lr.StudentGroup)
-            .WithMany()
-            .HasForeignKey(lr => lr.StudentGroupId)
-            .OnDelete(DeleteBehavior.Cascade);
-    }
-
-    private void LessonTeacherConfigure(EntityTypeBuilder<DbLessonTeacher> builder)
-    {
-        builder.HasKey(x => new { x.LessonId, x.TeacherId });
-
-        builder.HasOne(lr => lr.Lesson)
-            .WithMany(l => l.Teachers)
-            .HasForeignKey(lr => lr.LessonId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        builder.HasOne(lr => lr.Teacher)
-            .WithMany()
-            .HasForeignKey(lr => lr.TeacherId)
-            .OnDelete(DeleteBehavior.Cascade);
-    }
-
-    private void LessonRoomConfigure(EntityTypeBuilder<DbLessonRoom> builder)
-    {
-        builder.HasKey(x => new { x.LessonId, x.RoomId });
-
-        builder.HasOne(lr => lr.Lesson)
-            .WithMany(l => l.Rooms)
-            .HasForeignKey(lr => lr.LessonId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        builder.HasOne(lr => lr.Room)
-            .WithMany()
-            .HasForeignKey(lr => lr.RoomId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 
@@ -277,23 +279,28 @@ public class InsmaScheduleContext(DbContextOptions options) : DbContextBase(opti
             .HasForeignKey(x => x.ScheduleId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        builder.HasMany(x => x.Children)
+            .WithMany(x => x.Parents)
+            .UsingEntity<Dictionary<string, object>>("student_group_link",
+                l => l.HasOne<DbStudentGroup>()
+                    .WithMany()
+                    .HasForeignKey("child_id")
+                    .HasConstraintName("fk_student_group_link_child")
+                    .OnDelete(DeleteBehavior.Cascade),
+                r => r.HasOne<DbStudentGroup>()
+                    .WithMany()
+                    .HasForeignKey("parent_id")
+                    .HasConstraintName("fk_student_group_link_parent")
+                    .OnDelete(DeleteBehavior.Cascade),
+                j =>
+                {
+                    j.HasKey("parent_id", "child_id").HasName("pk_student_group_link");
+                    j.HasIndex("child_id").HasDatabaseName("ix_student_group_link_child_id");
+                    j.ToTable("student_group_link");
+                });
+
         builder.Property(x => x.StudentGroupType)
             .HasConversion(new EnumToStringConverter<StudentGroupType>());
-    }
-
-    private void StudentGroupLinkConfigure(EntityTypeBuilder<DbStudentGroupLink> builder)
-    {
-        builder.HasKey(x => new { x.ChildStudentGroupId, x.ParentStudentGroupId });
-
-        builder.HasOne(x => x.ParentStudentGroup)
-            .WithMany(g => g.Children)
-            .HasForeignKey(x => x.ParentStudentGroupId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        builder.HasOne(x => x.ChildStudentGroup)
-            .WithMany(g => g.Parents)
-            .HasForeignKey(x => x.ChildStudentGroupId)
-            .OnDelete(DeleteBehavior.Cascade);
     }
 
     private void TeacherConfigure(EntityTypeBuilder<DbTeacher> builder)

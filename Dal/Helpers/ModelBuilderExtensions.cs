@@ -127,7 +127,7 @@ public static class ModelBuilderExtensions
 
     private static string Cleanup(string name)
     {
-        return name.Replace("Db", string.Empty).Replace("Entity", string.Empty);
+        return name.Replace("Db", string.Empty).Replace("Entity", string.Empty).Replace(" (Dictionary<string, object>)", string.Empty);
     }
 
     private static (string Name, string Sql) FixedLengthConstraint(string fieldName, int length, bool acceptNull)

@@ -1,6 +1,5 @@
 ﻿using Dal.Entities;
 using Dal.Transactions;
-using Domain.Exceptions;
 using Domain.Models;
 using Domain.Models.Enums;
 using Domain.Models.SearchModels;
@@ -15,110 +14,49 @@ public class StudentGroupRepository(
     IPredicateBuilder<DbStudentGroup, StudentGroupSearchModel> predicateBuilder)
     : Repository<InsmaScheduleContext, DbStudentGroup, StudentGroup>(context, mapper, transactionalService), IStudentGroupRepository
 {
-    public override async Task<StudentGroup[]> SelectAsync(Guid[] ids, CancellationToken cancellationToken = default)
-    {
-        if (ids.Length == 0)
-        {
-            return [];
-        }
-        var entities = await Query()
-            .Include(x => x.Parents)
-            .ThenInclude(x => x.ParentStudentGroup)
-            .Include(x => x.Children)
-            .ThenInclude(x => x.ChildStudentGroup)
-            .Where(i => ids.Contains(i.Id))
-            .AsNoTracking()
-            .ToArrayAsync(cancellationToken);
-
-        return entities.Select(f => MapperReadonly.Map(f)).ToArray();
-    }
-
     public override async Task<Guid> SaveAsync(StudentGroup model, CancellationToken cancellationToken = default)
     {
-        var previousStudentGroup = model.Id.HasValue ? await GetAsync(model.Id!.Value, cancellationToken) : null;
-        if (previousStudentGroup == null) return await base.SaveAsync(model, cancellationToken);
+        var id = model.Id;
+        var previousStudentGroup = id.HasValue ? await GetAsync(id.Value, cancellationToken) : null;
+        if (previousStudentGroup == null)
+        {
+            id = await base.SaveAsync(model, cancellationToken);
+            await SaveReferencesAsync(id.Value, model.Parents);
+            return id.Value;
+        }
 
-        var removedChildIds = previousStudentGroup.Children
+        var removedChildren = previousStudentGroup.Children
             .Where(x => model.Children.All(y => y.Id != x.Id))
-            .Select(x => x.Id!.Value);
-        var removedParentIds = previousStudentGroup.Parents
-            .Where(x => model.Parents.All(y => y.Id != x.Id))
-            .Select(x => x.Id!.Value);
-        var referencesToDelete = removedChildIds
-            .Select(x => new DbStudentGroupLink { ParentStudentGroupId = model.Id!.Value, ChildStudentGroupId = x })
-            .Concat(removedParentIds
-                .Select(x => new DbStudentGroupLink { ParentStudentGroupId = x, ChildStudentGroupId = model.Id!.Value }))
             .ToArray();
-        Context.Set<DbStudentGroupLink>().RemoveRange(referencesToDelete);
-        await Context.SaveChangesAsync(cancellationToken);
+        var removedParents = previousStudentGroup.Parents
+            .Where(x => model.Parents.All(y => y.Id != x.Id));
 
-        model.Children = model.Children.Where(x => previousStudentGroup.Children.All(y => y.Id != x.Id)).ToArray();
-        model.Parents = model.Parents.Where(x => previousStudentGroup.Parents.All(y => y.Id != x.Id)).ToArray();
-        return await base.SaveAsync(model, cancellationToken);
+        if (model.StudentGroupType == StudentGroupType.Group)
+        {
+            await DeleteAsync(removedChildren.Select(x => x.Id!.Value).ToArray(), cancellationToken);
+        }
+
+        await DeleteReferencesAsync(model.Id!.Value, removedParents.Concat(removedChildren).ToArray());
+        await base.SaveAsync(model, cancellationToken);
+        await SaveReferencesAsync(id!.Value, model.Parents);
+
+        return id.Value;
     }
 
     public override async Task<Guid[]> SaveAllAsync(StudentGroup[] models, CancellationToken cancellationToken = default)
     {
-        var totalRemovedChildIds = new List<Guid>();
+        var result = new List<Guid>();
         foreach (var model in models)
         {
-            var previousStudentGroup = model.Id.HasValue ? await GetAsync(model.Id!.Value, cancellationToken) : null;
-            if (previousStudentGroup == null) continue;
-
-            var removedChildIds = previousStudentGroup.Children
-                .Where(x => model.Children.All(y => y.Id != x.Id))
-                .Select(x => x.Id!.Value)
-                .ToArray();
-            if (model.StudentGroupType == StudentGroupType.Group)
-            {
-                totalRemovedChildIds.AddRange(removedChildIds);
-            }
-            var removedParentIds = previousStudentGroup.Parents
-                .Where(x => model.Parents.All(y => y.Id != x.Id))
-                .Select(x => x.Id!.Value);
-            var referencesToDelete = removedChildIds
-                .Select(x => new DbStudentGroupLink { ParentStudentGroupId = model.Id!.Value, ChildStudentGroupId = x })
-                .Concat(removedParentIds
-                    .Select(x => new DbStudentGroupLink { ParentStudentGroupId = x, ChildStudentGroupId = model.Id!.Value }))
-                .ToArray();
-            Context.Set<DbStudentGroupLink>().RemoveRange(referencesToDelete);
-
-            model.Children = model.Children.Where(x => previousStudentGroup.Children.All(y => y.Id != x.Id)).ToArray();
-            model.Parents = model.Parents.Where(x => previousStudentGroup.Parents.All(y => y.Id != x.Id)).ToArray();
+            var id = await SaveAsync(model, cancellationToken);
+            result.Add(id);
         }
-        await Context.SaveChangesAsync(cancellationToken);
-        await base.DeleteAsync(totalRemovedChildIds.ToArray(), cancellationToken);
-        return await base.SaveAllAsync(models, cancellationToken);
-    }
-
-    public override async Task<StudentGroup> GetAsync(Guid id, CancellationToken cancellationToken = default)
-    {
-        var entity = await Query().AsNoTracking()
-            .AsNoTracking()
-            .Include(x => x.Parents)
-            .ThenInclude(x => x.ParentStudentGroup)
-            .Include(x => x.Children)
-            .ThenInclude(x => x.ChildStudentGroup)
-            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
-
-        var foundEntity = entity ?? throw new ServiceException(ServiceExceptionTypes.EntityNotFound);
-        return MapperReadonly.Map(foundEntity);
+        return result.ToArray();
     }
 
     public async Task<StudentGroup[]> SearchAsync(StudentGroupSearchModel searchModel)
     {
-        var predicate = predicateBuilder.Build(searchModel);
-
-        var entities = await Query()
-            .AsNoTracking()
-            .Include(x => x.Parents)
-            .ThenInclude(x => x.ParentStudentGroup)
-            .Include(x => x.Children)
-            .ThenInclude(x => x.ChildStudentGroup)
-            .Where(predicate)
-            .ToArrayAsync();
-
-        return entities.Select(x => MapperReadonly.Map(x)).ToArray();
+        return await base.SearchAsync(predicateBuilder, searchModel);
     }
 
     public async Task<bool> ExistsAsync(Guid id)
@@ -128,22 +66,45 @@ public class StudentGroupRepository(
 
     public async Task<Dictionary<Guid, List<Guid>>> GetStudentGroupTreeIdsAsync(Guid[] studentGroupIds)
     {
-        var studentGroupTrees = await Query()
-            .AsNoTracking()
-            .Include(x => x.Parents)
-            .ThenInclude(x => x.ParentStudentGroup)
-            .Include(x => x.Children)
-            .ThenInclude(x => x.ChildStudentGroup)
-            .Where(x => studentGroupIds.Contains(x.Id))
-            .ToArrayAsync();
+        var studentGroupTrees = await SelectAsync(studentGroupIds);
 
         var result = new Dictionary<Guid, List<Guid>>();
         foreach (var studentGroup in studentGroupTrees)
         {
-            result[studentGroup.Id] = [studentGroup.Id];
-            result[studentGroup.Id].AddRange(studentGroup.Parents.Select(x => x.ParentStudentGroupId));
-            result[studentGroup.Id].AddRange(studentGroup.Children.Select(x => x.ChildStudentGroupId));
+            result[studentGroup.Id!.Value] = [studentGroup.Id!.Value];
+            result[studentGroup.Id!.Value].AddRange(studentGroup.Parents.Select(x => x.Id!.Value));
+            result[studentGroup.Id!.Value].AddRange(studentGroup.Children.Select(x => x.Id!.Value));
         }
         return result;
+    }
+
+    protected override IQueryable<DbStudentGroup> Query() => Context.Set<DbStudentGroup>()
+        .Include(x => x.Parents)
+        .Include(x => x.Children);
+
+    private async Task SaveReferencesAsync(Guid modelId, StudentGroup[] modelParents)
+    {
+        foreach (var parent in modelParents)
+        {
+            await Context.Database.ExecuteSqlInterpolatedAsync(
+                $"""
+                 INSERT INTO public.student_group_link (parent_id, child_id)
+                 VALUES ({parent.Id!.Value}, {modelId})
+                 ON CONFLICT (parent_id, child_id) DO NOTHING
+                 """);
+        }
+    }
+
+    private async Task DeleteReferencesAsync(Guid modelId, StudentGroup[] modelReferences)
+    {
+        foreach (var parent in modelReferences)
+        {
+            await Context.Database.ExecuteSqlInterpolatedAsync(
+                $"""
+                 DELETE FROM public.student_group_link
+                 WHERE (parent_id = {modelId} AND child_id = {parent.Id!.Value})
+                 OR (child_id = {modelId} AND parent_id = {parent.Id!.Value})
+                 """);
+        }
     }
 }

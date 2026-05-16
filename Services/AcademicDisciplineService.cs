@@ -1,5 +1,6 @@
 ﻿using Dal.RegistryRepositories.AcademicDiscipline;
 using Dal.Repositories.AcademicDisciplines;
+using Dal.Repositories.LessonBatchInfo;
 using Dal.Repositories.Lessons;
 using Dal.Repositories.Schedules;
 using Domain.Dto;
@@ -25,7 +26,8 @@ public class AcademicDisciplineService(
     IAcademicDisciplineRegistryRepository academicDisciplineRegistryRepository,
     IScheduleRepository scheduleRepository,
     ILessonService lessonService,
-    ILessonRepository lessonRepository) : IAcademicDisciplineService
+    ILessonRepository lessonRepository,
+    ILessonBatchInfoRepository lessonBatchInfoRepository) : IAcademicDisciplineService
 {
     public async Task<AcademicDisciplineShortDto[]> SearchShortAsync(Guid scheduleId)
     {
@@ -70,10 +72,31 @@ public class AcademicDisciplineService(
             id = await academicDisciplineRepository.SaveAsync(academicDiscipline);
         }
 
-        var savedAcademicDiscipline = await academicDisciplineRepository.GetAsync(id.Value);
+        var lessonBatchInfosToSave = Enum.GetValues<AcademicDisciplineType>()
+            .SelectMany(type =>
+            {
+                var batchInfos = academicDiscipline.GetBatchInfosByType(type);
+                foreach (var batchInfo in batchInfos)
+                {
+                    batchInfo.AcademicDisciplineId = id.Value;
+                    batchInfo.Type = type;
+                }
+                return batchInfos;
+            })
+            .ToArray();
+        var updatedBatchIds = lessonBatchInfosToSave
+            .Where(x => x.Id.HasValue)
+            .Select(x => x.Id!.Value)
+            .ToArray();
+        var ids = await lessonBatchInfoRepository.SaveAllAsync(lessonBatchInfosToSave);
+        var savedLessonBatchInfos = await lessonBatchInfoRepository.SelectAsync(ids);
+        var newLessonBatchInfoIds = savedLessonBatchInfos
+            .Where(x => !updatedBatchIds.Contains(x.Id!.Value))
+            .Select(x => x.Id!.Value)
+            .ToArray();
 
-        await lessonService.UpdateAcademicDisciplineLessons(savedAcademicDiscipline);
-        await lessonService.RecalculateConflictsForUpdatedAcademicDiscipline(savedAcademicDiscipline);
+        await lessonService.UpdateLessonsByBatches(academicDiscipline.ScheduleId, savedLessonBatchInfos, newLessonBatchInfoIds);
+        await lessonService.RecalculateConflictsForUpdatedAcademicDiscipline(academicDiscipline);
     }
 
     public async Task<LessonSeriesConflictDto[]> GetLessonSeriesConflictsAsync(Guid lessonId)
@@ -90,12 +113,7 @@ public class AcademicDisciplineService(
             throw new ServiceException(validationMessages.ToArray());
         }
 
-        var academicDiscipline = await academicDisciplineRepository.GetAsync(lesson.AcademicDisciplineId!.Value);
-        var lessonBatchInfo = Enum.GetValues<AcademicDisciplineType>()
-            .SelectMany(type => academicDiscipline.GetBatchInfosByType(type))
-            .Single(lessonBatchInfo => lessonBatchInfo.Id == lesson.LessonBatchInfoId);
-
-        return await lessonService.GetLessonSeriesConflictsAsync(lesson, lessonBatchInfo, academicDiscipline.ScheduleId);
+        return await lessonService.GetLessonSeriesConflictsAsync(lesson);
     }
 
     public async Task DeleteAsync(Guid academicDisciplineId)

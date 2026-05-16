@@ -20,13 +20,13 @@ public interface ILessonService
 
     Task RecalculateConflictsForUpdatedAcademicDiscipline(AcademicDiscipline academicDiscipline);
 
-    Task UpdateAcademicDisciplineLessons(AcademicDiscipline academicDiscipline);
+    Task UpdateLessonsByBatches(Guid scheduleId, LessonBatchInfo[] lessonBatchInfos, Guid[] newLessonBatchInfoIds);
 
     Task RecalculateConflictsForNewTeacherPreferences(TeacherPreference[] teacherPreferences);
 
     Task RecalculateConflictsForNewStudentGroup(StudentGroup studentGroup);
 
-    Task<LessonSeriesConflictDto[]> GetLessonSeriesConflictsAsync(Lesson lesson, LessonBatchInfo lessonBatchInfo, Guid scheduleId);
+    Task<LessonSeriesConflictDto[]> GetLessonSeriesConflictsAsync(Lesson lesson);
 
     Task DeleteAsync(Guid lessonId);
 }

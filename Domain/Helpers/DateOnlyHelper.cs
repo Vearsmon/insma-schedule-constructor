@@ -34,13 +34,42 @@ public static class DateOnlyHelper
 
     public static DateOnly GetNextWeekStartDate(this DateOnly date) => date.GetWeekStartDate().AddDays(7);
 
+    public static DateOnly GetPreviousWeekEndDate(this DateOnly date) => date.GetWeekStartDate().AddDays(-1);
+
+    public static bool IntersectsEvenWeek(this DateOnly date, DateInterval dateInterval) =>
+        date < dateInterval.DateFrom || date > dateInterval.DateTo
+            ? throw new ArgumentOutOfRangeException()
+            : (date.DayNumber - dateInterval.DateFrom.DayNumber) / 7 % 2 == 0;
+
+    public static int GetDaysInDateIntervalCount(DateInterval dateInterval,
+        int daysPerWeekCount,
+        DisciplineLessonRepeatType repeatType,
+        DateInterval scheduleDateInterval)
+    {
+        var isIntervalStartIntersectEvenWeek = dateInterval.DateFrom.IntersectsEvenWeek(scheduleDateInterval);
+        var dateFrom = repeatType == DisciplineLessonRepeatType.OddWeeks && isIntervalStartIntersectEvenWeek
+                            || repeatType == DisciplineLessonRepeatType.EvenWeeks && !isIntervalStartIntersectEvenWeek
+            ? dateInterval.DateFrom.GetNextWeekStartDate()
+            : dateInterval.DateFrom;
+
+        var isIntervalEndIntersectEvenWeek = dateInterval.DateTo.IntersectsEvenWeek(scheduleDateInterval);
+        var dateTo = repeatType == DisciplineLessonRepeatType.OddWeeks && isIntervalEndIntersectEvenWeek
+                       || repeatType == DisciplineLessonRepeatType.EvenWeeks && !isIntervalEndIntersectEvenWeek
+            ? dateInterval.DateTo.GetPreviousWeekEndDate()
+            : dateInterval.DateTo;
+
+        var totalDays = dateTo.DayNumber - dateFrom.DayNumber + 1;
+        var weeksCount = (int)Math.Ceiling(totalDays / 7.0);
+        return daysPerWeekCount * weeksCount;
+    }
+
     public static DateOnly[] GetDatesInIntervalByDaysOfWeek(DateInterval dateInterval,
         DayOfWeek[] daysOfWeek,
         DisciplineLessonRepeatType repeatType,
         DateInterval scheduleDateInterval)
     {
         var result = new List<DateOnly>();
-        var isIntervalStartIntersectEvenWeek = (dateInterval.DateFrom.DayNumber - scheduleDateInterval.DateFrom.DayNumber) / 7 % 2 == 0;
+        var isIntervalStartIntersectEvenWeek = dateInterval.DateFrom.IntersectsEvenWeek(scheduleDateInterval);
         var skipUntilDate = repeatType == DisciplineLessonRepeatType.OddWeeks && isIntervalStartIntersectEvenWeek
                             || repeatType == DisciplineLessonRepeatType.EvenWeeks && !isIntervalStartIntersectEvenWeek
             ? dateInterval.DateFrom.GetNextWeekStartDate()

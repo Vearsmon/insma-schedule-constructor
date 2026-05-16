@@ -44,10 +44,10 @@ public class DbStudentGroup : IDbEntityWithId
     /// <summary>
     /// Родительские академические группы
     /// </summary>
-    public ICollection<DbStudentGroupLink> Parents { get; set; } = [];
+    public ICollection<DbStudentGroup> Parents { get; set; } = [];
 
     /// <summary>
     /// Составляющие академические группы
     /// </summary>
-    public ICollection<DbStudentGroupLink> Children { get; set; } = [];
+    public ICollection<DbStudentGroup> Children { get; set; } = [];
 }

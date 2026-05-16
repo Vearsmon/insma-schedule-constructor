@@ -10,8 +10,6 @@ public interface ILessonValidationService
 
     Task<LessonPolicyViolation[]> ValidateAsync(Lesson[] lessons);
 
-    Task DeleteViolationsAsync(Guid[] ids);
-
     void BuildPolicyViolations(List<LessonPolicyViolation> lessonPolicyViolations,
         Dictionary<Guid, List<Guid>> studentGroupHierarchyIdsByStudentGroupId,
         Lesson[] conflictingLessons,
@@ -40,23 +38,9 @@ public interface ILessonValidationService
         Guid[] hierarchyIds,
         bool includeTiming = false);
 
-    void ValidateLessonConflictByTeacher(
-        Lesson lesson,
-        Guid[] teacherIds,
-        Lesson[] conflictingByTeacherLessons,
-        List<LessonPolicyViolation> violations,
-        bool includeTiming = false);
-
     void ValidateTeacherPreferenceConflict(
         Lesson lesson,
         TeacherPreference[] conflictingTeacherPreferences,
-        List<LessonPolicyViolation> violations,
-        bool includeTiming = false);
-
-    void ValidateLessonConflictByRoom(
-        Lesson lesson,
-        Guid[] roomIds,
-        Lesson[] conflictingByRoomLessons,
         List<LessonPolicyViolation> violations,
         bool includeTiming = false);
 

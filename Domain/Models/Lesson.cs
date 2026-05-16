@@ -71,6 +71,11 @@ public class Lesson : IModelWithId
     public bool AllowCombining { get; set; }
 
     /// <summary>
+    /// Занятие откреплено от своего шаблона
+    /// </summary>
+    public bool DetachedFromBatch { get; set; }
+
+    /// <summary>
     /// Сведения о созданных занятиях, к которым относится данное
     /// </summary>
     public Guid? LessonBatchInfoId { get; set; }

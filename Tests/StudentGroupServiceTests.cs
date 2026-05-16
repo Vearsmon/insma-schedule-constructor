@@ -1,5 +1,6 @@
 ﻿using AutoFixture;
 using Dal.RegistryRepositories.StudentGroup;
+using Dal.Repositories.Lessons;
 using Dal.Repositories.Schedules;
 using Dal.Repositories.StudentGroups;
 using Domain.Dto.SaveDto;
@@ -20,12 +21,14 @@ public class StudentGroupServiceTests
     private readonly Mock<IStudentGroupRegistryRepository> _studentGroupRegistryRepositoryMock = new();
     private readonly Mock<IScheduleRepository> _scheduleRepositoryMock = new();
     private readonly Mock<ILessonService> _lessonServiceMock = new();
+    private readonly Mock<ILessonRepository> _lessonRepositoryMock = new();
 
     private StudentGroupService CreateService() => new(
         _studentGroupRepositoryMock.Object,
         _studentGroupRegistryRepositoryMock.Object,
         _scheduleRepositoryMock.Object,
-        _lessonServiceMock.Object
+        _lessonServiceMock.Object,
+        _lessonRepositoryMock.Object
     );
 
     [Fact]

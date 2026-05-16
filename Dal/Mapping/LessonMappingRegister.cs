@@ -14,7 +14,7 @@ public static partial class LessonMappingRegister
     {
         var model = AutoMapEntityToModel(entity);
         if (entity == null) return model;
-        model!.DateWithTimeInterval ??= new DateWithTimeInterval
+        model!.DateWithTimeInterval = entity.Date.HasValue ? new DateWithTimeInterval
         {
             Date = entity.Date!.Value,
             TimeInterval = new TimeInterval
@@ -22,10 +22,10 @@ public static partial class LessonMappingRegister
                 TimeFrom = entity.TimeFrom!.Value,
                 TimeTo = entity.TimeTo!.Value,
             },
-        };
-        model.StudentGroups = entity.StudentGroups.Select(x => StudentGroupMappingRegister.MapEntityToModel(x.StudentGroup)).ToArray()!;
-        model.Teachers = entity.Teachers.Select(x => TeacherMappingRegister.MapEntityToModel(x.Teacher)).ToArray()!;
-        model.Rooms = entity.Rooms.Select(x => RoomMappingRegister.MapEntityToModel(x.Room)).ToArray()!;
+        } : null;
+        model.StudentGroups = entity.StudentGroups.Select(StudentGroupMappingRegister.MapEntityToModel).ToArray()!;
+        model.Teachers = entity.Teachers.Select(TeacherMappingRegister.MapEntityToModel).ToArray()!;
+        model.Rooms = entity.Rooms.Select(RoomMappingRegister.MapEntityToModel).ToArray()!;
         model.LessonBatchInfo = LessonBatchInfoMappingRegister.MapEntityToModel(entity.LessonBatchInfo);
         model.Violations = entity.Violations.Select(LessonPolicyViolationMappingRegister.MapEntityToModel).ToArray()!;
         return model;
@@ -39,10 +39,6 @@ public static partial class LessonMappingRegister
         entity!.Date = model.DateWithTimeInterval?.Date;
         entity.TimeFrom = model.DateWithTimeInterval?.TimeInterval.TimeFrom;
         entity.TimeTo = model.DateWithTimeInterval?.TimeInterval.TimeTo;
-        entity.StudentGroups = model.StudentGroups.Select(x => new DbLessonStudentGroup { LessonId = model.Id ?? Guid.Empty, StudentGroupId = x.Id ?? Guid.Empty }).ToList();
-        entity.Teachers = model.Teachers.Select(x => new DbLessonTeacher { LessonId = model.Id ?? Guid.Empty, TeacherId = x.Id ?? Guid.Empty }).ToList();
-        entity.Rooms = model.Rooms.Select(x => new DbLessonRoom { LessonId = model.Id ?? Guid.Empty, RoomId = x.Id ?? Guid.Empty }).ToList();
-        entity.Violations = model.Violations.Select(LessonPolicyViolationMappingRegister.MapModelToEntity).ToList()!;
         return entity;
     }
 
@@ -54,10 +50,6 @@ public static partial class LessonMappingRegister
         entity.Date = model!.DateWithTimeInterval?.Date;
         entity.TimeFrom = model.DateWithTimeInterval?.TimeInterval.TimeFrom;
         entity.TimeTo = model.DateWithTimeInterval?.TimeInterval.TimeTo;
-        entity.StudentGroups = model.StudentGroups.Select(x => new DbLessonStudentGroup { LessonId = model.Id ?? Guid.Empty, StudentGroupId = x.Id ?? Guid.Empty }).ToList();
-        entity.Teachers = model.Teachers.Select(x => new DbLessonTeacher { LessonId = model.Id ?? Guid.Empty, TeacherId = x.Id ?? Guid.Empty }).ToList();
-        entity.Rooms = model.Rooms.Select(x => new DbLessonRoom { LessonId = model.Id ?? Guid.Empty, RoomId = x.Id ?? Guid.Empty }).ToList();
-        entity.Violations = model.Violations.Select(LessonPolicyViolationMappingRegister.MapModelToEntity).ToList()!;
     }
 
     [UserMapping(Default = true)]
@@ -65,7 +57,7 @@ public static partial class LessonMappingRegister
     {
         var item = AutoMapEntityToRegistryItem(entity);
         if (entity == null) return item;
-        item!.DateWithTimeInterval ??= new DateWithTimeInterval
+        item!.DateWithTimeInterval = entity.Date.HasValue ? new DateWithTimeInterval
         {
             Date = entity.Date!.Value,
             TimeInterval = new TimeInterval
@@ -73,10 +65,10 @@ public static partial class LessonMappingRegister
                 TimeFrom = entity.TimeFrom!.Value,
                 TimeTo = entity.TimeTo!.Value,
             },
-        };
-        item.StudentGroupIds = entity.StudentGroups.Select(x => x.StudentGroupId).ToArray();
-        item.TeacherIds = entity.Teachers.Select(x => x.TeacherId).ToArray();
-        item.RoomIds = entity.Rooms.Select(x => x.RoomId).ToArray();
+        } : null;
+        item.StudentGroupIds = entity.StudentGroups.Select(x => x.Id).ToArray();
+        item.TeacherIds = entity.Teachers.Select(x => x.Id).ToArray();
+        item.RoomIds = entity.Rooms.Select(x => x.Id).ToArray();
         item.Violations = entity.Violations.Select(LessonPolicyViolationMappingRegister.MapEntityToModel).ToArray()!;
         return item;
     }
@@ -148,6 +140,7 @@ public static partial class LessonMappingRegister
     [MapperIgnoreSource(nameof(DbLesson.StudentGroups))]
     [MapperIgnoreSource(nameof(DbLesson.Teachers))]
     [MapperIgnoreSource(nameof(DbLesson.Rooms))]
+    [MapperIgnoreSource(nameof(DbLesson.DetachedFromBatch))]
     [MapperIgnoreSource(nameof(DbLesson.LessonBatchInfoId))]
     [MapperIgnoreSource(nameof(DbLesson.LessonBatchInfo))]
     [MapperIgnoreSource(nameof(DbLesson.Violations))]

@@ -13,12 +13,6 @@ public class RoomRepository(
     IPredicateBuilder<DbRoom, RoomSearchModel> predicateBuilder)
     : Repository<InsmaScheduleContext, DbRoom, Room>(context, mapper, transactionalService), IRoomRepository
 {
-    public override async Task<Room> GetAsync(Guid id, CancellationToken cancellationToken = default)
-    {
-        var entity = await GetEntityAsync(id, BaseQuery(), cancellationToken);
-        return MapperReadonly.Map(entity);
-    }
-
     public async Task<Room[]> SearchAsync(RoomSearchModel searchModel)
     {
         return await base.SearchAsync(predicateBuilder, searchModel);
@@ -29,9 +23,6 @@ public class RoomRepository(
         return await ExistAsync(predicateBuilder, new RoomSearchModel { Id = id });
     }
 
-    protected override IQueryable<DbRoom> Query()
-    {
-        return BaseQuery()
-            .Include(x => x.Campus);
-    }
+    protected override IQueryable<DbRoom> Query() => Context.Set<DbRoom>()
+        .Include(x => x.Campus);
 }

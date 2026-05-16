@@ -42,54 +42,14 @@ public class DbAcademicDiscipline : IDbEntityWithId
     public AcademicDisciplineTargetType AcademicDisciplineTargetType { get; set; }
 
     /// <summary>
-    /// Поддерживает назначение лекционных занятий
+    /// Сведения о созданных через академическую дисциплину наборах занятий
     /// </summary>
-    public bool IsLectureLessonsAllowed { get; set; }
+    public ICollection<DbLessonBatchInfo> LessonBatchInfos { get; set; } = [];
 
     /// <summary>
-    /// Сведения о созданных через академическую дисциплину лекционных занятиях
+    /// Поддерживаемые виды занятий
     /// </summary>
-    public ICollection<DbLessonBatchInfo> AcademicDisciplineLectureLessonBatchInfos { get; set; } = [];
-
-    /// <summary>
-    /// Поддерживает назначение практических занятий
-    /// </summary>
-    public bool IsPracticeLessonsAllowed { get; set; }
-
-    /// <summary>
-    /// Сведения о созданных через академическую дисциплину практических занятиях
-    /// </summary>
-    public ICollection<DbLessonBatchInfo> AcademicDisciplinePracticeLessonBatchInfos { get; set; } = [];
-
-    /// <summary>
-    /// Поддерживает назначение лабораторных занятий
-    /// </summary>
-    public bool IsLabLessonsAllowed { get; set; }
-
-    /// <summary>
-    /// Сведения о созданных через академическую дисциплину лабораторных занятиях
-    /// </summary>
-    public ICollection<DbLessonBatchInfo> AcademicDisciplineLabLessonBatchInfos { get; set; } = [];
-
-    /// <summary>
-    /// Поддерживает назначение экзаменов
-    /// </summary>
-    public bool IsExamLessonsAllowed { get; set; }
-
-    /// <summary>
-    /// Сведения о созданных через академическую дисциплину экзаменах
-    /// </summary>
-    public ICollection<DbLessonBatchInfo> AcademicDisciplineExamLessonBatchInfos { get; set; } = [];
-
-    /// <summary>
-    /// Поддерживает назначение зачетов
-    /// </summary>
-    public bool IsTestLessonsAllowed { get; set; }
-
-    /// <summary>
-    /// Сведения о созданных через академическую дисциплину зачетах
-    /// </summary>
-    public ICollection<DbLessonBatchInfo> AcademicDisciplineTestLessonBatchInfos { get; set; } = [];
+    public AcademicDisciplineType[] AllowedLessonTypes { get; set; } = [];
 
     /// <summary>
     /// Комментарий

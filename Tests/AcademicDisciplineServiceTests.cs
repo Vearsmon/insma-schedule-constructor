@@ -1,6 +1,7 @@
 ﻿using AutoFixture;
 using Dal.RegistryRepositories.AcademicDiscipline;
 using Dal.Repositories.AcademicDisciplines;
+using Dal.Repositories.LessonBatchInfo;
 using Dal.Repositories.Lessons;
 using Dal.Repositories.Schedules;
 using Domain.Dto.SaveDto;
@@ -21,13 +22,15 @@ public class AcademicDisciplineServiceTests
     private readonly Mock<IScheduleRepository> _scheduleRepositoryMock = new();
     private readonly Mock<ILessonService> _lessonServiceMock = new();
     private readonly Mock<ILessonRepository> _lessonRepositoryMock = new();
+    private readonly Mock<ILessonBatchInfoRepository> _lessonBatchInfoRepositoryMock = new();
 
     private AcademicDisciplineService CreateService() => new(
         _academicDisciplineRepositoryMock.Object,
         _academicDisciplineRegistryRepositoryMock.Object,
         _scheduleRepositoryMock.Object,
         _lessonServiceMock.Object,
-        _lessonRepositoryMock.Object
+        _lessonRepositoryMock.Object,
+        _lessonBatchInfoRepositoryMock.Object
     );
 
     [Fact]

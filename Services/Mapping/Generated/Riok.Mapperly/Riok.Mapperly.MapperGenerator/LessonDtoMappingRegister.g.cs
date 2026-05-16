@@ -57,9 +57,6 @@ namespace Services.Mapping
                 return default;
             var target = new global::Domain.Models.Lesson();
             target.Id = dto.Id;
-            target.ScheduleId = dto.ScheduleId;
-            target.AcademicDisciplineId = dto.AcademicDisciplineId;
-            target.AcademicDisciplineType = dto.AcademicDisciplineType;
             target.DateWithTimeInterval = dto.DateWithTimeInterval;
             target.FlexibilityType = dto.FlexibilityType;
             target.HoursCost = dto.HoursCost;
@@ -80,11 +77,6 @@ namespace Services.Mapping
             target.DateWithTimeInterval = model.DateWithTimeInterval;
             target.FlexibilityType = model.FlexibilityType;
             target.AllowCombining = model.AllowCombining;
-            if (model.HoursCost != null)
-            {
-                target.HoursCost = model.HoursCost.Value;
-            }
-            target.LessonBatchInfoId = model.LessonBatchInfoId;
             target.CurrentErrorsMaxLevel = GetViolationsMaxLevel(model.Violations);
             return target;
         }
@@ -95,9 +87,6 @@ namespace Services.Mapping
             if (dto == null || model == null)
                 return;
             model.Id = dto.Id;
-            model.ScheduleId = dto.ScheduleId;
-            model.AcademicDisciplineId = dto.AcademicDisciplineId;
-            model.AcademicDisciplineType = dto.AcademicDisciplineType;
             model.DateWithTimeInterval = dto.DateWithTimeInterval;
             model.FlexibilityType = dto.FlexibilityType;
             model.HoursCost = dto.HoursCost;

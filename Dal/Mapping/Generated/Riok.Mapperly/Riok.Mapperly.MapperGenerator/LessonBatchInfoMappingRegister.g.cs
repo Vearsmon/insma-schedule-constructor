@@ -12,9 +12,13 @@ namespace Dal.Mapping
                 return default;
             var target = new global::Domain.Models.LessonBatchInfo();
             target.Id = entity.Id;
+            target.AcademicDisciplineId = entity.AcademicDisciplineId;
+            target.Type = entity.Type;
+            target.LessonsPerWeekCount = entity.LessonsPerWeekCount;
             target.DayOfWeekTimeIntervals = entity.DayOfWeekTimeIntervals;
             target.RepeatType = entity.RepeatType;
             target.AllowCombining = entity.AllowCombining;
+            target.FlexibilityType = entity.FlexibilityType;
             target.HoursCost = entity.HoursCost;
             target.TotalHoursCount = entity.TotalHoursCount;
             return target;
@@ -31,9 +35,13 @@ namespace Dal.Mapping
             {
                 target.Id = model.Id.Value;
             }
+            target.AcademicDisciplineId = model.AcademicDisciplineId;
+            target.Type = model.Type;
+            target.LessonsPerWeekCount = model.LessonsPerWeekCount;
             target.DayOfWeekTimeIntervals = model.DayOfWeekTimeIntervals;
             target.RepeatType = model.RepeatType;
             target.AllowCombining = model.AllowCombining;
+            target.FlexibilityType = model.FlexibilityType;
             target.HoursCost = model.HoursCost;
             target.TotalHoursCount = model.TotalHoursCount;
             return target;
@@ -48,9 +56,13 @@ namespace Dal.Mapping
             {
                 entity.Id = model.Id.Value;
             }
+            entity.AcademicDisciplineId = model.AcademicDisciplineId;
+            entity.Type = model.Type;
+            entity.LessonsPerWeekCount = model.LessonsPerWeekCount;
             entity.DayOfWeekTimeIntervals = model.DayOfWeekTimeIntervals;
             entity.RepeatType = model.RepeatType;
             entity.AllowCombining = model.AllowCombining;
+            entity.FlexibilityType = model.FlexibilityType;
             entity.HoursCost = model.HoursCost;
             entity.TotalHoursCount = model.TotalHoursCount;
         }

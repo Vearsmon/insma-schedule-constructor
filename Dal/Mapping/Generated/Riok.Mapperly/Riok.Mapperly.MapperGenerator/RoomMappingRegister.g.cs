@@ -59,20 +59,6 @@ namespace Dal.Mapping
         }
 
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        public static partial void UpdateModelWithEntity(global::Dal.Entities.DbRoom? entity, global::Domain.Models.Room? model)
-        {
-            if (entity == null || model == null)
-                return;
-            model.Id = entity.Id;
-            model.Name = entity.Name;
-            model.CampusId = entity.CampusId;
-            model.RoomType = entity.RoomType;
-            model.Capacity = entity.Capacity;
-            model.RoomBoardType = entity.RoomBoardType;
-            model.HasProjector = entity.HasProjector;
-        }
-
-        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
         [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(entity))]
         public static partial global::Domain.Models.RegistryItemModels.RoomRegistryItem? MapEntityToRegistryItem(global::Dal.Entities.DbRoom? entity)
         {
