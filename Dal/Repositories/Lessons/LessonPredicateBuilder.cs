@@ -46,6 +46,7 @@ public class LessonPredicateBuilder : IPredicateBuilder<DbLesson, LessonSearchMo
                 .AndIf(searchModel.ExcludeAllowCombining, f => f.AllowCombining == false)
                 .AndIf(searchModel.ExcludeLessonIds.Length > 0, f => !searchModel.ExcludeLessonIds.Contains(f.Id))
                 .AndIf(searchModel.LessonBatchInfoIds.Length > 0, f => f.LessonBatchInfoId.HasValue && searchModel.LessonBatchInfoIds.Contains(f.LessonBatchInfoId!.Value))
+                .AndIf(searchModel.HasNoTimeAssignment, f => f.Date == null && f.TimeFrom == null && f.TimeTo == null)
             ;
     }
 

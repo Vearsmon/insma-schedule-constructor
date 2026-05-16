@@ -20,4 +20,5 @@ public class LessonSearchModel
     public Guid[] ExcludeLessonIds { get; set; } = [];
     public Guid[] LessonBatchInfoIds { get; set; } = [];
     public bool SearchForConflicts { get; set; }
+    public bool HasNoTimeAssignment { get; set; }
 }

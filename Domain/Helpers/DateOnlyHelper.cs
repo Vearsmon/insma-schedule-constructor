@@ -6,10 +6,7 @@ namespace Domain.Helpers;
 
 public static class DateOnlyHelper
 {
-    public static DateOnly ToDateOnly(this DateTime dateTime)
-    {
-        return DateOnly.FromDateTime(dateTime);
-    }
+    public static DateOnly ToDateOnly(this DateTime dateTime) => DateOnly.FromDateTime(dateTime);
 
     public static IEnumerable<DateOnly> ToDateSequence(this DateInterval interval)
     {
@@ -19,18 +16,17 @@ public static class DateOnlyHelper
         }
     }
 
-    public static bool HasIntersection(this DateInterval interval, DateOnly date)
-    {
-        return date >= interval.DateFrom && date <= interval.DateTo;
-    }
+    public static bool HasIntersection(this DateInterval interval, DateOnly date) =>
+        date >= interval.DateFrom && date <= interval.DateTo;
 
-    public static int GetLogicalDayOfWeekNumber(DayOfWeek dayOfWeek)
-    {
-        return dayOfWeek == DayOfWeek.Sunday ? 7 : (int)dayOfWeek;
-    }
+    public static bool HasIntersection(this DateInterval first, DateInterval second) =>
+        first.DateFrom <= second.DateTo && second.DateFrom <= first.DateTo;
+
+    public static int GetLogicalDayOfWeekNumber(DayOfWeek dayOfWeek) =>
+        dayOfWeek == DayOfWeek.Sunday ? 7 : (int)dayOfWeek;
 
     public static DateOnly GetWeekStartDate(this DateOnly date) =>
-        date.AddDays(((int)DayOfWeek.Monday - GetLogicalDayOfWeekNumber(date.DayOfWeek) + 7) % 7);
+        date.AddDays(1 - GetLogicalDayOfWeekNumber(date.DayOfWeek));
 
     public static DateOnly GetNextWeekStartDate(this DateOnly date) => date.GetWeekStartDate().AddDays(7);
 
@@ -151,8 +147,15 @@ public static class DateOnlyHelper
 
     public static DateInterval GetWeekDatesRangeByDate(this DateOnly date)
     {
-        var startOfWeek = date.AddDays(-GetLogicalDayOfWeekNumber(date.DayOfWeek));
+        var startOfWeek = date.GetWeekStartDate();
         var endOfWeek = startOfWeek.AddDays(6);
         return new DateInterval { DateFrom = startOfWeek, DateTo = endOfWeek };
     }
+
+    public static DayOfWeekTimeInterval ToDayOfWeekTimeInterval(this DateWithTimeInterval dateWithTimeInterval) =>
+        new()
+        {
+            DayOfWeek = dateWithTimeInterval.Date.DayOfWeek,
+            TimeInterval = dateWithTimeInterval.TimeInterval,
+        };
 }

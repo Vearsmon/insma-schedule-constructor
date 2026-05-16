@@ -23,6 +23,7 @@ public static partial class LessonMappingRegister
                 TimeTo = entity.TimeTo!.Value,
             },
         } : null;
+        model.AcademicDiscipline = AcademicDisciplineMappingRegister.MapEntityToModel(entity.AcademicDiscipline);
         model.StudentGroups = entity.StudentGroups.Select(StudentGroupMappingRegister.MapEntityToModel).ToArray()!;
         model.Teachers = entity.Teachers.Select(TeacherMappingRegister.MapEntityToModel).ToArray()!;
         model.Rooms = entity.Rooms.Select(RoomMappingRegister.MapEntityToModel).ToArray()!;

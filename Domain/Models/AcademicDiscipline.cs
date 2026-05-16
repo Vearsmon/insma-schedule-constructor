@@ -84,4 +84,11 @@ public class AcademicDiscipline : IModelWithId
         AcademicDisciplineType.Test => TestLessonBatchInfos,
         _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
     };
+
+    public LessonBatchInfo[] GetAllBatchInfos() => LectureLessonBatchInfos
+        .Concat(PracticeLessonBatchInfos)
+        .Concat(LabLessonBatchInfos)
+        .Concat(ExamLessonBatchInfos)
+        .Concat(TestLessonBatchInfos)
+        .ToArray();
 }

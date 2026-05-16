@@ -11,6 +11,8 @@ public class LessonBatchInfoPredicateBuilder : IPredicateBuilder<DbLessonBatchIn
 
     public Expression<Func<DbLessonBatchInfo, bool>> Build(LessonBatchInfoSearchModel searchModel)
     {
-        return Predicate;
+        return Predicate
+                .AndIf(searchModel is { DateFrom: not null, DateTo: not null }, f => f.DateFrom <= searchModel.DateTo && searchModel.DateFrom <= f.DateTo)
+            ;
     }
 }

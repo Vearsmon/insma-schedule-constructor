@@ -29,6 +29,7 @@ public class LessonServiceTests
     private readonly Mock<ILessonRepository> _lessonRepositoryMock = new();
     private readonly Mock<ILessonRegistryRepository> _lessonRegistryRepositoryMock = new();
     private ILessonValidationService _lessonValidationService = null!;
+    private readonly Mock<ILessonValidationService> _lessonValidationServiceMock = new();
     private readonly Mock<ILessonBatchInfoRepository> _lessonBatchInfoRepositoryMock = new();
     private readonly Mock<IAcademicDisciplineRepository> _academicDisciplineRepositoryMock = new();
     private readonly Mock<IStudentGroupRepository> _studentGroupRepositoryMock = new();
@@ -38,7 +39,7 @@ public class LessonServiceTests
     private readonly Mock<ITeacherPreferenceRepository> _teacherPreferenceRepositoryMock = new();
     private readonly Mock<ILessonPolicyViolationRepository> _lessonPolicyViolationRepositoryMock = new();
 
-    private LessonService CreateService()
+    private LessonService CreateService(bool withMockValidation = false)
     {
         _lessonValidationService = new LessonValidationService(
             _lessonRepositoryMock.Object,
@@ -52,7 +53,7 @@ public class LessonServiceTests
         return new(
             _lessonRepositoryMock.Object,
             _lessonRegistryRepositoryMock.Object,
-            _lessonValidationService,
+            withMockValidation ? _lessonValidationServiceMock.Object : _lessonValidationService,
             _lessonBatchInfoRepositoryMock.Object,
             _academicDisciplineRepositoryMock.Object,
             _studentGroupRepositoryMock.Object,
@@ -232,8 +233,8 @@ public class LessonServiceTests
                 .Without(x => x.RepeatType)
                 .With(x => x.DateInterval, new DateInterval
                 {
-                    DateFrom = DateTime.Today.AddDays(-7).ToDateOnly(),
-                    DateTo = DateTime.Today.AddDays(7).ToDateOnly(),
+                    DateFrom = DateTime.Today.ToDateOnly().GetWeekStartDate().AddDays(-7),
+                    DateTo = DateTime.Today.ToDateOnly().GetWeekStartDate().AddDays(7),
                 })
                 .Without(x => x.AllowCombining)
                 .Without(x => x.FlexibilityType)
@@ -382,6 +383,7 @@ public class LessonServiceTests
                 .With(x => x.StudentGroups, [new StudentGroup { Id = Guid.NewGuid() }])
                 .Without(x => x.Teachers)
                 .Without(x => x.Rooms)
+                .With(x => x.LessonsPerWeekCount, 2)
                 .With(x => x.DayOfWeekTimeIntervals,
                 [
                     new DayOfWeekTimeInterval { DayOfWeek = DayOfWeek.Tuesday, TimeInterval = firstTimeInterval },
@@ -392,8 +394,8 @@ public class LessonServiceTests
                     // 4 недели занятий
                     new DateInterval
                     {
-                        DateFrom = DateTime.Today.AddDays(-(int)DateTime.Today.DayOfWeek + (int)DayOfWeek.Monday).AddDays(-7).ToDateOnly(),
-                        DateTo = DateTime.Today.AddDays(-(int)DateTime.Today.DayOfWeek + (int)DayOfWeek.Monday).AddDays(21).ToDateOnly(),
+                        DateFrom = DateTime.Today.ToDateOnly().GetWeekStartDate().AddDays(-7),
+                        DateTo = DateTime.Today.ToDateOnly().GetWeekStartDate().AddDays(20),
                     })
                 .Without(x => x.AllowCombining)
                 .With(x => x.HoursCost, _fixture.Create<int>())
@@ -414,8 +416,8 @@ public class LessonServiceTests
             {
                 DateInterval = new DateInterval
                 {
-                    DateFrom = DateTime.Today.AddDays(-(int)DateTime.Today.DayOfWeek + (int)DayOfWeek.Monday).AddDays(-7).ToDateOnly(),
-                    DateTo = DateTime.Today.AddDays(-(int)DateTime.Today.DayOfWeek + (int)DayOfWeek.Monday).AddDays(21).ToDateOnly(),
+                    DateFrom = DateTime.Today.ToDateOnly().GetWeekStartDate().AddDays(-7),
+                    DateTo = DateTime.Today.ToDateOnly().GetWeekStartDate().AddDays(20),
                 }
             });
 
@@ -521,6 +523,7 @@ public class LessonServiceTests
                 .With(x => x.StudentGroups, [new StudentGroup { Id = Guid.NewGuid() }])
                 .Without(x => x.Teachers)
                 .Without(x => x.Rooms)
+                .With(x => x.LessonsPerWeekCount, 2)
                 .With(x => x.DayOfWeekTimeIntervals,
                 [
                     new DayOfWeekTimeInterval { DayOfWeek = DayOfWeek.Tuesday, TimeInterval = firstTimeInterval },
@@ -531,8 +534,8 @@ public class LessonServiceTests
                     // 4 недели занятий
                     new DateInterval
                     {
-                        DateFrom = DateTime.Today.AddDays(-(int)DateTime.Today.DayOfWeek + (int)DayOfWeek.Monday).AddDays(-7).ToDateOnly(),
-                        DateTo = DateTime.Today.AddDays(-(int)DateTime.Today.DayOfWeek + (int)DayOfWeek.Monday).AddDays(21).ToDateOnly(),
+                        DateFrom = DateTime.Today.ToDateOnly().GetWeekStartDate().AddDays(-7),
+                        DateTo = DateTime.Today.ToDateOnly().GetWeekStartDate().AddDays(20),
                     })
                 .Without(x => x.AllowCombining)
                 .With(x => x.HoursCost, _fixture.Create<int>())
@@ -564,8 +567,8 @@ public class LessonServiceTests
             {
                 DateInterval = new DateInterval
                 {
-                    DateFrom = DateTime.Today.AddDays(-(int)DateTime.Today.DayOfWeek + (int)DayOfWeek.Monday).AddDays(-7).ToDateOnly(),
-                    DateTo = DateTime.Today.AddDays(-(int)DateTime.Today.DayOfWeek + (int)DayOfWeek.Monday).AddDays(21).ToDateOnly(),
+                    DateFrom = DateTime.Today.ToDateOnly().GetWeekStartDate().AddDays(-7),
+                    DateTo = DateTime.Today.ToDateOnly().GetWeekStartDate().AddDays(20),
                 }
             });
 
@@ -594,44 +597,44 @@ public class LessonServiceTests
         _lessonPolicyViolationRepositoryMock.Setup(m => m.SaveAllAsync(It.IsAny<LessonPolicyViolation[]>(), CancellationToken.None))
             .Callback<LessonPolicyViolation[], CancellationToken>((violations, _) => actualViolations.AddRange(violations));
 
-        _scheduleRepositoryMock.Setup(r => r.ExistsAsync(It.IsAny<Guid>()))
-            .ReturnsAsync(true);
+        // _scheduleRepositoryMock.Setup(r => r.ExistsAsync(It.IsAny<Guid>()))
+        //     .ReturnsAsync(true);
+        //
+        // _studentGroupRepositoryMock.Setup(r => r.GetStudentGroupTreeIdsAsync(
+        //         new[] { payloadFixture.First().StudentGroups.First().Id!.Value }))
+        //     .ReturnsAsync(new Dictionary<Guid, List<Guid>>
+        //     {
+        //         {
+        //             payloadFixture.First().StudentGroups.First().Id!.Value,
+        //             [payloadFixture.First().StudentGroups.First().Id!.Value]
+        //         }
+        //     });
+        //
+        // _academicDisciplineRepositoryMock.Setup(r => r.SelectAsync(new[] { academicDiscipline.Id!.Value }, CancellationToken.None))
+        //     .ReturnsAsync([academicDiscipline]);
+        //
+        // _lessonRepositoryMock.Setup(r => r.SearchConflictsAsync(It.IsAny<LessonConflictsSearchModel>()))
+        //     .ReturnsAsync(
+        //     [
+        //         new Lesson
+        //         {
+        //             Id = Guid.NewGuid(),
+        //             StudentGroups = [new StudentGroup { Id = payloadFixture.First().StudentGroups.First().Id!.Value }],
+        //             FlexibilityType = LessonFlexibilityType.Fixed,
+        //             DateWithTimeInterval = new DateWithTimeInterval
+        //             {
+        //                 Date = DateTime.Today.ToDateOnly(),
+        //                 TimeInterval = new TimeInterval
+        //                 {
+        //                     TimeFrom = new TimeOnly(11, 0),
+        //                     TimeTo = new TimeOnly(15, 0),
+        //                 },
+        //             },
+        //             Violations = [],
+        //         }
+        //     ]);
 
-        _studentGroupRepositoryMock.Setup(r => r.GetStudentGroupTreeIdsAsync(
-                new[] { payloadFixture.First().StudentGroups.First().Id!.Value }))
-            .ReturnsAsync(new Dictionary<Guid, List<Guid>>
-            {
-                {
-                    payloadFixture.First().StudentGroups.First().Id!.Value,
-                    [payloadFixture.First().StudentGroups.First().Id!.Value]
-                }
-            });
-
-        _academicDisciplineRepositoryMock.Setup(r => r.SelectAsync(new[] { academicDiscipline.Id!.Value }, CancellationToken.None))
-            .ReturnsAsync([academicDiscipline]);
-
-        _lessonRepositoryMock.Setup(r => r.SearchConflictsAsync(It.IsAny<LessonConflictsSearchModel>()))
-            .ReturnsAsync(
-            [
-                new Lesson
-                {
-                    Id = Guid.NewGuid(),
-                    StudentGroups = [new StudentGroup { Id = payloadFixture.First().StudentGroups.First().Id!.Value }],
-                    FlexibilityType = LessonFlexibilityType.Fixed,
-                    DateWithTimeInterval = new DateWithTimeInterval
-                    {
-                        Date = DateTime.Today.ToDateOnly(),
-                        TimeInterval = new TimeInterval
-                        {
-                            TimeFrom = new TimeOnly(11, 0),
-                            TimeTo = new TimeOnly(15, 0),
-                        },
-                    },
-                    Violations = [],
-                }
-            ]);
-
-        var service = CreateService();
+        var service = CreateService(withMockValidation: true);
 
         // Act
         await service.UpdateLessonsByBatches(academicDiscipline.ScheduleId,

@@ -4,26 +4,22 @@ namespace Domain.Helpers;
 
 public static class TimeOnlyHelper
 {
-    public static bool HasIntersection(this TimeInterval first, TimeInterval second)
-    {
-        return first.TimeFrom <= second.TimeTo && first.TimeTo >= second.TimeFrom;
-    }
+    public static bool HasIntersection(this TimeInterval first, TimeInterval second) =>
+        first.TimeFrom <= second.TimeTo && first.TimeTo >= second.TimeFrom;
 
-    public static bool HasIntersection(this DayOfWeekTimeInterval first, DayOfWeekTimeInterval second)
-    {
-        return first.DayOfWeek == second.DayOfWeek && first.TimeInterval.HasIntersection(second.TimeInterval);
-    }
+    public static bool HasIntersection(this DayOfWeekTimeInterval first, DayOfWeekTimeInterval second) =>
+        first.DayOfWeek == second.DayOfWeek && first.TimeInterval.HasIntersection(second.TimeInterval);
 
-    public static bool HasIntersection(this DayOfWeekTimeInterval first, DateWithTimeInterval? second)
-    {
-        return second != null && first.DayOfWeek == second.Date.DayOfWeek
-                              && first.TimeInterval.HasIntersection(second.TimeInterval);
-    }
+    public static bool HasIntersection(this DayOfWeekTimeInterval first, DateWithTimeInterval? second) =>
+        second != null
+        && first.DayOfWeek == second.Date.DayOfWeek
+        && first.TimeInterval.HasIntersection(second.TimeInterval);
 
-    public static bool HasIntersection(this DateWithTimeInterval first, DateWithTimeInterval second)
-    {
-        return first.Date == second.Date && first.TimeInterval.HasIntersection(second.TimeInterval);
-    }
+    public static bool HasIntersection(this DateWithTimeInterval first, DayOfWeekTimeInterval second) =>
+        first.Date.DayOfWeek == second.DayOfWeek && first.TimeInterval.HasIntersection(second.TimeInterval);
+
+    public static bool HasIntersection(this DateWithTimeInterval first, DateWithTimeInterval second) =>
+        first.Date == second.Date && first.TimeInterval.HasIntersection(second.TimeInterval);
 
     public static TimeInterval[] MergeIntersections(this IEnumerable<TimeInterval> timeIntervals)
     {

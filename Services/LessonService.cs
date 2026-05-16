@@ -13,6 +13,7 @@ using Domain.Dto.RegistryDto;
 using Domain.Dto.SaveDto;
 using Domain.Dto.ShortDto;
 using Domain.Dto.ViewDto;
+using Domain.Exceptions;
 using Domain.Helpers;
 using Domain.Mapping;
 using Domain.Models;
@@ -46,9 +47,29 @@ public class LessonService(
             DateFrom = dateFrom,
             DateTo = dateTo,
         });
+        var lessonBatchInfos = await lessonBatchInfoRepository.SearchAsync(new LessonBatchInfoSearchModel
+        {
+            DateFrom = dateFrom,
+            DateTo = dateTo,
+        });
+
+        var notFullyPresentedLessonBatchInfos = lessonBatchInfos
+            .Where(x => lessons.All(y => y.LessonBatchInfoId != x.Id)
+                        || lessons.Count(y => y.LessonBatchInfoId == x.Id) != x.LessonsPerWeekCount);
+        var batchLessons = await lessonRepository.SearchAsync(new LessonSearchModel
+        {
+            ScheduleId = scheduleId,
+            HasNoTimeAssignment = true,
+            LessonBatchInfoIds = notFullyPresentedLessonBatchInfos.Select(x => x.Id!.Value).ToArray(),
+        });
+        var noTimeAssignmentLessons = batchLessons
+            .GroupBy(x => x.LessonBatchInfoId!.Value)
+            .SelectMany(x => x.Take(x.First().LessonBatchInfo!.LessonsPerWeekCount - lessons.Count(y => y.LessonBatchInfoId == x.Key)))
+            .ToArray();
+
         var messages = await lessonValidationService.FillValidationMessages(
-            lessons.Where(x => x.Violations.Length == 1).ToArray());
-        return lessons.Select(x =>
+            lessons.Concat(noTimeAssignmentLessons).DistinctBy(x => x.Id!.Value).Where(x => x.Violations.Length == 1).ToArray());
+        return lessons.Concat(noTimeAssignmentLessons).DistinctBy(x => x.Id!.Value).Select(x =>
         {
             var shortDto = LessonDtoMappingRegister.MapModelToShortDto(x);
             shortDto!.LessonPolicyViolationDescription = x.Violations.Length switch
@@ -83,15 +104,11 @@ public class LessonService(
         var validationMessages = new List<ValidationMessage>();
         if (!lessonSaveDto.Id.HasValue)
         {
-            validationMessages.Add(new ValidationMessage("Не допускается создание занятий без создания академической дисциплины"));
+            validationMessages.Add(new ValidationMessage("Не допускается сохранение занятий без создания академической дисциплины"));
         }
 
         var lesson = await lessonRepository.GetAsync(lessonSaveDto.Id!.Value);
         var schedule = await scheduleRepository.GetAsync(lesson.ScheduleId);
-
-        var updatedLessonsToSave = new List<Lesson>();
-        var updatedLessonBatchInfosToSave = new List<LessonBatchInfo>();
-        var shouldDetach = false;
 
         if (lessonSaveDto.DateWithTimeInterval != null)
         {
@@ -101,16 +118,18 @@ public class LessonService(
             {
                 validationMessages.Add(new ValidationMessage("Дата сохраняемого занятия не входит в отрезок дат расписания или своего шаблона"));
             }
-
-            var intersectsEvenWeek = lessonSaveDto.DateWithTimeInterval.Date.IntersectsEvenWeek(schedule.DateInterval);
-            switch (lesson.LessonBatchInfo!.RepeatType)
+            else
             {
-                case DisciplineLessonRepeatType.EvenWeeks when !intersectsEvenWeek:
-                    validationMessages.Add(new ValidationMessage("Занятие может быть сохранено только в четные недели согласно шаблону дисциплины"));
-                    break;
-                case DisciplineLessonRepeatType.OddWeeks when intersectsEvenWeek:
-                    validationMessages.Add(new ValidationMessage("Занятие может быть сохранено только в нечетные недели согласно шаблону дисциплины"));
-                    break;
+                var intersectsEvenWeek = lessonSaveDto.DateWithTimeInterval.Date.IntersectsEvenWeek(schedule.DateInterval);
+                switch (lesson.LessonBatchInfo!.RepeatType)
+                {
+                    case DisciplineLessonRepeatType.EvenWeeks when !intersectsEvenWeek:
+                        validationMessages.Add(new ValidationMessage("Занятие может быть сохранено только в четные недели согласно шаблону дисциплины"));
+                        break;
+                    case DisciplineLessonRepeatType.OddWeeks when intersectsEvenWeek:
+                        validationMessages.Add(new ValidationMessage("Занятие может быть сохранено только в нечетные недели согласно шаблону дисциплины"));
+                        break;
+                }
             }
 
             if (lesson.DateWithTimeInterval != null
@@ -130,11 +149,7 @@ public class LessonService(
                      && !lessonSaveDto.DateWithTimeInterval.Equals(lesson.DateWithTimeInterval))
             {
                 var matchedAnyBatchInfoDayOfWeekIntervals = lesson.LessonBatchInfo!.DayOfWeekTimeIntervals
-                    .Any(dayOfWeekTimeInterval => dayOfWeekTimeInterval.Equals(new DayOfWeekTimeInterval
-                    {
-                        DayOfWeek = lessonSaveDto.DateWithTimeInterval.Date.DayOfWeek,
-                        TimeInterval = lessonSaveDto.DateWithTimeInterval.TimeInterval,
-                    }));
+                    .Any(dayOfWeekTimeInterval => dayOfWeekTimeInterval.Equals(lessonSaveDto.DateWithTimeInterval.ToDayOfWeekTimeInterval()));
                 if (matchedAnyBatchInfoDayOfWeekIntervals)
                 {
                     validationMessages.Add(new ValidationMessage("Серия занятий не может быть поставлена в это время, так как оно уже занято другой серией этого шаблона"));
@@ -142,15 +157,14 @@ public class LessonService(
             }
         }
 
+        var updatedLessonsToSave = new List<Lesson>();
+        var updatedLessonBatchInfosToSave = new List<LessonBatchInfo>();
+        var shouldDetach = false;
         if (lessonSaveDto.DateWithTimeInterval != null)
         {
             if (lesson.DateWithTimeInterval == null)
             {
-                var dayOfWeekTimeInterval = new DayOfWeekTimeInterval
-                {
-                    DayOfWeek = lessonSaveDto.DateWithTimeInterval.Date.DayOfWeek,
-                    TimeInterval = lessonSaveDto.DateWithTimeInterval.TimeInterval,
-                };
+                var dayOfWeekTimeInterval = lessonSaveDto.DateWithTimeInterval.ToDayOfWeekTimeInterval();
                 lesson.LessonBatchInfo!.DayOfWeekTimeIntervals = lesson.LessonBatchInfo.DayOfWeekTimeIntervals
                     .Concat([dayOfWeekTimeInterval])
                     .ToArray();
@@ -172,7 +186,12 @@ public class LessonService(
                     .ToArray();
                 foreach (var batchLessonWithoutTimeAssignment in batchLessonsWithoutTimeAssignment)
                 {
-                    LessonDtoMappingRegister.UpdateModelWithSaveDto(lessonSaveDto, batchLessonWithoutTimeAssignment);
+                    batchLessonWithoutTimeAssignment.StudentGroups = lessonSaveDto.StudentGroupIds.Select(x => new StudentGroup { Id = x }).ToArray();
+                    batchLessonWithoutTimeAssignment.Teachers = lessonSaveDto.TeacherIds.Select(x => new Teacher { Id = x }).ToArray();
+                    batchLessonWithoutTimeAssignment.Rooms = lessonSaveDto.RoomIds.Select(x => new Room { Id = x }).ToArray();
+                    batchLessonWithoutTimeAssignment.FlexibilityType = lessonSaveDto.FlexibilityType;
+                    batchLessonWithoutTimeAssignment.HoursCost = lessonSaveDto.HoursCost;
+                    batchLessonWithoutTimeAssignment.AllowCombining = lessonSaveDto.AllowCombining;
                 }
                 updatedLessonsToSave.AddRange(batchLessonsWithoutTimeAssignment);
                 updatedLessonBatchInfosToSave.Add(lesson.LessonBatchInfo);
@@ -188,8 +207,8 @@ public class LessonService(
                 });
                 var batchLessonsToUpdate = batchLessons
                     .Where(x => x.DateWithTimeInterval != null
-                                && x.DateWithTimeInterval.Date.DayOfWeek == lesson.DateWithTimeInterval.Date.DayOfWeek
-                                && x.DateWithTimeInterval.TimeInterval.Equals(lesson.DateWithTimeInterval.TimeInterval)
+                                && x.DateWithTimeInterval.ToDayOfWeekTimeInterval().Equals(
+                                    lesson.DateWithTimeInterval.ToDayOfWeekTimeInterval())
                                 && x.Id!.Value != lesson.Id!.Value)
                     .ToArray();
                 if (batchLessonsToUpdate.Any(batchLesson =>
@@ -220,18 +239,10 @@ public class LessonService(
                         };
                     }
 
-                    var dayOfWeekTimeIntervalToCompareTo = new DayOfWeekTimeInterval
-                    {
-                        DayOfWeek = lesson.DateWithTimeInterval.Date.DayOfWeek,
-                        TimeInterval = lesson.DateWithTimeInterval.TimeInterval,
-                    };
+                    var dayOfWeekTimeIntervalToCompareTo = lesson.DateWithTimeInterval.ToDayOfWeekTimeInterval();
                     lesson.LessonBatchInfo!.DayOfWeekTimeIntervals = lesson.LessonBatchInfo.DayOfWeekTimeIntervals
                         .Where(x => !x.Equals(dayOfWeekTimeIntervalToCompareTo))
-                        .Concat([new DayOfWeekTimeInterval
-                        {
-                            DayOfWeek = lessonSaveDto.DateWithTimeInterval.Date.DayOfWeek,
-                            TimeInterval = lessonSaveDto.DateWithTimeInterval.TimeInterval,
-                        }])
+                        .Concat([lessonSaveDto.DateWithTimeInterval.ToDayOfWeekTimeInterval()])
                         .ToArray();
                     updatedLessonsToSave.AddRange(batchLessonsToUpdate);
                     updatedLessonBatchInfosToSave.Add(lesson.LessonBatchInfo);
@@ -242,7 +253,6 @@ public class LessonService(
                 shouldDetach = true;
             }
         }
-
         else if (lessonSaveDto.UpdateBatch)
         {
             if (lesson.DateWithTimeInterval != null)
@@ -261,14 +271,25 @@ public class LessonService(
             });
             var batchLessonsToUpdate = batchLessons
                 .Where(x => x.DateWithTimeInterval != null
-                            && x.DateWithTimeInterval.Equals(lesson.DateWithTimeInterval)
+                            && x.DateWithTimeInterval.ToDayOfWeekTimeInterval().Equals(
+                                lesson.DateWithTimeInterval?.ToDayOfWeekTimeInterval())
                             && x.Id!.Value != lesson.Id!.Value)
                 .ToArray();
             foreach (var batchLessonToUpdate in batchLessonsToUpdate)
             {
-                LessonDtoMappingRegister.UpdateModelWithSaveDto(lessonSaveDto, batchLessonToUpdate);
+                batchLessonToUpdate.StudentGroups = lessonSaveDto.StudentGroupIds.Select(x => new StudentGroup { Id = x }).ToArray();
+                batchLessonToUpdate.Teachers = lessonSaveDto.TeacherIds.Select(x => new Teacher { Id = x }).ToArray();
+                batchLessonToUpdate.Rooms = lessonSaveDto.RoomIds.Select(x => new Room { Id = x }).ToArray();
+                batchLessonToUpdate.FlexibilityType = lessonSaveDto.FlexibilityType;
+                batchLessonToUpdate.HoursCost = lessonSaveDto.HoursCost;
+                batchLessonToUpdate.AllowCombining = lessonSaveDto.AllowCombining;
             }
             updatedLessonsToSave.AddRange(batchLessonsToUpdate);
+        }
+
+        if (validationMessages.Count > 0)
+        {
+            throw new ServiceException(validationMessages.ToArray());
         }
 
         LessonDtoMappingRegister.UpdateModelWithSaveDto(lessonSaveDto, lesson);

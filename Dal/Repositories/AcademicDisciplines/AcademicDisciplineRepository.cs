@@ -1,7 +1,6 @@
 ﻿using Dal.Entities;
 using Dal.Transactions;
 using Domain.Models;
-using Domain.Models.Enums;
 using Domain.Models.SearchModels;
 using Microsoft.EntityFrameworkCore;
 
@@ -29,10 +28,8 @@ public class AcademicDisciplineRepository(
             return id.Value;
         }
 
-        var currentLessonBatchInfos = Enum.GetValues<AcademicDisciplineType>()
-            .SelectMany(model.GetBatchInfosByType);
-        var removedLessonBatchInfoIds = Enum.GetValues<AcademicDisciplineType>()
-            .SelectMany(type => previousAcademicDiscipline.GetBatchInfosByType(type))
+        var currentLessonBatchInfos = model.GetAllBatchInfos();
+        var removedLessonBatchInfoIds = previousAcademicDiscipline.GetAllBatchInfos()
             .Where(x => currentLessonBatchInfos.All(y => y.Id != x.Id))
             .Select(x => x.Id!.Value)
             .ToArray();

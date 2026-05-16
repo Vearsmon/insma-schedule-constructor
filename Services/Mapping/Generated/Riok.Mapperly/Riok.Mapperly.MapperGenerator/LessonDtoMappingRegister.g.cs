@@ -73,6 +73,7 @@ namespace Services.Mapping
             var target = new global::Domain.Dto.ShortDto.LessonShortDto();
             target.Id = model.Id;
             target.AcademicDisciplineId = model.AcademicDisciplineId;
+            target.AcademicDisciplineName = model.AcademicDiscipline?.Name;
             target.AcademicDisciplineType = model.AcademicDisciplineType;
             target.DateWithTimeInterval = model.DateWithTimeInterval;
             target.FlexibilityType = model.FlexibilityType;
