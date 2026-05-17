@@ -252,6 +252,10 @@ namespace Dal.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("affected_by_lesson_id");
 
+                    b.Property<Guid?>("AffectedByRoomId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("affected_by_room_id");
+
                     b.Property<Guid?>("AffectedByStudentGroupId")
                         .HasColumnType("uuid")
                         .HasColumnName("affected_by_student_group_id");
@@ -286,6 +290,9 @@ namespace Dal.Migrations
 
                     b.HasIndex("AffectedByLessonId")
                         .HasDatabaseName("ix_lesson_policy_violation_affected_by_lesson_id");
+
+                    b.HasIndex("AffectedByRoomId")
+                        .HasDatabaseName("ix_lesson_policy_violation_affected_by_room_id");
 
                     b.HasIndex("AffectedByStudentGroupId")
                         .HasDatabaseName("ix_lesson_policy_violation_affected_by_student_group_id");
@@ -766,6 +773,12 @@ namespace Dal.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .HasConstraintName("fk_lesson_policy_violation_lesson_affected_by_lesson_id");
 
+                    b.HasOne("Dal.Entities.DbRoom", "AffectedByRoom")
+                        .WithMany()
+                        .HasForeignKey("AffectedByRoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasConstraintName("fk_lesson_policy_violation_db_room_affected_by_room_id");
+
                     b.HasOne("Dal.Entities.DbStudentGroup", "AffectedByStudentGroup")
                         .WithMany()
                         .HasForeignKey("AffectedByStudentGroupId")
@@ -794,6 +807,8 @@ namespace Dal.Migrations
                     b.Navigation("AffectedByAcademicDiscipline");
 
                     b.Navigation("AffectedByLesson");
+
+                    b.Navigation("AffectedByRoom");
 
                     b.Navigation("AffectedByStudentGroup");
 

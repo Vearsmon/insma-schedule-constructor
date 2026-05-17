@@ -26,14 +26,9 @@ namespace Dal.Mapping
             target.AffectedByStudentGroupId = model.Payload.AffectedByStudentGroupId;
             target.AffectedByStudentGroup = global::Dal.Mapping.StudentGroupMappingRegister.MapModelToEntity(model.Payload.AffectedByStudentGroup);
             target.AffectedByTeacherId = model.Payload.AffectedByTeacherId;
-            if (model.Payload.AffectedByTeacher != null)
-            {
-                target.AffectedByTeacher = MapToDbTeacher(model.Payload.AffectedByTeacher);
-            }
-            else
-            {
-                target.AffectedByTeacher = null;
-            }
+            target.AffectedByTeacher = global::Dal.Mapping.TeacherMappingRegister.MapModelToEntity(model.Payload.AffectedByTeacher);
+            target.AffectedByRoomId = model.Payload.AffectedByRoomId;
+            target.AffectedByRoom = global::Dal.Mapping.RoomMappingRegister.MapModelToEntity(model.Payload.AffectedByRoom);
             target.AffectedByTeacherPreferenceId = model.Payload.AffectedByTeacherPreferenceId;
             target.AffectedByTeacherPreference = global::Dal.Mapping.TeacherPreferenceMappingRegister.MapModelToEntity(model.Payload.AffectedByTeacherPreference);
             return target;
@@ -59,14 +54,9 @@ namespace Dal.Mapping
             entity.AffectedByStudentGroupId = model.Payload.AffectedByStudentGroupId;
             entity.AffectedByStudentGroup = global::Dal.Mapping.StudentGroupMappingRegister.MapModelToEntity(model.Payload.AffectedByStudentGroup);
             entity.AffectedByTeacherId = model.Payload.AffectedByTeacherId;
-            if (model.Payload.AffectedByTeacher != null)
-            {
-                entity.AffectedByTeacher = MapToDbTeacher(model.Payload.AffectedByTeacher);
-            }
-            else
-            {
-                entity.AffectedByTeacher = null;
-            }
+            entity.AffectedByTeacher = global::Dal.Mapping.TeacherMappingRegister.MapModelToEntity(model.Payload.AffectedByTeacher);
+            entity.AffectedByRoomId = model.Payload.AffectedByRoomId;
+            entity.AffectedByRoom = global::Dal.Mapping.RoomMappingRegister.MapModelToEntity(model.Payload.AffectedByRoom);
             entity.AffectedByTeacherPreferenceId = model.Payload.AffectedByTeacherPreferenceId;
             entity.AffectedByTeacherPreference = global::Dal.Mapping.TeacherPreferenceMappingRegister.MapModelToEntity(model.Payload.AffectedByTeacherPreference);
         }
@@ -82,19 +72,6 @@ namespace Dal.Mapping
             target.LessonId = entity.LessonId;
             target.ErrorType = entity.ErrorType;
             target.Code = entity.Code;
-            return target;
-        }
-
-        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        private static global::Dal.Entities.DbTeacher MapToDbTeacher(global::Domain.Models.Teacher source)
-        {
-            var target = new global::Dal.Entities.DbTeacher();
-            if (source.Id != null)
-            {
-                target.Id = source.Id.Value;
-            }
-            target.Fullname = source.Fullname;
-            target.Contacts = source.Contacts;
             return target;
         }
     }

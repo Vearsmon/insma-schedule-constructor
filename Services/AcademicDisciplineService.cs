@@ -70,6 +70,7 @@ public class AcademicDisciplineService(
         {
             academicDiscipline = AcademicDisciplineDtoMappingRegister.MapSaveDtoToModel(academicDisciplineSaveDto)!;
             id = await academicDisciplineRepository.SaveAsync(academicDiscipline);
+            academicDiscipline.Id = id;
         }
 
         var lessonBatchInfosToSave = Enum.GetValues<AcademicDisciplineType>()

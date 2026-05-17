@@ -55,7 +55,6 @@ public class LessonServiceTests
             _lessonRegistryRepositoryMock.Object,
             withMockValidation ? _lessonValidationServiceMock.Object : _lessonValidationService,
             _lessonBatchInfoRepositoryMock.Object,
-            _academicDisciplineRepositoryMock.Object,
             _studentGroupRepositoryMock.Object,
             _scheduleRepositoryMock.Object,
             _teacherRepositoryMock.Object,

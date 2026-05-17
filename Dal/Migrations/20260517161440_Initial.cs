@@ -375,6 +375,7 @@ namespace Dal.Migrations
                     affected_by_lesson_id = table.Column<Guid>(type: "uuid", nullable: true),
                     affected_by_student_group_id = table.Column<Guid>(type: "uuid", nullable: true),
                     affected_by_teacher_id = table.Column<Guid>(type: "uuid", nullable: true),
+                    affected_by_room_id = table.Column<Guid>(type: "uuid", nullable: true),
                     affected_by_teacher_preference_id = table.Column<Guid>(type: "uuid", nullable: true)
                 },
                 constraints: table =>
@@ -384,6 +385,12 @@ namespace Dal.Migrations
                         name: "fk_lesson_policy_violation_academic_discipline_affected_by_aca",
                         column: x => x.affected_by_academic_discipline_id,
                         principalTable: "academic_discipline",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_lesson_policy_violation_db_room_affected_by_room_id",
+                        column: x => x.affected_by_room_id,
+                        principalTable: "room",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -563,6 +570,11 @@ namespace Dal.Migrations
                 name: "ix_lesson_policy_violation_affected_by_lesson_id",
                 table: "lesson_policy_violation",
                 column: "affected_by_lesson_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_lesson_policy_violation_affected_by_room_id",
+                table: "lesson_policy_violation",
+                column: "affected_by_room_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_lesson_policy_violation_affected_by_student_group_id",

@@ -38,13 +38,17 @@ public class StudentGroupService(
 
     public async Task<StudentGroupTreeDto[]> SearchTreeAsync(Guid scheduleId)
     {
-        var threadGroups = await studentGroupRepository.SearchAsync(new StudentGroupSearchModel
+        var studentGroups = await studentGroupRepository.SearchAsync(new StudentGroupSearchModel
         {
             ScheduleId = scheduleId,
-            StudentGroupTypes = [StudentGroupType.Thread],
-            IncludeGroupsWithoutParents = true,
+            StudentGroupTypes = [StudentGroupType.Thread, StudentGroupType.Group],
         });
-        return threadGroups.Select(StudentGroupDtoMappingRegister.MapModelToTreeDto).ToArray()!;
+        var threads = studentGroups.Where(x => x.StudentGroupType == StudentGroupType.Thread).ToArray();
+        var groupsWithoutParents = studentGroups
+            .Where(x => x.StudentGroupType == StudentGroupType.Group
+                        && threads.All(thread => thread.Children
+                            .All(child => child.Id!.Value != x.Id!.Value)));
+        return threads.Concat(groupsWithoutParents).Select(StudentGroupDtoMappingRegister.MapModelToTreeDto).ToArray()!;
     }
 
     public async Task<RegistryDto<StudentGroupRegistryItemDto>> SearchAsync(StudentGroupRegistrySearchModel searchModel)

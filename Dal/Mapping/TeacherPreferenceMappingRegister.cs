@@ -37,8 +37,6 @@ public static partial class TeacherPreferenceMappingRegister
     [MapProperty($"{nameof(TeacherPreference.DayOfWeekTimeInterval)}.{nameof(TeacherPreference.DayOfWeekTimeInterval.DayOfWeek)}", nameof(DbTeacherPreference.DayOfWeek))]
     [MapProperty($"{nameof(TeacherPreference.DayOfWeekTimeInterval)}.{nameof(TeacherPreference.DayOfWeekTimeInterval.TimeInterval)}.{nameof(TeacherPreference.DayOfWeekTimeInterval.TimeInterval.TimeFrom)}", nameof(DbTeacherPreference.TimeFrom))]
     [MapProperty($"{nameof(TeacherPreference.DayOfWeekTimeInterval)}.{nameof(TeacherPreference.DayOfWeekTimeInterval.TimeInterval)}.{nameof(TeacherPreference.DayOfWeekTimeInterval.TimeInterval.TimeTo)}", nameof(DbTeacherPreference.TimeTo))]
-    // [MapProperty(nameof(TeacherPreference.Schedule), nameof(DbTeacherPreference.Schedule), Use = nameof(@ScheduleMappingRegister.MapModelToEntity))]
-    // [MapProperty(nameof(TeacherPreference.Teacher), nameof(DbTeacherPreference.Teacher), Use = nameof(@TeacherMappingRegister.MapModelToEntity))]
     [MapProperty(nameof(TeacherPreference.Room), nameof(DbTeacherPreference.Room), Use = nameof(@RoomMappingRegister.MapModelToEntity))]
     [MapperIgnoreSource(nameof(TeacherPreference.Schedule))]
     [MapperIgnoreSource(nameof(TeacherPreference.Teacher))]

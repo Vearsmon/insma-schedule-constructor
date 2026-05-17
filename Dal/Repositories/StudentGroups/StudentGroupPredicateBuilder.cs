@@ -15,7 +15,6 @@ public class StudentGroupPredicateBuilder : IPredicateBuilder<DbStudentGroup, St
                 .AndIf(searchModel.Id.HasValue, f => f.Id == searchModel.Id)
                 .AndIf(searchModel.ScheduleId.HasValue, f => f.ScheduleId == searchModel.ScheduleId)
                 .AndIf(searchModel.StudentGroupTypes.Length > 0, f => searchModel.StudentGroupTypes.Contains(f.StudentGroupType))
-                .AndIf(searchModel.IncludeGroupsWithoutParents, f => f.Parents.Count == 0)
             ;
     }
 }

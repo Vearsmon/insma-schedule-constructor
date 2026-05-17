@@ -240,6 +240,11 @@ public class InsmaScheduleContext(DbContextOptions options) : DbContextBase(opti
             .HasForeignKey(x => x.AffectedByTeacherId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        builder.HasOne(x => x.AffectedByRoom)
+            .WithMany()
+            .HasForeignKey(x => x.AffectedByRoomId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         builder.HasOne(x => x.AffectedByTeacherPreference)
             .WithMany()
             .HasForeignKey(x => x.AffectedByTeacherPreferenceId)
