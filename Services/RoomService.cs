@@ -23,7 +23,6 @@ public class RoomService(
 {
     public async Task<RoomTreeDto[]> SearchTreeAsync()
     {
-        // todo: вернуть поле campus в room
         var items = await roomRepository.SelectAllAsync();
         var campuses = (await campusRepository.SelectAllAsync()).ToDictionary(x => x.Id!.Value);
         return items.GroupBy(x => x.CampusId)
@@ -58,7 +57,6 @@ public class RoomService(
 
     public async Task<RoomTreeDto[]> GetRoomTreeAsync(RoomSearchModel searchModel)
     {
-        // todo: неправильный campusName
         var rooms = await roomRepository.SearchAsync(searchModel);
         return rooms
             .GroupBy(room => room.CampusId)

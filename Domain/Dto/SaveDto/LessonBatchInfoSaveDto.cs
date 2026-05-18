@@ -1,13 +1,12 @@
-﻿using Domain.Dto.ShortDto;
-using Domain.Models.Common;
+﻿using Domain.Models.Common;
 using Domain.Models.Enums;
 
-namespace Domain.Dto;
+namespace Domain.Dto.SaveDto;
 
-public class LessonBatchInfoDto
+public class LessonBatchInfoSaveDto
 {
     public Guid? Id { get; set; }
-    public StudentGroupShortDto[] StudentGroups { get; set; } = [];
+    public Guid[] StudentGroupIds { get; set; } = [];
     public Guid[] TeacherIds { get; set; } = [];
     public Guid[] RoomIds { get; set; } = [];
     public int LessonsPerWeekCount { get; set; }

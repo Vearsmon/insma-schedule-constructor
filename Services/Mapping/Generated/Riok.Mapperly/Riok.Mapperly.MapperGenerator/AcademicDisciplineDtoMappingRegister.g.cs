@@ -6,93 +6,6 @@ namespace Services.Mapping
     {
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
         [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(model))]
-        public static partial global::Domain.Dto.ViewDto.AcademicDisciplineViewDto? MapModelToViewDto(global::Domain.Models.AcademicDiscipline? model)
-        {
-            if (model == null)
-                return default;
-            var target = new global::Domain.Dto.ViewDto.AcademicDisciplineViewDto();
-            target.Id = model.Id;
-            target.Name = model.Name;
-            target.AssociatedNames = model.AssociatedNames;
-            target.SemesterNumber = model.SemesterNumber;
-            target.AcademicDisciplineTargetType = model.AcademicDisciplineTargetType;
-            target.AllowedLessonTypes = model.AllowedLessonTypes;
-            target.LectureLessonBatchInfos = MapToLessonBatchInfoDtoArray(model.LectureLessonBatchInfos);
-            target.PracticeLessonBatchInfos = MapToLessonBatchInfoDtoArray(model.PracticeLessonBatchInfos);
-            target.LabLessonBatchInfos = MapToLessonBatchInfoDtoArray(model.LabLessonBatchInfos);
-            target.ExamLessonBatchInfos = MapToLessonBatchInfoDtoArray(model.ExamLessonBatchInfos);
-            target.TestLessonBatchInfos = MapToLessonBatchInfoDtoArray(model.TestLessonBatchInfos);
-            target.Comment = model.Comment;
-            return target;
-        }
-
-        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(dto))]
-        public static partial global::Domain.Models.AcademicDiscipline? MapSaveDtoToModel(global::Domain.Dto.SaveDto.AcademicDisciplineSaveDto? dto)
-        {
-            if (dto == null)
-                return default;
-            var target = new global::Domain.Models.AcademicDiscipline();
-            target.Id = dto.Id;
-            target.ScheduleId = dto.ScheduleId;
-            target.Name = dto.Name;
-            target.AssociatedNames = dto.AssociatedNames;
-            target.SemesterNumber = dto.SemesterNumber;
-            target.AcademicDisciplineTargetType = dto.AcademicDisciplineTargetType;
-            target.AllowedLessonTypes = dto.AllowedLessonTypes;
-            target.LectureLessonBatchInfos = MapToLessonBatchInfoArray(dto.LectureLessonBatchInfos);
-            target.PracticeLessonBatchInfos = MapToLessonBatchInfoArray(dto.PracticeLessonBatchInfos);
-            target.LabLessonBatchInfos = MapToLessonBatchInfoArray(dto.LabLessonBatchInfos);
-            target.ExamLessonBatchInfos = MapToLessonBatchInfoArray(dto.ExamLessonBatchInfos);
-            target.TestLessonBatchInfos = MapToLessonBatchInfoArray(dto.TestLessonBatchInfos);
-            target.Comment = dto.Comment;
-            return target;
-        }
-
-        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        public static partial void UpdateModelWithSaveDto(global::Domain.Dto.SaveDto.AcademicDisciplineSaveDto? dto, global::Domain.Models.AcademicDiscipline? model)
-        {
-            if (dto == null || model == null)
-                return;
-            model.Id = dto.Id;
-            model.ScheduleId = dto.ScheduleId;
-            model.Name = dto.Name;
-            model.AssociatedNames = dto.AssociatedNames;
-            model.SemesterNumber = dto.SemesterNumber;
-            model.AcademicDisciplineTargetType = dto.AcademicDisciplineTargetType;
-            model.AllowedLessonTypes = dto.AllowedLessonTypes;
-            model.LectureLessonBatchInfos = MapToLessonBatchInfoArray(dto.LectureLessonBatchInfos);
-            model.PracticeLessonBatchInfos = MapToLessonBatchInfoArray(dto.PracticeLessonBatchInfos);
-            model.LabLessonBatchInfos = MapToLessonBatchInfoArray(dto.LabLessonBatchInfos);
-            model.ExamLessonBatchInfos = MapToLessonBatchInfoArray(dto.ExamLessonBatchInfos);
-            model.TestLessonBatchInfos = MapToLessonBatchInfoArray(dto.TestLessonBatchInfos);
-            model.Comment = dto.Comment;
-        }
-
-        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(item))]
-        public static partial global::Domain.Dto.RegistryDto.AcademicDisciplineRegistryItemDto? MapItemToItemDto(global::Domain.Models.RegistryItemModels.AcademicDisciplineRegistryItem? item)
-        {
-            if (item == null)
-                return default;
-            var target = new global::Domain.Dto.RegistryDto.AcademicDisciplineRegistryItemDto();
-            target.Id = item.Id;
-            target.Name = item.Name;
-            target.AssociatedNames = item.AssociatedNames;
-            target.SemesterNumber = item.SemesterNumber;
-            target.AcademicDisciplineTargetType = item.AcademicDisciplineTargetType;
-            target.AllowedLessonTypes = item.AllowedLessonTypes;
-            target.LectureLessonBatchInfos = MapToLessonBatchInfoDtoArray(item.LectureLessonBatchInfos);
-            target.PracticeLessonBatchInfos = MapToLessonBatchInfoDtoArray(item.PracticeLessonBatchInfos);
-            target.LabLessonBatchInfos = MapToLessonBatchInfoDtoArray(item.LabLessonBatchInfos);
-            target.ExamLessonBatchInfos = MapToLessonBatchInfoDtoArray(item.ExamLessonBatchInfos);
-            target.TestLessonBatchInfos = MapToLessonBatchInfoDtoArray(item.TestLessonBatchInfos);
-            target.Comment = item.Comment;
-            return target;
-        }
-
-        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(model))]
         public static partial global::Domain.Dto.ShortDto.AcademicDisciplineShortDto? MapModelToShortDto(global::Domain.Models.AcademicDiscipline? model)
         {
             if (model == null)
@@ -107,68 +20,69 @@ namespace Services.Mapping
         }
 
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(dto))]
-        private static partial global::Domain.Dto.LessonBatchInfoDto? AutoMapModelToDto(global::Domain.Models.LessonBatchInfo? dto)
+        [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(model))]
+        private static partial global::Domain.Dto.ViewDto.AcademicDisciplineViewDto? AutoMapModelToViewDto(global::Domain.Models.AcademicDiscipline? model)
         {
-            if (dto == null)
+            if (model == null)
                 return default;
-            var target = new global::Domain.Dto.LessonBatchInfoDto();
-            target.Id = dto.Id;
-            target.StudentGroups = MapStudentGroupsCollection(dto.StudentGroups);
-            target.TeacherIds = MapTeachersCollection(dto.Teachers);
-            target.RoomIds = MapRoomsCollection(dto.Rooms);
-            target.LessonsPerWeekCount = dto.LessonsPerWeekCount;
-            target.DayOfWeekTimeIntervals = dto.DayOfWeekTimeIntervals;
-            target.RepeatType = dto.RepeatType;
-            target.DateInterval = dto.DateInterval;
-            target.AllowCombining = dto.AllowCombining;
-            target.FlexibilityType = dto.FlexibilityType;
-            target.HoursCost = dto.HoursCost;
-            target.TotalHoursCount = dto.TotalHoursCount;
+            var target = new global::Domain.Dto.ViewDto.AcademicDisciplineViewDto();
+            target.Id = model.Id;
+            target.Name = model.Name;
+            target.AssociatedNames = model.AssociatedNames;
+            target.SemesterNumber = model.SemesterNumber;
+            target.AcademicDisciplineTargetType = model.AcademicDisciplineTargetType;
+            target.AllowedLessonTypes = model.AllowedLessonTypes;
+            target.Comment = model.Comment;
             return target;
         }
 
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
         [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(dto))]
-        private static partial global::Domain.Models.LessonBatchInfo? AutoMapDtoToModel(global::Domain.Dto.LessonBatchInfoDto? dto)
+        private static partial global::Domain.Models.AcademicDiscipline? AutoMapSaveDtoToModel(global::Domain.Dto.SaveDto.AcademicDisciplineSaveDto? dto)
         {
             if (dto == null)
                 return default;
-            var target = new global::Domain.Models.LessonBatchInfo();
+            var target = new global::Domain.Models.AcademicDiscipline();
             target.Id = dto.Id;
-            target.StudentGroups = MapStudentGroups(dto.StudentGroups);
-            target.Teachers = MapTeacherIds(dto.TeacherIds);
-            target.Rooms = MapRoomIds(dto.RoomIds);
-            target.LessonsPerWeekCount = dto.LessonsPerWeekCount;
-            target.DayOfWeekTimeIntervals = dto.DayOfWeekTimeIntervals;
-            target.RepeatType = dto.RepeatType;
-            target.DateInterval = dto.DateInterval;
-            target.AllowCombining = dto.AllowCombining;
-            target.FlexibilityType = dto.FlexibilityType;
-            target.HoursCost = dto.HoursCost;
-            target.TotalHoursCount = dto.TotalHoursCount;
+            target.ScheduleId = dto.ScheduleId;
+            target.Name = dto.Name;
+            target.AssociatedNames = dto.AssociatedNames;
+            target.SemesterNumber = dto.SemesterNumber;
+            target.AcademicDisciplineTargetType = dto.AcademicDisciplineTargetType;
+            target.AllowedLessonTypes = dto.AllowedLessonTypes;
+            target.Comment = dto.Comment;
             return target;
         }
 
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        private static global::Domain.Dto.LessonBatchInfoDto[] MapToLessonBatchInfoDtoArray(global::Domain.Models.LessonBatchInfo[] source)
+        private static partial void AutoUpdateModelWithSaveDto(global::Domain.Dto.SaveDto.AcademicDisciplineSaveDto? dto, global::Domain.Models.AcademicDiscipline? model)
         {
-            var target = new global::Domain.Dto.LessonBatchInfoDto?[source.Length];
-            for (var i = 0; i < source.Length; i++)
-            {
-                target[i] = AutoMapModelToDto(source[i]);
-            }
-            return target;
+            if (dto == null || model == null)
+                return;
+            model.Id = dto.Id;
+            model.ScheduleId = dto.ScheduleId;
+            model.Name = dto.Name;
+            model.AssociatedNames = dto.AssociatedNames;
+            model.SemesterNumber = dto.SemesterNumber;
+            model.AcademicDisciplineTargetType = dto.AcademicDisciplineTargetType;
+            model.AllowedLessonTypes = dto.AllowedLessonTypes;
+            model.Comment = dto.Comment;
         }
 
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        private static global::Domain.Models.LessonBatchInfo[] MapToLessonBatchInfoArray(global::Domain.Dto.LessonBatchInfoDto[] source)
+        [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(item))]
+        private static partial global::Domain.Dto.RegistryDto.AcademicDisciplineRegistryItemDto? AutoMapItemToItemDto(global::Domain.Models.RegistryItemModels.AcademicDisciplineRegistryItem? item)
         {
-            var target = new global::Domain.Models.LessonBatchInfo?[source.Length];
-            for (var i = 0; i < source.Length; i++)
-            {
-                target[i] = AutoMapDtoToModel(source[i]);
-            }
+            if (item == null)
+                return default;
+            var target = new global::Domain.Dto.RegistryDto.AcademicDisciplineRegistryItemDto();
+            target.Id = item.Id;
+            target.Name = item.Name;
+            target.AssociatedNames = item.AssociatedNames;
+            target.SemesterNumber = item.SemesterNumber;
+            target.AcademicDisciplineTargetType = item.AcademicDisciplineTargetType;
+            target.AllowedLessonTypes = item.AllowedLessonTypes;
+            target.Comment = item.Comment;
             return target;
         }
     }

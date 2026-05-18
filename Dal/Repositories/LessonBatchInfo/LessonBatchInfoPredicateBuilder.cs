@@ -12,7 +12,9 @@ public class LessonBatchInfoPredicateBuilder : IPredicateBuilder<DbLessonBatchIn
     public Expression<Func<DbLessonBatchInfo, bool>> Build(LessonBatchInfoSearchModel searchModel)
     {
         return Predicate
+                .AndIf(searchModel.ScheduleId.HasValue, f => f.AcademicDiscipline.ScheduleId == searchModel.ScheduleId)
                 .AndIf(searchModel is { DateFrom: not null, DateTo: not null }, f => f.DateFrom <= searchModel.DateTo && searchModel.DateFrom <= f.DateTo)
+                .AndIf(searchModel.AcademicDisciplineId.HasValue, f => f.AcademicDisciplineId == searchModel.AcademicDisciplineId)
             ;
     }
 }

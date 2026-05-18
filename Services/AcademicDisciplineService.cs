@@ -73,6 +73,12 @@ public class AcademicDisciplineService(
             academicDiscipline.Id = id;
         }
 
+        var previousLessonBatchInfosById = (await lessonBatchInfoRepository.SearchAsync(new LessonBatchInfoSearchModel
+        {
+            ScheduleId = academicDiscipline.ScheduleId,
+            AcademicDisciplineId = id,
+        })).ToDictionary(x => x.Id!.Value);
+
         var lessonBatchInfosToSave = Enum.GetValues<AcademicDisciplineType>()
             .SelectMany(type =>
             {
@@ -85,6 +91,21 @@ public class AcademicDisciplineService(
                 return batchInfos;
             })
             .ToArray();
+
+        var updatedDayOfWeekTimeIntervalsByLessonBatchId = lessonBatchInfosToSave
+            .Where(x => x.Id.HasValue)
+            .Select(x => new LessonBatchInfoTimeAssignmentDifferenceDto
+            {
+                LessonBatchInfoId = x.Id!.Value,
+                PreviousAssignments = previousLessonBatchInfosById[x.Id!.Value].DayOfWeekTimeIntervals,
+                CurrentAssignments = x.DayOfWeekTimeIntervals,
+            })
+            .ToArray();
+
+        var lessonBatchInfosToDelete = previousLessonBatchInfosById.Values
+            .Where(x => academicDiscipline.GetAllBatchInfos().All(y => y.Id != x.Id));
+        await lessonBatchInfoRepository.DeleteAsync(lessonBatchInfosToDelete.Select(x => x.Id!.Value).ToArray());
+
         var updatedBatchIds = lessonBatchInfosToSave
             .Where(x => x.Id.HasValue)
             .Select(x => x.Id!.Value)
@@ -96,7 +117,7 @@ public class AcademicDisciplineService(
             .Select(x => x.Id!.Value)
             .ToArray();
 
-        await lessonService.UpdateLessonsByBatches(academicDiscipline.ScheduleId, savedLessonBatchInfos, newLessonBatchInfoIds);
+        await lessonService.UpdateLessonsByBatches(academicDiscipline.ScheduleId, savedLessonBatchInfos, newLessonBatchInfoIds, updatedDayOfWeekTimeIntervalsByLessonBatchId);
         await lessonService.RecalculateConflictsForUpdatedAcademicDiscipline(academicDiscipline);
     }
 
@@ -154,31 +175,31 @@ public class AcademicDisciplineService(
                 new ValidationMessage($"Дисциплина не может содержать дополнительную информацию по занятиям вида " +
                                       $"\"{type.GetDescription()}\", если она не подразумевает их проведение")));
 
-        validationMessages.AddRange(availableTypes
-            .Where(type =>
-            {
-                var lessonBatchInfos = academicDiscipline.GetBatchInfosByType(type);
-                var studentGroupIds = lessonBatchInfos
-                    .SelectMany(lessonBatchInfo => lessonBatchInfo.StudentGroups.Select(studentGroup => studentGroup.Id!.Value))
-                    .ToArray();
-                var duplicates = studentGroupIds.Where(x => studentGroupIds.Count(y => y == x) > 1).ToArray();
-                foreach (var duplicate in duplicates)
-                {
-                    var dateIntervals = lessonBatchInfos
-                        .Where(x => x.StudentGroups.Any(y => y.Id == duplicate))
-                        .Select(x => x.DateInterval)
-                        .OrderBy(x => x.DateFrom)
-                        .ToArray();
-                    for (var i = 0; i < dateIntervals.Length - 1; i++)
-                    {
-                        if (dateIntervals[i].HasIntersection(dateIntervals[i + 1])) return true;
-                    }
-                }
-
-                return false;
-            })
-            .Select(type => new ValidationMessage(
-                $"Наборы занятий вида \"{type.GetDescription()}\" не должны иметь общие группы для одного и того же отрезка времени")));
+        // validationMessages.AddRange(availableTypes
+        //     .Where(type =>
+        //     {
+        //         var lessonBatchInfos = academicDiscipline.GetBatchInfosByType(type);
+        //         var studentGroupIds = lessonBatchInfos
+        //             .SelectMany(lessonBatchInfo => lessonBatchInfo.StudentGroups.Select(studentGroup => studentGroup.Id!.Value))
+        //             .ToArray();
+        //         var duplicates = studentGroupIds.Where(x => studentGroupIds.Count(y => y == x) > 1).ToArray();
+        //         foreach (var duplicate in duplicates)
+        //         {
+        //             var dateIntervals = lessonBatchInfos
+        //                 .Where(x => x.StudentGroups.Any(y => y.Id == duplicate))
+        //                 .Select(x => x.DateInterval)
+        //                 .OrderBy(x => x.DateFrom)
+        //                 .ToArray();
+        //             for (var i = 0; i < dateIntervals.Length - 1; i++)
+        //             {
+        //                 if (dateIntervals[i].HasIntersection(dateIntervals[i + 1])) return true;
+        //             }
+        //         }
+        //
+        //         return false;
+        //     })
+        //     .Select(type => new ValidationMessage(
+        //         $"Наборы занятий вида \"{type.GetDescription()}\" не должны иметь общие группы для одного и того же отрезка времени")));
 
         if (validationMessages.Count != 0)
         {

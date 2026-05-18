@@ -76,4 +76,9 @@ public class LessonBatchInfo : IModelWithId
     /// Требуемое количество часов освоения занятий указанного вида
     /// </summary>
     public int? TotalHoursCount { get; set; }
+
+    /// <summary>
+    /// Комментарий
+    /// </summary>
+    public string? Comment { get; set; }
 }

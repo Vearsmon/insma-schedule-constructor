@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Dal.Migrations
 {
     [DbContext(typeof(InsmaScheduleContext))]
-    [Migration("20260517161440_Initial")]
+    [Migration("20260518184641_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -187,6 +187,10 @@ namespace Dal.Migrations
                     b.Property<bool>("AllowCombining")
                         .HasColumnType("boolean")
                         .HasColumnName("allow_combining");
+
+                    b.Property<string>("Comment")
+                        .HasColumnType("text")
+                        .HasColumnName("comment");
 
                     b.Property<DateOnly>("DateFrom")
                         .HasColumnType("Date")

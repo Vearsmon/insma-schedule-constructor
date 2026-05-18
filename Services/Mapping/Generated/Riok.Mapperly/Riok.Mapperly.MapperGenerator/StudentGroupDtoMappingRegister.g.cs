@@ -6,25 +6,6 @@ namespace Services.Mapping
     {
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
         [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(model))]
-        public static partial global::Domain.Dto.ViewDto.StudentGroupViewDto? MapModelToViewDto(global::Domain.Models.StudentGroup? model)
-        {
-            if (model == null)
-                return default;
-            var target = new global::Domain.Dto.ViewDto.StudentGroupViewDto();
-            if (model.Id != null)
-            {
-                target.Id = model.Id.Value;
-            }
-            target.Name = model.Name;
-            target.SemesterNumber = model.SemesterNumber;
-            target.StudentsCount = model.StudentsCount;
-            target.StudentGroupType = model.StudentGroupType;
-            target.Children = MapToStudentGroupShortDtoArray(model.Children);
-            return target;
-        }
-
-        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(model))]
         public static partial global::Domain.Dto.ShortDto.StudentGroupShortDto? MapModelToShortDto(global::Domain.Models.StudentGroup? model)
         {
             if (model == null)
@@ -82,33 +63,41 @@ namespace Services.Mapping
             target.SemesterNumber = item.SemesterNumber;
             target.StudentsCount = item.StudentsCount;
             target.StudentGroupType = item.StudentGroupType;
-            target.Parents = MapToStudentGroupShortDtoArray1(item.Parents);
-            target.Children = MapToStudentGroupShortDtoArray1(item.Children);
+            target.Parents = MapToStudentGroupShortDtoArray(item.Parents);
+            target.Children = MapToStudentGroupShortDtoArray(item.Children);
             return target;
         }
 
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
         [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(model))]
-        public static partial global::Domain.Dto.StudentGroupTreeDto? MapModelToTreeDto(global::Domain.Models.StudentGroup model)
+        private static partial global::Domain.Dto.ViewDto.StudentGroupViewDto? AutoMapModelToViewDto(global::Domain.Models.StudentGroup? model)
         {
+            if (model == null)
+                return default;
+            var target = new global::Domain.Dto.ViewDto.StudentGroupViewDto();
+            if (model.Id != null)
+            {
+                target.Id = model.Id.Value;
+            }
+            target.Name = model.Name;
+            target.SemesterNumber = model.SemesterNumber;
+            target.StudentsCount = model.StudentsCount;
+            target.StudentGroupType = model.StudentGroupType;
+            return target;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(model))]
+        private static partial global::Domain.Dto.StudentGroupTreeDto? AutoMapModelToTreeDto(global::Domain.Models.StudentGroup? model)
+        {
+            if (model == null)
+                return default;
             var target = new global::Domain.Dto.StudentGroupTreeDto();
             if (model.Id != null)
             {
                 target.Id = model.Id.Value;
             }
             target.Name = model.Name;
-            target.Children = MapToStudentGroupTreeDtoArray(model.Children);
-            return target;
-        }
-
-        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        private static global::Domain.Dto.ShortDto.StudentGroupShortDto[] MapToStudentGroupShortDtoArray(global::Domain.Models.StudentGroup[] source)
-        {
-            var target = new global::Domain.Dto.ShortDto.StudentGroupShortDto?[source.Length];
-            for (var i = 0; i < source.Length; i++)
-            {
-                target[i] = MapModelToShortDto(source[i]);
-            }
             return target;
         }
 
@@ -122,23 +111,12 @@ namespace Services.Mapping
         }
 
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        private static global::Domain.Dto.ShortDto.StudentGroupShortDto[] MapToStudentGroupShortDtoArray1(global::Domain.Models.RegistryItemModels.StudentGroupShortRegistryItem[] source)
+        private static global::Domain.Dto.ShortDto.StudentGroupShortDto[] MapToStudentGroupShortDtoArray(global::Domain.Models.RegistryItemModels.StudentGroupShortRegistryItem[] source)
         {
             var target = new global::Domain.Dto.ShortDto.StudentGroupShortDto[source.Length];
             for (var i = 0; i < source.Length; i++)
             {
                 target[i] = MapToStudentGroupShortDto(source[i]);
-            }
-            return target;
-        }
-
-        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        private static global::Domain.Dto.StudentGroupTreeDto[] MapToStudentGroupTreeDtoArray(global::Domain.Models.StudentGroup[] source)
-        {
-            var target = new global::Domain.Dto.StudentGroupTreeDto?[source.Length];
-            for (var i = 0; i < source.Length; i++)
-            {
-                target[i] = MapModelToTreeDto(source[i]);
             }
             return target;
         }

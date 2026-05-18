@@ -21,6 +21,7 @@ namespace Dal.Mapping
             target.FlexibilityType = entity.FlexibilityType;
             target.HoursCost = entity.HoursCost;
             target.TotalHoursCount = entity.TotalHoursCount;
+            target.Comment = entity.Comment;
             return target;
         }
 
@@ -44,6 +45,7 @@ namespace Dal.Mapping
             target.FlexibilityType = model.FlexibilityType;
             target.HoursCost = model.HoursCost;
             target.TotalHoursCount = model.TotalHoursCount;
+            target.Comment = model.Comment;
             return target;
         }
 
@@ -65,6 +67,7 @@ namespace Dal.Mapping
             entity.FlexibilityType = model.FlexibilityType;
             entity.HoursCost = model.HoursCost;
             entity.TotalHoursCount = model.TotalHoursCount;
+            entity.Comment = model.Comment;
         }
     }
 }

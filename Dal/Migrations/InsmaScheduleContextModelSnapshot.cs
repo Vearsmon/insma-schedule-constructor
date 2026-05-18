@@ -185,6 +185,10 @@ namespace Dal.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("allow_combining");
 
+                    b.Property<string>("Comment")
+                        .HasColumnType("text")
+                        .HasColumnName("comment");
+
                     b.Property<DateOnly>("DateFrom")
                         .HasColumnType("Date")
                         .HasColumnName("date_from");

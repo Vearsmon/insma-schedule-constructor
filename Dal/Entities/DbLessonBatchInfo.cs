@@ -87,4 +87,9 @@ public class DbLessonBatchInfo : IDbEntityWithId
     /// Требуемое количество часов освоения занятий
     /// </summary>
     public int? TotalHoursCount { get; set; }
+
+    /// <summary>
+    /// Комментарий
+    /// </summary>
+    public string? Comment { get; set; }
 }

@@ -187,7 +187,8 @@ namespace Dal.Migrations
                     allow_combining = table.Column<bool>(type: "boolean", nullable: false),
                     flexibility_type = table.Column<string>(type: "text", nullable: false),
                     hours_cost = table.Column<int>(type: "integer", nullable: true),
-                    total_hours_count = table.Column<int>(type: "integer", nullable: true)
+                    total_hours_count = table.Column<int>(type: "integer", nullable: true),
+                    comment = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {

@@ -20,7 +20,10 @@ public interface ILessonService
 
     Task RecalculateConflictsForUpdatedAcademicDiscipline(AcademicDiscipline academicDiscipline);
 
-    Task UpdateLessonsByBatches(Guid scheduleId, LessonBatchInfo[] lessonBatchInfos, Guid[] newLessonBatchInfoIds);
+    Task UpdateLessonsByBatches(Guid scheduleId,
+        LessonBatchInfo[] lessonBatchInfos,
+        Guid[] newLessonBatchInfoIds,
+        LessonBatchInfoTimeAssignmentDifferenceDto[] dayOfWeekTimeIntervalDifferences);
 
     Task RecalculateConflictsForNewTeacherPreferences(TeacherPreference[] teacherPreferences);
 

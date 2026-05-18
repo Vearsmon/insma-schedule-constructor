@@ -12,11 +12,23 @@ namespace Services.Mapping;
 [Mapper]
 public static partial class StudentGroupDtoMappingRegister
 {
-    [MapperIgnoreSource(nameof(StudentGroup.ScheduleId))]
-    [MapperIgnoreSource(nameof(StudentGroup.Schedule))]
-    [MapperIgnoreSource(nameof(StudentGroup.Parents))]
-    [MapperIgnoreSource(nameof(StudentGroup.ChildrenFlat))]
-    public static partial StudentGroupViewDto? MapModelToViewDto(StudentGroup? model);
+    [UserMapping(Default = true)]
+    public static StudentGroupViewDto? MapModelToViewDto(StudentGroup? model)
+    {
+        var viewDto = AutoMapModelToViewDto(model);
+        if (model == null) return viewDto;
+        viewDto!.Children = model.Children.Select(MapModelToShortDto).ToArray()!;
+        return viewDto;
+    }
+
+    [UserMapping(Default = true)]
+    public static StudentGroupTreeDto? MapModelToTreeDto(StudentGroup? model)
+    {
+        var treeDto = AutoMapModelToTreeDto(model);
+        if (model == null) return treeDto;
+        treeDto!.Children = model.Children.Select(MapModelToTreeDto).ToArray()!;
+        return treeDto;
+    }
 
     [MapperIgnoreSource(nameof(StudentGroup.ScheduleId))]
     [MapperIgnoreSource(nameof(StudentGroup.Schedule))]
@@ -43,12 +55,22 @@ public static partial class StudentGroupDtoMappingRegister
 
     [MapperIgnoreSource(nameof(StudentGroup.ScheduleId))]
     [MapperIgnoreSource(nameof(StudentGroup.Schedule))]
+    [MapperIgnoreSource(nameof(StudentGroup.Parents))]
+    [MapperIgnoreSource(nameof(StudentGroup.Children))]
+    [MapperIgnoreSource(nameof(StudentGroup.ChildrenFlat))]
+    [MapperIgnoreTarget(nameof(StudentGroupViewDto.Children))]
+    private static partial StudentGroupViewDto? AutoMapModelToViewDto(StudentGroup? model);
+
+    [MapperIgnoreSource(nameof(StudentGroup.ScheduleId))]
+    [MapperIgnoreSource(nameof(StudentGroup.Schedule))]
     [MapperIgnoreSource(nameof(StudentGroup.SemesterNumber))]
     [MapperIgnoreSource(nameof(StudentGroup.StudentsCount))]
     [MapperIgnoreSource(nameof(StudentGroup.StudentGroupType))]
     [MapperIgnoreSource(nameof(StudentGroup.Parents))]
+    [MapperIgnoreSource(nameof(StudentGroup.Children))]
     [MapperIgnoreSource(nameof(StudentGroup.ChildrenFlat))]
-    public static partial StudentGroupTreeDto? MapModelToTreeDto(StudentGroup model);
+    [MapperIgnoreTarget(nameof(StudentGroupTreeDto.Children))]
+    private static partial StudentGroupTreeDto? AutoMapModelToTreeDto(StudentGroup? model);
 
     private static StudentGroup[] MapReferences(StudentSemiGroupSaveDto[] semiGroups) =>
         semiGroups.Where(x => x.Id.HasValue).Select(x => new StudentGroup { Id = x.Id, Name = x.Name }).ToArray();
