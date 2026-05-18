@@ -24,6 +24,8 @@ public static partial class LessonPolicyViolationMappingRegister
         model.Payload.AffectedByTeacherPreference = TeacherPreferenceMappingRegister.MapEntityToModel(entity.AffectedByTeacherPreference);
         model.Payload.AffectedByTeacherId = entity.AffectedByTeacherId;
         model.Payload.AffectedByTeacher = TeacherMappingRegister.MapEntityToModel(entity.AffectedByTeacher);
+        model.Payload.AffectedByRoomId = entity.AffectedByRoomId;
+        model.Payload.AffectedByRoom = RoomMappingRegister.MapEntityToModel(entity.AffectedByRoom);
         return model;
     }
 

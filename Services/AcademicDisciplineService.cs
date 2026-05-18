@@ -157,13 +157,28 @@ public class AcademicDisciplineService(
         validationMessages.AddRange(availableTypes
             .Where(type =>
             {
-                var studentGroupIds = academicDiscipline.GetBatchInfosByType(type)
-                    .SelectMany(lessonBatchInfo => lessonBatchInfo.StudentGroups.Select(studentGroup => studentGroup.Id))
+                var lessonBatchInfos = academicDiscipline.GetBatchInfosByType(type);
+                var studentGroupIds = lessonBatchInfos
+                    .SelectMany(lessonBatchInfo => lessonBatchInfo.StudentGroups.Select(studentGroup => studentGroup.Id!.Value))
                     .ToArray();
-                return studentGroupIds.Distinct().Count() != studentGroupIds.Length;
+                var duplicates = studentGroupIds.Where(x => studentGroupIds.Count(y => y == x) > 1).ToArray();
+                foreach (var duplicate in duplicates)
+                {
+                    var dateIntervals = lessonBatchInfos
+                        .Where(x => x.StudentGroups.Any(y => y.Id == duplicate))
+                        .Select(x => x.DateInterval)
+                        .OrderBy(x => x.DateFrom)
+                        .ToArray();
+                    for (var i = 0; i < dateIntervals.Length - 1; i++)
+                    {
+                        if (dateIntervals[i].HasIntersection(dateIntervals[i + 1])) return true;
+                    }
+                }
+
+                return false;
             })
             .Select(type => new ValidationMessage(
-                $"Наборы занятий вида \"{type.GetDescription()}\" не должны иметь общие группы")));
+                $"Наборы занятий вида \"{type.GetDescription()}\" не должны иметь общие группы для одного и того же отрезка времени")));
 
         if (validationMessages.Count != 0)
         {

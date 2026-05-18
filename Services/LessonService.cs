@@ -45,6 +45,9 @@ public class LessonService(
             DateFrom = dateFrom,
             DateTo = dateTo,
         });
+        var lessonsCountByBatchId = lessons
+            .GroupBy(x => x.LessonBatchInfoId!.Value)
+            .ToDictionary(x => x.Key, x => x.Count());
         var lessonBatchInfos = await lessonBatchInfoRepository.SearchAsync(new LessonBatchInfoSearchModel
         {
             DateFrom = dateFrom,
@@ -52,32 +55,40 @@ public class LessonService(
         });
 
         var notFullyPresentedLessonBatchInfos = lessonBatchInfos
-            .Where(x => lessons.All(y => y.LessonBatchInfoId != x.Id)
-                        || lessons.Count(y => y.LessonBatchInfoId == x.Id) != x.LessonsPerWeekCount);
-        var batchLessons = await lessonRepository.SearchAsync(new LessonSearchModel
+            .Where(x => !lessonsCountByBatchId.ContainsKey(x.Id!.Value)
+                        || lessonsCountByBatchId[x.Id!.Value] != x.LessonsPerWeekCount)
+            .ToArray();
+        var batchLessons = notFullyPresentedLessonBatchInfos.Length > 0 ? await lessonRepository.SearchAsync(new LessonSearchModel
         {
             ScheduleId = scheduleId,
             HasNoTimeAssignment = true,
             LessonBatchInfoIds = notFullyPresentedLessonBatchInfos.Select(x => x.Id!.Value).ToArray(),
-        });
+        }) : [];
         var noTimeAssignmentLessons = batchLessons
             .GroupBy(x => x.LessonBatchInfoId!.Value)
-            .SelectMany(x => x.Take(x.First().LessonBatchInfo!.LessonsPerWeekCount - lessons.Count(y => y.LessonBatchInfoId == x.Key)))
+            .SelectMany(x => x.Take(x.First().LessonBatchInfo!.LessonsPerWeekCount - lessonsCountByBatchId[x.Key]))
             .ToArray();
 
-        var messages = await lessonValidationService.FillValidationMessages(
-            lessons.Concat(noTimeAssignmentLessons).DistinctBy(x => x.Id!.Value).Where(x => x.Violations.Length == 1).ToArray());
-        return lessons.Concat(noTimeAssignmentLessons).DistinctBy(x => x.Id!.Value).Select(x =>
-        {
-            var shortDto = LessonDtoMappingRegister.MapModelToShortDto(x);
-            shortDto!.LessonPolicyViolationDescription = x.Violations.Length switch
+        var lessonsToReturn = lessons
+            .Concat(noTimeAssignmentLessons)
+            .DistinctBy(x => x.Id!.Value)
+            .ToArray();
+        var messagesByLessonId = (await lessonValidationService.FillValidationMessages(lessonsToReturn
+            .Where(x => x.Violations.Length == 1)
+            .ToArray()))
+            .ToDictionary(x => x.LessonIds.Single());
+        return lessonsToReturn
+            .Select(x =>
             {
-                0 => null,
-                1 => messages.Single(y => y.LessonIds.Contains(x.Id!.Value)).Messages.Single().Message,
-                _ => string.Format(LessonPolicyViolationTemplates.LessonPolicyViolationDefaultTemplate, x.Violations.Length)
-            };
-            return shortDto;
-        }).ToArray();
+                var shortDto = LessonDtoMappingRegister.MapModelToShortDto(x);
+                shortDto!.LessonPolicyViolationDescription = x.Violations.Length switch
+                {
+                    0 => null,
+                    1 => messagesByLessonId[x.Id!.Value].Messages.Single().Message,
+                    _ => string.Format(LessonPolicyViolationTemplates.LessonPolicyViolationDefaultTemplate, x.Violations.Length)
+                };
+                return shortDto;
+            }).ToArray();
     }
 
     public async Task<RegistryDto<LessonRegistryItemDto>> SearchAsync(LessonRegistrySearchModel searchModel)
