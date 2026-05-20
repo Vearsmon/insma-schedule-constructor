@@ -51,6 +51,16 @@ public class DbLesson : IDbEntityWithId
     public ICollection<DbRoom> Rooms { get; set; } = [];
 
     /// <summary>
+    /// Назначение дня недели с отрезком времени
+    /// </summary>
+    public Guid? DayOfWeekTimeIntervalAssignmentId { get; set; }
+
+    /// <summary>
+    /// Назначение дня недели с отрезком времени
+    /// </summary>
+    public DbDayOfWeekTimeIntervalAssignment? DayOfWeekTimeIntervalAssignment { get; set; }
+
+    /// <summary>
     /// Дата проведения занятия
     /// </summary>
     [Column(TypeName = DbDataTypes.Date)]

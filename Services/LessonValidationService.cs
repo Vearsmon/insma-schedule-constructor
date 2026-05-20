@@ -265,10 +265,10 @@ public class LessonValidationService(
             .Select(violation => new LessonSeriesConflictDto
             {
                 LessonIds = [lesson.Id!.Value],
-                DayOfWeekTimeInterval = lesson.DateWithTimeInterval!.ToDayOfWeekTimeInterval(),
+                DayOfWeekTimeInterval = lesson.DateWithTimeInterval?.ToDayOfWeekTimeInterval(),
                 Messages = [new LessonSeriesConflictMessageDto
                 {
-                    TimeInterval = lesson.DateWithTimeInterval!.TimeInterval,
+                    TimeInterval = lesson.DateWithTimeInterval?.TimeInterval,
                     Message = messagesByLessonId[lesson.Id!.Value][violation.Id!.Value],
                     ErrorType = violation.ErrorType,
                 }],

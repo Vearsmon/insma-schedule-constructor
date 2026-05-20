@@ -15,6 +15,7 @@ namespace Dal.Mapping
             target.ScheduleId = entity.ScheduleId;
             target.AcademicDisciplineId = entity.AcademicDisciplineId;
             target.AcademicDisciplineType = entity.AcademicDisciplineType;
+            target.DayOfWeekTimeIntervalAssignmentId = entity.DayOfWeekTimeIntervalAssignmentId;
             target.FlexibilityType = entity.FlexibilityType;
             target.HoursCost = entity.HoursCost;
             target.AllowCombining = entity.AllowCombining;
@@ -39,6 +40,7 @@ namespace Dal.Mapping
             target.AcademicDisciplineId = model.AcademicDisciplineId;
             target.AcademicDiscipline = global::Dal.Mapping.AcademicDisciplineMappingRegister.MapModelToEntity(model.AcademicDiscipline);
             target.AcademicDisciplineType = model.AcademicDisciplineType;
+            target.DayOfWeekTimeIntervalAssignmentId = model.DayOfWeekTimeIntervalAssignmentId;
             target.FlexibilityType = model.FlexibilityType;
             target.HoursCost = model.HoursCost;
             target.AllowCombining = model.AllowCombining;
@@ -59,6 +61,7 @@ namespace Dal.Mapping
             entity.ScheduleId = model.ScheduleId;
             entity.AcademicDisciplineId = model.AcademicDisciplineId;
             entity.AcademicDisciplineType = model.AcademicDisciplineType;
+            entity.DayOfWeekTimeIntervalAssignmentId = model.DayOfWeekTimeIntervalAssignmentId;
             entity.FlexibilityType = model.FlexibilityType;
             entity.HoursCost = model.HoursCost;
             entity.AllowCombining = model.AllowCombining;

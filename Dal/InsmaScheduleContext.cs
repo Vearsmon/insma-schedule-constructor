@@ -1,6 +1,5 @@
 ﻿using System.Text.Json;
 using Dal.Entities;
-using Domain.Models.Common;
 using Domain.Models.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -21,6 +20,7 @@ public class InsmaScheduleContext(DbContextOptions options) : DbContextBase(opti
         builder.Entity<DbStudentGroup>(StudentGroupConfigure);
         builder.Entity<DbStudent>(StudentConfigure);
         builder.Entity<DbAcademicDiscipline>(AcademicDisciplineConfigure);
+        builder.Entity<DbDayOfWeekTimeIntervalAssignment>(DayOfWeekTimeIntervalAssignmentConfigure);
         builder.Entity<DbLessonBatchInfo>(LessonBatchInfoConfigure);
         builder.Entity<DbLesson>(LessonConfigure);
         builder.Entity<DbLessonPolicyViolation>(LessonPolicyViolationConfigure);
@@ -45,14 +45,12 @@ public class InsmaScheduleContext(DbContextOptions options) : DbContextBase(opti
             .HasConversion(new EnumToStringConverter<AcademicDisciplineTargetType>());
     }
 
+    private void DayOfWeekTimeIntervalAssignmentConfigure(EntityTypeBuilder<DbDayOfWeekTimeIntervalAssignment> builder)
+    {
+    }
+
     private void LessonBatchInfoConfigure(EntityTypeBuilder<DbLessonBatchInfo> builder)
     {
-        builder.Property(e => e.DayOfWeekTimeIntervals)
-            .HasConversion(
-                v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null!),
-                v => JsonSerializer.Deserialize<DayOfWeekTimeInterval[]>(v, (JsonSerializerOptions)null!)!
-            );
-
         builder.HasMany(x => x.StudentGroups)
             .WithMany()
             .UsingEntity<Dictionary<string, object>>("lesson_batch_info_student_group",
@@ -112,6 +110,12 @@ public class InsmaScheduleContext(DbContextOptions options) : DbContextBase(opti
                     j.HasIndex("lesson_batch_info_id").HasDatabaseName("ix_lesson_batch_info_room_batch_id");
                     j.ToTable("lesson_batch_info_room");
                 });
+
+        builder.HasMany(x => x.DayOfWeekTimeIntervals)
+            .WithOne()
+            .HasForeignKey(x => x.LessonBatchInfoId)
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.Property(x => x.RepeatType)
             .HasConversion(new EnumToStringConverter<DisciplineLessonRepeatType>());
@@ -191,6 +195,11 @@ public class InsmaScheduleContext(DbContextOptions options) : DbContextBase(opti
                     j.HasIndex("lesson_id").HasDatabaseName("ix_lesson_room_lesson_id");
                     j.ToTable("lesson_room");
                 });
+
+        builder.HasOne(x => x.DayOfWeekTimeIntervalAssignment)
+            .WithMany()
+            .HasForeignKey(x => x.DayOfWeekTimeIntervalAssignmentId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.Property(x => x.AcademicDisciplineType)
             .HasConversion(new EnumToStringConverter<AcademicDisciplineType>());

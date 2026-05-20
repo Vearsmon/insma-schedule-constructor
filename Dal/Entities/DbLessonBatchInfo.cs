@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
-using Domain.Models.Common;
 using Domain.Models.Enums;
 
 namespace Dal.Entities;
@@ -49,7 +48,7 @@ public class DbLessonBatchInfo : IDbEntityWithId
     /// <summary>
     /// Отрезки времени занятий по дням недели
     /// </summary>
-    public DayOfWeekTimeInterval[] DayOfWeekTimeIntervals { get; set; } = [];
+    public ICollection<DbDayOfWeekTimeIntervalAssignment> DayOfWeekTimeIntervals { get; set; } = [];
 
     /// <summary>
     /// Вид повторения занятий

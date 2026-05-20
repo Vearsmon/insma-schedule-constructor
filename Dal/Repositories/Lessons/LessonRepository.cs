@@ -122,12 +122,15 @@ public class LessonRepository(
         .Include(x => x.StudentGroups)
         .Include(x => x.Teachers)
         .Include(x => x.Rooms)
+        .Include(x => x.DayOfWeekTimeIntervalAssignment)
         .Include(x => x.LessonBatchInfo)
         .ThenInclude(x => x!.StudentGroups)
         .Include(x => x.LessonBatchInfo)
         .ThenInclude(x => x!.Teachers)
         .Include(x => x.LessonBatchInfo)
         .ThenInclude(x => x!.Rooms)
+        .Include(x => x.LessonBatchInfo)
+        .ThenInclude(x => x!.DayOfWeekTimeIntervals)
         .Include(x => x.Violations);
 
     private string? BuildSaveReferencesExpression(Lesson model)

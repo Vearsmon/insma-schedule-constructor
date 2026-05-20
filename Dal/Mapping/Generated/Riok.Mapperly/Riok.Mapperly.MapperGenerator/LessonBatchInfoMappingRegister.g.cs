@@ -15,7 +15,6 @@ namespace Dal.Mapping
             target.AcademicDisciplineId = entity.AcademicDisciplineId;
             target.Type = entity.Type;
             target.LessonsPerWeekCount = entity.LessonsPerWeekCount;
-            target.DayOfWeekTimeIntervals = entity.DayOfWeekTimeIntervals;
             target.RepeatType = entity.RepeatType;
             target.AllowCombining = entity.AllowCombining;
             target.FlexibilityType = entity.FlexibilityType;
@@ -39,7 +38,6 @@ namespace Dal.Mapping
             target.AcademicDisciplineId = model.AcademicDisciplineId;
             target.Type = model.Type;
             target.LessonsPerWeekCount = model.LessonsPerWeekCount;
-            target.DayOfWeekTimeIntervals = model.DayOfWeekTimeIntervals;
             target.RepeatType = model.RepeatType;
             target.AllowCombining = model.AllowCombining;
             target.FlexibilityType = model.FlexibilityType;
@@ -61,7 +59,6 @@ namespace Dal.Mapping
             entity.AcademicDisciplineId = model.AcademicDisciplineId;
             entity.Type = model.Type;
             entity.LessonsPerWeekCount = model.LessonsPerWeekCount;
-            entity.DayOfWeekTimeIntervals = model.DayOfWeekTimeIntervals;
             entity.RepeatType = model.RepeatType;
             entity.AllowCombining = model.AllowCombining;
             entity.FlexibilityType = model.FlexibilityType;

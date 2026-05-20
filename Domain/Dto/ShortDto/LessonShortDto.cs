@@ -12,6 +12,7 @@ public class LessonShortDto
     public StudentGroupShortDto[] StudentGroups { get; set; } = [];
     public TeacherShortDto[] Teachers { get; set; } = [];
     public RoomShortDto[] Rooms { get; set; } = [];
+    public Guid? DayOfWeekTimeIntervalAssignmentId { get; set; }
     public DateWithTimeInterval? DateWithTimeInterval { get; set; }
     public LessonFlexibilityType FlexibilityType { get; set; }
     public bool AllowCombining { get; set; }

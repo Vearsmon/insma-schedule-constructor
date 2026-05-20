@@ -1,5 +1,6 @@
 ﻿using Dal.RegistryRepositories.AcademicDiscipline;
 using Dal.Repositories.AcademicDisciplines;
+using Dal.Repositories.DayOfWeekTimeIntervalAssignments;
 using Dal.Repositories.LessonBatchInfo;
 using Dal.Repositories.Lessons;
 using Dal.Repositories.Schedules;
@@ -27,7 +28,8 @@ public class AcademicDisciplineService(
     IScheduleRepository scheduleRepository,
     ILessonService lessonService,
     ILessonRepository lessonRepository,
-    ILessonBatchInfoRepository lessonBatchInfoRepository) : IAcademicDisciplineService
+    ILessonBatchInfoRepository lessonBatchInfoRepository,
+    IDayOfWeekTimeIntervalAssignmentRepository dayOfWeekTimeIntervalAssignmentRepository) : IAcademicDisciplineService
 {
     public async Task<AcademicDisciplineShortDto[]> SearchShortAsync(Guid scheduleId)
     {
@@ -73,51 +75,12 @@ public class AcademicDisciplineService(
             academicDiscipline.Id = id;
         }
 
-        var previousLessonBatchInfosById = (await lessonBatchInfoRepository.SearchAsync(new LessonBatchInfoSearchModel
+        var savedLessonBatchInfos = await SaveLessonBatchInfosAsync(academicDiscipline);
+
+        if (savedLessonBatchInfos.Length > 0)
         {
-            ScheduleId = academicDiscipline.ScheduleId,
-            AcademicDisciplineId = id,
-        })).ToDictionary(x => x.Id!.Value);
-
-        var lessonBatchInfosToSave = Enum.GetValues<AcademicDisciplineType>()
-            .SelectMany(type =>
-            {
-                var batchInfos = academicDiscipline.GetBatchInfosByType(type);
-                foreach (var batchInfo in batchInfos)
-                {
-                    batchInfo.AcademicDisciplineId = id.Value;
-                    batchInfo.Type = type;
-                }
-                return batchInfos;
-            })
-            .ToArray();
-
-        var updatedDayOfWeekTimeIntervalsByLessonBatchId = lessonBatchInfosToSave
-            .Where(x => x.Id.HasValue)
-            .Select(x => new LessonBatchInfoTimeAssignmentDifferenceDto
-            {
-                LessonBatchInfoId = x.Id!.Value,
-                PreviousAssignments = previousLessonBatchInfosById[x.Id!.Value].DayOfWeekTimeIntervals,
-                CurrentAssignments = x.DayOfWeekTimeIntervals,
-            })
-            .ToArray();
-
-        var lessonBatchInfosToDelete = previousLessonBatchInfosById.Values
-            .Where(x => academicDiscipline.GetAllBatchInfos().All(y => y.Id != x.Id));
-        await lessonBatchInfoRepository.DeleteAsync(lessonBatchInfosToDelete.Select(x => x.Id!.Value).ToArray());
-
-        var updatedBatchIds = lessonBatchInfosToSave
-            .Where(x => x.Id.HasValue)
-            .Select(x => x.Id!.Value)
-            .ToArray();
-        var ids = await lessonBatchInfoRepository.SaveAllAsync(lessonBatchInfosToSave);
-        var savedLessonBatchInfos = await lessonBatchInfoRepository.SelectAsync(ids);
-        var newLessonBatchInfoIds = savedLessonBatchInfos
-            .Where(x => !updatedBatchIds.Contains(x.Id!.Value))
-            .Select(x => x.Id!.Value)
-            .ToArray();
-
-        await lessonService.UpdateLessonsByBatches(academicDiscipline.ScheduleId, savedLessonBatchInfos, newLessonBatchInfoIds, updatedDayOfWeekTimeIntervalsByLessonBatchId);
+            await lessonService.UpdateLessonsByBatches(academicDiscipline.ScheduleId, savedLessonBatchInfos);
+        }
         await lessonService.RecalculateConflictsForUpdatedAcademicDiscipline(academicDiscipline);
     }
 
@@ -175,6 +138,11 @@ public class AcademicDisciplineService(
                 new ValidationMessage($"Дисциплина не может содержать дополнительную информацию по занятиям вида " +
                                       $"\"{type.GetDescription()}\", если она не подразумевает их проведение")));
 
+        if (academicDiscipline.GetAllBatchInfos().Any(x => x.DayOfWeekTimeIntervals.Length > x.LessonsPerWeekCount))
+        {
+            validationMessages.Add(new ValidationMessage("При сохранении серии занятий число отрезков времени не может быть больше требуемого количества занятий в неделю"));
+        }
+
         // validationMessages.AddRange(availableTypes
         //     .Where(type =>
         //     {
@@ -205,5 +173,63 @@ public class AcademicDisciplineService(
         {
             throw new ServiceException(validationMessages.ToArray());
         }
+    }
+
+    private async Task<LessonBatchInfo[]> SaveLessonBatchInfosAsync(AcademicDiscipline academicDiscipline)
+    {
+        var previousLessonBatchInfos = await lessonBatchInfoRepository.SearchAsync(new LessonBatchInfoSearchModel
+        {
+            ScheduleId = academicDiscipline.ScheduleId,
+            AcademicDisciplineId = academicDiscipline.Id!.Value,
+        });
+
+        var toDelete = previousLessonBatchInfos
+            .Where(x => academicDiscipline.GetAllBatchInfos().All(y => y.Id != x.Id));
+        await lessonBatchInfoRepository.DeleteAsync(toDelete.Select(x => x.Id!.Value).ToArray());
+
+        var lessonBatchInfosToSave = Enum.GetValues<AcademicDisciplineType>()
+            .SelectMany(type =>
+            {
+                var batchInfos = academicDiscipline.GetBatchInfosByType(type);
+                foreach (var batchInfo in batchInfos)
+                {
+                    batchInfo.AcademicDisciplineId = academicDiscipline.Id!.Value;
+                    batchInfo.Type = type;
+                }
+                return batchInfos;
+            })
+            .ToArray();
+
+        var ids = new List<Guid>();
+        foreach (var lessonBatchInfo in lessonBatchInfosToSave)
+        {
+            var id = await lessonBatchInfoRepository.SaveAsync(lessonBatchInfo);
+            ids.Add(id);
+            lessonBatchInfo.Id = id;
+            lessonBatchInfo.DayOfWeekTimeIntervals = await SaveTimeAssignmentsAsync(lessonBatchInfo);
+        }
+
+        return await lessonBatchInfoRepository.SelectAsync(ids.ToArray());
+    }
+
+    private async Task<DayOfWeekTimeIntervalAssignment[]> SaveTimeAssignmentsAsync(LessonBatchInfo lessonBatchInfo)
+    {
+        var previousTimeAssignments = await dayOfWeekTimeIntervalAssignmentRepository.SearchAsync(new DayOfWeekTimeIntervalAssignmentSearchModel
+        {
+            LessonBatchInfoIds = [lessonBatchInfo.Id!.Value],
+        });
+
+        var toDelete = previousTimeAssignments
+            .Where(x => lessonBatchInfo.DayOfWeekTimeIntervals
+                .All(y => y.Id != x.Id));
+        await dayOfWeekTimeIntervalAssignmentRepository.DeleteAsync(toDelete.Select(x => x.Id!.Value).ToArray());
+
+        foreach (var timeAssignment in lessonBatchInfo.DayOfWeekTimeIntervals)
+        {
+            timeAssignment.LessonBatchInfoId = lessonBatchInfo.Id!.Value;
+        }
+
+        var ids = await dayOfWeekTimeIntervalAssignmentRepository.SaveAllAsync(lessonBatchInfo.DayOfWeekTimeIntervals);
+        return await dayOfWeekTimeIntervalAssignmentRepository.SelectAsync(ids);
     }
 }

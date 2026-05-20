@@ -103,6 +103,38 @@ namespace Dal.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Dal.Entities.DbDayOfWeekTimeIntervalAssignment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<int>("DayOfWeek")
+                        .HasColumnType("integer")
+                        .HasColumnName("day_of_week");
+
+                    b.Property<Guid>("LessonBatchInfoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("lesson_batch_info_id");
+
+                    b.Property<TimeOnly>("TimeFrom")
+                        .HasColumnType("time without time zone")
+                        .HasColumnName("time_from");
+
+                    b.Property<TimeOnly>("TimeTo")
+                        .HasColumnType("time without time zone")
+                        .HasColumnName("time_to");
+
+                    b.HasKey("Id")
+                        .HasName("pk_day_of_week_time_interval_assignment");
+
+                    b.HasIndex("LessonBatchInfoId")
+                        .HasDatabaseName("ix_day_of_week_time_interval_assignment_lesson_batch_info_id");
+
+                    b.ToTable("day_of_week_time_interval_assignment", (string)null);
+                });
+
             modelBuilder.Entity("Dal.Entities.DbLesson", b =>
                 {
                     b.Property<Guid>("Id")
@@ -125,6 +157,10 @@ namespace Dal.Migrations
                     b.Property<DateOnly?>("Date")
                         .HasColumnType("Date")
                         .HasColumnName("date");
+
+                    b.Property<Guid?>("DayOfWeekTimeIntervalAssignmentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("day_of_week_time_interval_assignment_id");
 
                     b.Property<bool>("DetachedFromBatch")
                         .HasColumnType("boolean")
@@ -161,6 +197,9 @@ namespace Dal.Migrations
                     b.HasIndex("AcademicDisciplineId")
                         .HasDatabaseName("ix_lesson_academic_discipline_id");
 
+                    b.HasIndex("DayOfWeekTimeIntervalAssignmentId")
+                        .HasDatabaseName("ix_lesson_day_of_week_time_interval_assignment_id");
+
                     b.HasIndex("LessonBatchInfoId")
                         .HasDatabaseName("ix_lesson_lesson_batch_info_id");
 
@@ -196,11 +235,6 @@ namespace Dal.Migrations
                     b.Property<DateOnly>("DateTo")
                         .HasColumnType("Date")
                         .HasColumnName("date_to");
-
-                    b.Property<string>("DayOfWeekTimeIntervals")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("day_of_week_time_intervals");
 
                     b.Property<string>("FlexibilityType")
                         .IsRequired()
@@ -723,6 +757,16 @@ namespace Dal.Migrations
                     b.Navigation("Schedule");
                 });
 
+            modelBuilder.Entity("Dal.Entities.DbDayOfWeekTimeIntervalAssignment", b =>
+                {
+                    b.HasOne("Dal.Entities.DbLessonBatchInfo", null)
+                        .WithMany("DayOfWeekTimeIntervals")
+                        .HasForeignKey("LessonBatchInfoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_day_of_week_time_interval_assignment_db_lesson_batch_info_l");
+                });
+
             modelBuilder.Entity("Dal.Entities.DbLesson", b =>
                 {
                     b.HasOne("Dal.Entities.DbAcademicDiscipline", "AcademicDiscipline")
@@ -730,6 +774,12 @@ namespace Dal.Migrations
                         .HasForeignKey("AcademicDisciplineId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .HasConstraintName("fk_lesson_academic_discipline_academic_discipline_id");
+
+                    b.HasOne("Dal.Entities.DbDayOfWeekTimeIntervalAssignment", "DayOfWeekTimeIntervalAssignment")
+                        .WithMany()
+                        .HasForeignKey("DayOfWeekTimeIntervalAssignmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasConstraintName("fk_lesson_day_of_week_time_interval_assignment_day_of_week_tim");
 
                     b.HasOne("Dal.Entities.DbLessonBatchInfo", "LessonBatchInfo")
                         .WithMany()
@@ -745,6 +795,8 @@ namespace Dal.Migrations
                         .HasConstraintName("fk_lesson_db_schedule_schedule_id");
 
                     b.Navigation("AcademicDiscipline");
+
+                    b.Navigation("DayOfWeekTimeIntervalAssignment");
 
                     b.Navigation("LessonBatchInfo");
 
@@ -1024,6 +1076,11 @@ namespace Dal.Migrations
             modelBuilder.Entity("Dal.Entities.DbLesson", b =>
                 {
                     b.Navigation("Violations");
+                });
+
+            modelBuilder.Entity("Dal.Entities.DbLessonBatchInfo", b =>
+                {
+                    b.Navigation("DayOfWeekTimeIntervals");
                 });
 #pragma warning restore 612, 618
         }

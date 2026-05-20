@@ -180,7 +180,6 @@ namespace Dal.Migrations
                     academic_discipline_id = table.Column<Guid>(type: "uuid", nullable: false),
                     type = table.Column<int>(type: "integer", nullable: false),
                     lessons_per_week_count = table.Column<int>(type: "integer", nullable: false),
-                    day_of_week_time_intervals = table.Column<string>(type: "text", nullable: false),
                     repeat_type = table.Column<string>(type: "text", nullable: false),
                     date_from = table.Column<DateOnly>(type: "Date", nullable: false),
                     date_to = table.Column<DateOnly>(type: "Date", nullable: false),
@@ -252,41 +251,22 @@ namespace Dal.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "lesson",
+                name: "day_of_week_time_interval_assignment",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
-                    schedule_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    academic_discipline_id = table.Column<Guid>(type: "uuid", nullable: true),
-                    academic_discipline_type = table.Column<string>(type: "text", nullable: true),
-                    date = table.Column<DateOnly>(type: "Date", nullable: true),
-                    time_from = table.Column<TimeOnly>(type: "time without time zone", nullable: true),
-                    time_to = table.Column<TimeOnly>(type: "time without time zone", nullable: true),
-                    flexibility_type = table.Column<string>(type: "text", nullable: false),
-                    hours_cost = table.Column<int>(type: "integer", nullable: true),
-                    allow_combining = table.Column<bool>(type: "boolean", nullable: false),
-                    detached_from_batch = table.Column<bool>(type: "boolean", nullable: false),
-                    lesson_batch_info_id = table.Column<Guid>(type: "uuid", nullable: true)
+                    lesson_batch_info_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    day_of_week = table.Column<int>(type: "integer", nullable: false),
+                    time_from = table.Column<TimeOnly>(type: "time without time zone", nullable: false),
+                    time_to = table.Column<TimeOnly>(type: "time without time zone", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_lesson", x => x.id);
+                    table.PrimaryKey("pk_day_of_week_time_interval_assignment", x => x.id);
                     table.ForeignKey(
-                        name: "fk_lesson_academic_discipline_academic_discipline_id",
-                        column: x => x.academic_discipline_id,
-                        principalTable: "academic_discipline",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "fk_lesson_db_lesson_batch_info_lesson_batch_info_id",
+                        name: "fk_day_of_week_time_interval_assignment_db_lesson_batch_info_l",
                         column: x => x.lesson_batch_info_id,
                         principalTable: "lesson_batch_info",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "fk_lesson_db_schedule_schedule_id",
-                        column: x => x.schedule_id,
-                        principalTable: "schedule",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -359,6 +339,53 @@ namespace Dal.Migrations
                         name: "fk_lesson_batch_info_teacher_teacher",
                         column: x => x.teacher_id,
                         principalTable: "teacher",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "lesson",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    schedule_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    academic_discipline_id = table.Column<Guid>(type: "uuid", nullable: true),
+                    academic_discipline_type = table.Column<string>(type: "text", nullable: true),
+                    day_of_week_time_interval_assignment_id = table.Column<Guid>(type: "uuid", nullable: true),
+                    date = table.Column<DateOnly>(type: "Date", nullable: true),
+                    time_from = table.Column<TimeOnly>(type: "time without time zone", nullable: true),
+                    time_to = table.Column<TimeOnly>(type: "time without time zone", nullable: true),
+                    flexibility_type = table.Column<string>(type: "text", nullable: false),
+                    hours_cost = table.Column<int>(type: "integer", nullable: true),
+                    allow_combining = table.Column<bool>(type: "boolean", nullable: false),
+                    detached_from_batch = table.Column<bool>(type: "boolean", nullable: false),
+                    lesson_batch_info_id = table.Column<Guid>(type: "uuid", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_lesson", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_lesson_academic_discipline_academic_discipline_id",
+                        column: x => x.academic_discipline_id,
+                        principalTable: "academic_discipline",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_lesson_day_of_week_time_interval_assignment_day_of_week_tim",
+                        column: x => x.day_of_week_time_interval_assignment_id,
+                        principalTable: "day_of_week_time_interval_assignment",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_lesson_db_lesson_batch_info_lesson_batch_info_id",
+                        column: x => x.lesson_batch_info_id,
+                        principalTable: "lesson_batch_info",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_lesson_db_schedule_schedule_id",
+                        column: x => x.schedule_id,
+                        principalTable: "schedule",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -513,9 +540,19 @@ namespace Dal.Migrations
                 column: "schedule_id");
 
             migrationBuilder.CreateIndex(
+                name: "ix_day_of_week_time_interval_assignment_lesson_batch_info_id",
+                table: "day_of_week_time_interval_assignment",
+                column: "lesson_batch_info_id");
+
+            migrationBuilder.CreateIndex(
                 name: "ix_lesson_academic_discipline_id",
                 table: "lesson",
                 column: "academic_discipline_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_lesson_day_of_week_time_interval_assignment_id",
+                table: "lesson",
+                column: "day_of_week_time_interval_assignment_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_lesson_lesson_batch_info_id",
@@ -717,10 +754,13 @@ namespace Dal.Migrations
                 name: "teacher");
 
             migrationBuilder.DropTable(
-                name: "lesson_batch_info");
+                name: "day_of_week_time_interval_assignment");
 
             migrationBuilder.DropTable(
                 name: "campus");
+
+            migrationBuilder.DropTable(
+                name: "lesson_batch_info");
 
             migrationBuilder.DropTable(
                 name: "academic_discipline");

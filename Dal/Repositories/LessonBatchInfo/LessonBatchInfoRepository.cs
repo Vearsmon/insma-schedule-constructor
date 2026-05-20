@@ -110,7 +110,8 @@ public class LessonBatchInfoRepository(
     protected override IQueryable<DbLessonBatchInfo> Query() => Context.Set<DbLessonBatchInfo>()
         .Include(x => x.StudentGroups)
         .Include(x => x.Teachers)
-        .Include(x => x.Rooms);
+        .Include(x => x.Rooms)
+        .Include(x => x.DayOfWeekTimeIntervals);
 
     private string? BuildSaveReferencesExpression(Domain.Models.LessonBatchInfo model)
     {

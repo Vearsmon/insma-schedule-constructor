@@ -27,6 +27,7 @@ public static partial class LessonMappingRegister
         model.StudentGroups = entity.StudentGroups.Select(StudentGroupMappingRegister.MapEntityToModel).ToArray()!;
         model.Teachers = entity.Teachers.Select(TeacherMappingRegister.MapEntityToModel).ToArray()!;
         model.Rooms = entity.Rooms.Select(RoomMappingRegister.MapEntityToModel).ToArray()!;
+        model.DayOfWeekTimeIntervalAssignment = DayOfWeekTimeIntervalAssignmentMappingRegister.MapEntityToModel(entity.DayOfWeekTimeIntervalAssignment)!;
         model.LessonBatchInfo = LessonBatchInfoMappingRegister.MapEntityToModel(entity.LessonBatchInfo);
         model.Violations = entity.Violations.Select(LessonPolicyViolationMappingRegister.MapEntityToModel).ToArray()!;
         return model;
@@ -82,6 +83,7 @@ public static partial class LessonMappingRegister
     [MapperIgnoreSource(nameof(DbLesson.StudentGroups))]
     [MapperIgnoreSource(nameof(DbLesson.Teachers))]
     [MapperIgnoreSource(nameof(DbLesson.Rooms))]
+    [MapperIgnoreSource(nameof(DbLesson.DayOfWeekTimeIntervalAssignment))]
     [MapperIgnoreSource(nameof(DbLesson.LessonBatchInfo))]
     [MapperIgnoreSource(nameof(DbLesson.Violations))]
     [MapperIgnoreTarget(nameof(Lesson.Schedule))]
@@ -90,6 +92,7 @@ public static partial class LessonMappingRegister
     [MapperIgnoreTarget(nameof(Lesson.StudentGroups))]
     [MapperIgnoreTarget(nameof(Lesson.Teachers))]
     [MapperIgnoreTarget(nameof(Lesson.Rooms))]
+    [MapperIgnoreTarget(nameof(Lesson.DayOfWeekTimeIntervalAssignment))]
     [MapperIgnoreTarget(nameof(Lesson.LessonBatchInfo))]
     [MapperIgnoreTarget(nameof(Lesson.Violations))]
     private static partial Lesson? AutoMapEntityToModel(DbLesson? entity);
@@ -100,6 +103,7 @@ public static partial class LessonMappingRegister
     [MapperIgnoreSource(nameof(Lesson.StudentGroups))]
     [MapperIgnoreSource(nameof(Lesson.Teachers))]
     [MapperIgnoreSource(nameof(Lesson.Rooms))]
+    [MapperIgnoreSource(nameof(Lesson.DayOfWeekTimeIntervalAssignment))]
     [MapperIgnoreSource(nameof(Lesson.LessonBatchInfo))]
     [MapperIgnoreSource(nameof(Lesson.Violations))]
     [MapperIgnoreTarget(nameof(DbLesson.Date))]
@@ -108,6 +112,7 @@ public static partial class LessonMappingRegister
     [MapperIgnoreTarget(nameof(DbLesson.StudentGroups))]
     [MapperIgnoreTarget(nameof(DbLesson.Teachers))]
     [MapperIgnoreTarget(nameof(DbLesson.Rooms))]
+    [MapperIgnoreTarget(nameof(DbLesson.DayOfWeekTimeIntervalAssignment))]
     [MapperIgnoreTarget(nameof(DbLesson.LessonBatchInfo))]
     [MapperIgnoreTarget(nameof(DbLesson.Violations))]
     private static partial DbLesson? AutoMapModelToEntity(Lesson? model);
@@ -118,6 +123,7 @@ public static partial class LessonMappingRegister
     [MapperIgnoreSource(nameof(Lesson.StudentGroups))]
     [MapperIgnoreSource(nameof(Lesson.Teachers))]
     [MapperIgnoreSource(nameof(Lesson.Rooms))]
+    [MapperIgnoreSource(nameof(Lesson.DayOfWeekTimeIntervalAssignment))]
     [MapperIgnoreSource(nameof(Lesson.LessonBatchInfo))]
     [MapperIgnoreSource(nameof(Lesson.Violations))]
     [MapperIgnoreTarget(nameof(DbLesson.Schedule))]
@@ -128,6 +134,7 @@ public static partial class LessonMappingRegister
     [MapperIgnoreTarget(nameof(DbLesson.StudentGroups))]
     [MapperIgnoreTarget(nameof(DbLesson.Teachers))]
     [MapperIgnoreTarget(nameof(DbLesson.Rooms))]
+    [MapperIgnoreTarget(nameof(DbLesson.DayOfWeekTimeIntervalAssignment))]
     [MapperIgnoreTarget(nameof(DbLesson.LessonBatchInfo))]
     [MapperIgnoreTarget(nameof(DbLesson.Violations))]
     private static partial void AutoUpdateEntityWithModel(Lesson? model, DbLesson? entity);
@@ -141,6 +148,8 @@ public static partial class LessonMappingRegister
     [MapperIgnoreSource(nameof(DbLesson.StudentGroups))]
     [MapperIgnoreSource(nameof(DbLesson.Teachers))]
     [MapperIgnoreSource(nameof(DbLesson.Rooms))]
+    [MapperIgnoreSource(nameof(DbLesson.DayOfWeekTimeIntervalAssignmentId))]
+    [MapperIgnoreSource(nameof(DbLesson.DayOfWeekTimeIntervalAssignment))]
     [MapperIgnoreSource(nameof(DbLesson.DetachedFromBatch))]
     [MapperIgnoreSource(nameof(DbLesson.LessonBatchInfoId))]
     [MapperIgnoreSource(nameof(DbLesson.LessonBatchInfo))]

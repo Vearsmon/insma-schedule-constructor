@@ -38,13 +38,11 @@ namespace Services.Mapping
             target.Id = model.Id;
             target.AcademicDisciplineId = model.AcademicDisciplineId;
             target.AcademicDisciplineType = model.AcademicDisciplineType;
+            target.DayOfWeekTimeIntervalAssignmentId = model.DayOfWeekTimeIntervalAssignmentId;
             target.DateWithTimeInterval = model.DateWithTimeInterval;
             target.FlexibilityType = model.FlexibilityType;
             target.AllowCombining = model.AllowCombining;
-            if (model.HoursCost != null)
-            {
-                target.HoursCost = model.HoursCost.Value;
-            }
+            target.HoursCost = model.HoursCost;
             target.Violations = model.Violations;
             return target;
         }
@@ -75,6 +73,7 @@ namespace Services.Mapping
             target.AcademicDisciplineId = model.AcademicDisciplineId;
             target.AcademicDisciplineName = model.AcademicDiscipline?.Name;
             target.AcademicDisciplineType = model.AcademicDisciplineType;
+            target.DayOfWeekTimeIntervalAssignmentId = model.DayOfWeekTimeIntervalAssignmentId;
             target.DateWithTimeInterval = model.DateWithTimeInterval;
             target.FlexibilityType = model.FlexibilityType;
             target.AllowCombining = model.AllowCombining;

@@ -12,9 +12,10 @@ public class LessonViewDto
     public Guid[] StudentGroupIds { get; set; } = [];
     public Guid[] TeacherIds { get; set; } = [];
     public Guid[] RoomIds { get; set; } = [];
+    public Guid? DayOfWeekTimeIntervalAssignmentId { get; set; }
     public DateWithTimeInterval? DateWithTimeInterval { get; set; }
     public LessonFlexibilityType FlexibilityType { get; set; }
     public bool AllowCombining { get; set; }
-    public int HoursCost { get; set; }
+    public int? HoursCost { get; set; }
     public LessonPolicyViolation[] Violations { get; set; } = [];
 }

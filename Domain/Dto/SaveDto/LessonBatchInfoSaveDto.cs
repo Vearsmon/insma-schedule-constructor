@@ -10,7 +10,7 @@ public class LessonBatchInfoSaveDto
     public Guid[] TeacherIds { get; set; } = [];
     public Guid[] RoomIds { get; set; } = [];
     public int LessonsPerWeekCount { get; set; }
-    public DayOfWeekTimeInterval[] DayOfWeekTimeIntervals { get; set; } = [];
+    public DayOfWeekTimeIntervalAssignmentSaveDto[] DayOfWeekTimeIntervals { get; set; } = [];
     public DisciplineLessonRepeatType RepeatType { get; set; }
     public DateInterval DateInterval { get; set; } = null!;
     public bool AllowCombining { get; set; }

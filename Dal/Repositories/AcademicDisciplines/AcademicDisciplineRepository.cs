@@ -53,5 +53,7 @@ public class AcademicDisciplineRepository(
         .Include(x => x.LessonBatchInfos)
         .ThenInclude(x => x.Teachers)
         .Include(x => x.LessonBatchInfos)
-        .ThenInclude(x => x.Rooms);
+        .ThenInclude(x => x.Rooms)
+        .Include(x => x.LessonBatchInfos)
+        .ThenInclude(x => x.DayOfWeekTimeIntervals);
 }

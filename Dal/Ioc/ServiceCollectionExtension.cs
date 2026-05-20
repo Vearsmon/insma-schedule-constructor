@@ -11,6 +11,7 @@ using Dal.RegistryRepositories.TeacherPreference;
 using Dal.Repositories;
 using Dal.Repositories.AcademicDisciplines;
 using Dal.Repositories.Campuses;
+using Dal.Repositories.DayOfWeekTimeIntervalAssignments;
 using Dal.Repositories.LessonBatchInfo;
 using Dal.Repositories.Lessons;
 using Dal.Repositories.LessonPolicyViolations;
@@ -45,6 +46,10 @@ public static class ServiceCollectionExtension
             .AddScoped<IReadonlyRepositoryMapper<DbAcademicDiscipline, AcademicDisciplineRegistryItem>, AcademicDisciplineRegistryMapper>()
             .AddScoped<IRegistryRepositoryOrderer<DbAcademicDiscipline, AcademicDisciplineRegistryInternalSearchModel>, AcademicDisciplineRegistryOrderer>()
             .AddScoped<IPredicateBuilder<DbAcademicDiscipline, AcademicDisciplineRegistryInternalSearchModel>, AcademicDisciplineRegistryPredicateBuilder>()
+
+            .AddScoped<IDayOfWeekTimeIntervalAssignmentRepository, DayOfWeekTimeIntervalAssignmentRepository>()
+            .AddScoped<IRepositoryMapper<DbDayOfWeekTimeIntervalAssignment, DayOfWeekTimeIntervalAssignment>, DayOfWeekTimeIntervalAssignmentMapper>()
+            .AddScoped<IPredicateBuilder<DbDayOfWeekTimeIntervalAssignment, DayOfWeekTimeIntervalAssignmentSearchModel>, DayOfWeekTimeIntervalAssignmentPredicateBuilder>()
 
             .AddScoped<ILessonBatchInfoRepository, LessonBatchInfoRepository>()
             .AddScoped<IRepositoryMapper<DbLessonBatchInfo, LessonBatchInfo>, LessonBatchInfoMapper>()

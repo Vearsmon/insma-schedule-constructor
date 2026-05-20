@@ -9,6 +9,19 @@ namespace Services.Mapping;
 [Mapper]
 public static partial class LessonBatchInfoDtoMappingRegister
 {
+    [UserMapping(Default = true)]
+    public static LessonBatchInfo? MapSaveDtoToModel(LessonBatchInfoSaveDto? dto)
+    {
+        var model = AutoMapSaveDtoToModel(dto);
+        if (dto == null) return model;
+        model!.DayOfWeekTimeIntervals = dto.DayOfWeekTimeIntervals.Select(x => new DayOfWeekTimeIntervalAssignment
+        {
+            Id = x.Id,
+            DayOfWeekTimeInterval = x.DayOfWeekTimeInterval,
+        }).ToArray();
+        return model;
+    }
+
     [MapperIgnoreSource(nameof(LessonBatchInfo.AcademicDisciplineId))]
     [MapperIgnoreSource(nameof(LessonBatchInfo.AcademicDiscipline))]
     [MapperIgnoreSource(nameof(LessonBatchInfo.Type))]
@@ -25,13 +38,15 @@ public static partial class LessonBatchInfoDtoMappingRegister
     [MapProperty(nameof(LessonBatchInfoDto.RoomIds), nameof(LessonBatchInfo.Rooms), Use = nameof(MapRoomIds))]
     public static partial LessonBatchInfo? MapDtoToModel(LessonBatchInfoDto? dto);
 
+    [MapperIgnoreSource(nameof(LessonBatchInfoSaveDto.DayOfWeekTimeIntervals))]
     [MapperIgnoreTarget(nameof(LessonBatchInfo.AcademicDisciplineId))]
     [MapperIgnoreTarget(nameof(LessonBatchInfo.AcademicDiscipline))]
     [MapperIgnoreTarget(nameof(LessonBatchInfo.Type))]
+    [MapperIgnoreTarget(nameof(LessonBatchInfo.DayOfWeekTimeIntervals))]
     [MapProperty(nameof(LessonBatchInfoSaveDto.StudentGroupIds), nameof(LessonBatchInfo.StudentGroups), Use = nameof(MapStudentGroupIds))]
     [MapProperty(nameof(LessonBatchInfoSaveDto.TeacherIds), nameof(LessonBatchInfo.Teachers), Use = nameof(MapTeacherIds))]
     [MapProperty(nameof(LessonBatchInfoSaveDto.RoomIds), nameof(LessonBatchInfo.Rooms), Use = nameof(MapRoomIds))]
-    public static partial LessonBatchInfo? MapSaveDtoToModel(LessonBatchInfoSaveDto? dto);
+    private static partial LessonBatchInfo? AutoMapSaveDtoToModel(LessonBatchInfoSaveDto? dto);
 
     private static StudentGroupShortDto[] MapStudentGroupsCollection(StudentGroup[] collection) => collection.Select(x => new StudentGroupShortDto { Id = x.Id!.Value, Name = x.Name }).ToArray();
     private static Guid[] MapTeachersCollection(Teacher[] collection) => collection.Select(x => x.Id!.Value).ToArray();

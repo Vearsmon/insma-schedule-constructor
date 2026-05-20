@@ -16,7 +16,7 @@ namespace Services.Mapping
             target.TeacherIds = MapTeachersCollection(dto.Teachers);
             target.RoomIds = MapRoomsCollection(dto.Rooms);
             target.LessonsPerWeekCount = dto.LessonsPerWeekCount;
-            target.DayOfWeekTimeIntervals = dto.DayOfWeekTimeIntervals;
+            target.DayOfWeekTimeIntervals = MapToDayOfWeekTimeIntervalAssignmentShortDtoArray(dto.DayOfWeekTimeIntervals);
             target.RepeatType = dto.RepeatType;
             target.DateInterval = dto.DateInterval;
             target.AllowCombining = dto.AllowCombining;
@@ -39,7 +39,7 @@ namespace Services.Mapping
             target.Teachers = MapTeacherIds(dto.TeacherIds);
             target.Rooms = MapRoomIds(dto.RoomIds);
             target.LessonsPerWeekCount = dto.LessonsPerWeekCount;
-            target.DayOfWeekTimeIntervals = dto.DayOfWeekTimeIntervals;
+            target.DayOfWeekTimeIntervals = MapToDayOfWeekTimeIntervalAssignmentArray(dto.DayOfWeekTimeIntervals);
             target.RepeatType = dto.RepeatType;
             target.DateInterval = dto.DateInterval;
             target.AllowCombining = dto.AllowCombining;
@@ -52,7 +52,7 @@ namespace Services.Mapping
 
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
         [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(dto))]
-        public static partial global::Domain.Models.LessonBatchInfo? MapSaveDtoToModel(global::Domain.Dto.SaveDto.LessonBatchInfoSaveDto? dto)
+        private static partial global::Domain.Models.LessonBatchInfo? AutoMapSaveDtoToModel(global::Domain.Dto.SaveDto.LessonBatchInfoSaveDto? dto)
         {
             if (dto == null)
                 return default;
@@ -62,7 +62,6 @@ namespace Services.Mapping
             target.Teachers = MapTeacherIds(dto.TeacherIds);
             target.Rooms = MapRoomIds(dto.RoomIds);
             target.LessonsPerWeekCount = dto.LessonsPerWeekCount;
-            target.DayOfWeekTimeIntervals = dto.DayOfWeekTimeIntervals;
             target.RepeatType = dto.RepeatType;
             target.DateInterval = dto.DateInterval;
             target.AllowCombining = dto.AllowCombining;
@@ -70,6 +69,51 @@ namespace Services.Mapping
             target.HoursCost = dto.HoursCost;
             target.TotalHoursCount = dto.TotalHoursCount;
             target.Comment = dto.Comment;
+            return target;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        private static global::Domain.Dto.ShortDto.DayOfWeekTimeIntervalAssignmentShortDto MapToDayOfWeekTimeIntervalAssignmentShortDto(global::Domain.Models.DayOfWeekTimeIntervalAssignment source)
+        {
+            var target = new global::Domain.Dto.ShortDto.DayOfWeekTimeIntervalAssignmentShortDto();
+            if (source.Id != null)
+            {
+                target.Id = source.Id.Value;
+            }
+            target.LessonBatchInfoId = source.LessonBatchInfoId;
+            target.DayOfWeekTimeInterval = source.DayOfWeekTimeInterval;
+            return target;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        private static global::Domain.Dto.ShortDto.DayOfWeekTimeIntervalAssignmentShortDto[] MapToDayOfWeekTimeIntervalAssignmentShortDtoArray(global::Domain.Models.DayOfWeekTimeIntervalAssignment[] source)
+        {
+            var target = new global::Domain.Dto.ShortDto.DayOfWeekTimeIntervalAssignmentShortDto[source.Length];
+            for (var i = 0; i < source.Length; i++)
+            {
+                target[i] = MapToDayOfWeekTimeIntervalAssignmentShortDto(source[i]);
+            }
+            return target;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        private static global::Domain.Models.DayOfWeekTimeIntervalAssignment MapToDayOfWeekTimeIntervalAssignment(global::Domain.Dto.ShortDto.DayOfWeekTimeIntervalAssignmentShortDto source)
+        {
+            var target = new global::Domain.Models.DayOfWeekTimeIntervalAssignment();
+            target.Id = source.Id;
+            target.LessonBatchInfoId = source.LessonBatchInfoId;
+            target.DayOfWeekTimeInterval = source.DayOfWeekTimeInterval;
+            return target;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        private static global::Domain.Models.DayOfWeekTimeIntervalAssignment[] MapToDayOfWeekTimeIntervalAssignmentArray(global::Domain.Dto.ShortDto.DayOfWeekTimeIntervalAssignmentShortDto[] source)
+        {
+            var target = new global::Domain.Models.DayOfWeekTimeIntervalAssignment[source.Length];
+            for (var i = 0; i < source.Length; i++)
+            {
+                target[i] = MapToDayOfWeekTimeIntervalAssignment(source[i]);
+            }
             return target;
         }
     }

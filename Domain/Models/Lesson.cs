@@ -51,6 +51,16 @@ public class Lesson : IModelWithId
     public Room[] Rooms { get; set; } = [];
 
     /// <summary>
+    /// Назначение дня недели с отрезком времени
+    /// </summary>
+    public Guid? DayOfWeekTimeIntervalAssignmentId { get; set; }
+
+    /// <summary>
+    /// Назначение дня недели с отрезком времени
+    /// </summary>
+    public DayOfWeekTimeIntervalAssignment? DayOfWeekTimeIntervalAssignment { get; set; }
+
+    /// <summary>
     /// Дата с временным отрезком проведения занятия
     /// </summary>
     public DateWithTimeInterval? DateWithTimeInterval { get; set; }

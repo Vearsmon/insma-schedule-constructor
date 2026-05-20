@@ -45,7 +45,7 @@ public class LessonBatchInfo : IModelWithId
     /// <summary>
     /// Отрезки времени занятий по дням недели
     /// </summary>
-    public DayOfWeekTimeInterval[] DayOfWeekTimeIntervals { get; set; } = [];
+    public DayOfWeekTimeIntervalAssignment[] DayOfWeekTimeIntervals { get; set; } = [];
 
     /// <summary>
     /// Вид повторения занятий
