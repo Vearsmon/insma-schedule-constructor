@@ -12,9 +12,6 @@ namespace Dal.Mapping
                 return default;
             var target = new global::Domain.Models.Lesson();
             target.Id = entity.Id;
-            target.ScheduleId = entity.ScheduleId;
-            target.AcademicDisciplineId = entity.AcademicDisciplineId;
-            target.AcademicDisciplineType = entity.AcademicDisciplineType;
             target.DayOfWeekTimeIntervalAssignmentId = entity.DayOfWeekTimeIntervalAssignmentId;
             target.FlexibilityType = entity.FlexibilityType;
             target.HoursCost = entity.HoursCost;
@@ -35,11 +32,6 @@ namespace Dal.Mapping
             {
                 target.Id = model.Id.Value;
             }
-            target.ScheduleId = model.ScheduleId;
-            target.Schedule = global::Dal.Mapping.ScheduleMappingRegister.MapModelToEntity(model.Schedule) ?? throw new global::System.NullReferenceException("global::Dal.Mapping.ScheduleMappingRegister.MapModelToEntity returned null");
-            target.AcademicDisciplineId = model.AcademicDisciplineId;
-            target.AcademicDiscipline = global::Dal.Mapping.AcademicDisciplineMappingRegister.MapModelToEntity(model.AcademicDiscipline);
-            target.AcademicDisciplineType = model.AcademicDisciplineType;
             target.DayOfWeekTimeIntervalAssignmentId = model.DayOfWeekTimeIntervalAssignmentId;
             target.FlexibilityType = model.FlexibilityType;
             target.HoursCost = model.HoursCost;
@@ -58,9 +50,6 @@ namespace Dal.Mapping
             {
                 entity.Id = model.Id.Value;
             }
-            entity.ScheduleId = model.ScheduleId;
-            entity.AcademicDisciplineId = model.AcademicDisciplineId;
-            entity.AcademicDisciplineType = model.AcademicDisciplineType;
             entity.DayOfWeekTimeIntervalAssignmentId = model.DayOfWeekTimeIntervalAssignmentId;
             entity.FlexibilityType = model.FlexibilityType;
             entity.HoursCost = model.HoursCost;
@@ -77,8 +66,6 @@ namespace Dal.Mapping
                 return default;
             var target = new global::Domain.Models.RegistryItemModels.LessonRegistryItem();
             target.Id = entity.Id;
-            target.AcademicDisciplineId = entity.AcademicDisciplineId;
-            target.AcademicDisciplineType = entity.AcademicDisciplineType;
             target.FlexibilityType = entity.FlexibilityType;
             target.AllowCombining = entity.AllowCombining;
             target.HoursCost = entity.HoursCost;

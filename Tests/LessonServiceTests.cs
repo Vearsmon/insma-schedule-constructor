@@ -1,6 +1,7 @@
 ﻿using AutoFixture;
 using Dal.RegistryRepositories.Lesson;
 using Dal.Repositories.AcademicDisciplines;
+using Dal.Repositories.DayOfWeekTimeIntervalAssignments;
 using Dal.Repositories.LessonBatchInfo;
 using Dal.Repositories.LessonPolicyViolations;
 using Dal.Repositories.Lessons;
@@ -38,19 +39,19 @@ public class LessonServiceTests
     private readonly Mock<IRoomRepository> _roomRepositoryMock = new();
     private readonly Mock<ITeacherPreferenceRepository> _teacherPreferenceRepositoryMock = new();
     private readonly Mock<ILessonPolicyViolationRepository> _lessonPolicyViolationRepositoryMock = new();
+    private readonly Mock<IDayOfWeekTimeIntervalAssignmentRepository> _dayOfWeekTimeIntervalAssignmentRepositoryMock = new();
 
     private LessonService CreateService(bool withMockValidation = false)
     {
         _lessonValidationService = new LessonValidationService(
             _lessonRepositoryMock.Object,
             _lessonPolicyViolationRepositoryMock.Object,
-            _scheduleRepositoryMock.Object,
             _teacherRepositoryMock.Object,
             _academicDisciplineRepositoryMock.Object,
             _roomRepositoryMock.Object,
             _studentGroupRepositoryMock.Object,
             _teacherPreferenceRepositoryMock.Object);
-        return new(
+        return new LessonService(
             _lessonRepositoryMock.Object,
             _lessonRegistryRepositoryMock.Object,
             withMockValidation ? _lessonValidationServiceMock.Object : _lessonValidationService,
@@ -59,8 +60,144 @@ public class LessonServiceTests
             _scheduleRepositoryMock.Object,
             _teacherRepositoryMock.Object,
             _roomRepositoryMock.Object,
-            _teacherPreferenceRepositoryMock.Object
+            _teacherPreferenceRepositoryMock.Object,
+            _dayOfWeekTimeIntervalAssignmentRepositoryMock.Object
         );
+    }
+
+    [Fact]
+    public async Task Test1()
+    {
+        // Arrange
+        var schedule = _fixture.Build<Schedule>()
+            .With(x => x.Id, Guid.NewGuid())
+            .With(x => x.DateInterval, new DateInterval
+            {
+                DateFrom = DateTime.Today.ToDateOnly().GetWeekStartDate().AddDays(-14),
+                DateTo = DateTime.Today.ToDateOnly().GetWeekStartDate().AddDays(14),
+            })
+            .Create();
+        var academicDisciplineId = Guid.NewGuid();
+        var lessonBatchInfos = new[]
+        {
+            _fixture.Build<LessonBatchInfo>()
+                .With(x => x.Id, Guid.NewGuid())
+                .With(x => x.AcademicDisciplineId, academicDisciplineId)
+                .With(x => x.Type, AcademicDisciplineType.Practice)
+                .With(x => x.StudentGroups, [new StudentGroup { Id = Guid.NewGuid() }])
+                .With(x => x.Teachers, [new Teacher { Id = Guid.NewGuid() }])
+                .With(x => x.Rooms, [new Room { Id = Guid.NewGuid() }])
+                .With(x => x.LessonsPerWeekCount, 3)
+                .With(x => x.DayOfWeekTimeIntervals, [
+                    new DayOfWeekTimeIntervalAssignment
+                    {
+                        Id = Guid.NewGuid(),
+                        DayOfWeekTimeInterval = new DayOfWeekTimeInterval
+                        {
+                            DayOfWeek = DayOfWeek.Monday,
+                            TimeInterval = new TimeInterval
+                            {
+                                TimeFrom = new TimeOnly(9, 0),
+                                TimeTo = new TimeOnly(10, 30),
+                            },
+                        },
+                    },
+                    new DayOfWeekTimeIntervalAssignment
+                    {
+                        Id = Guid.NewGuid(),
+                        DayOfWeekTimeInterval = new DayOfWeekTimeInterval
+                        {
+                            DayOfWeek = DayOfWeek.Monday,
+                            TimeInterval = new TimeInterval
+                            {
+                                TimeFrom = new TimeOnly(11, 0),
+                                TimeTo = new TimeOnly(12, 30),
+                            },
+                        },
+                    },
+                ])
+                .With(x => x.RepeatType, DisciplineLessonRepeatType.OddWeeks)
+                .With(x => x.DateInterval, new DateInterval
+                {
+                    DateFrom = DateTime.Today.ToDateOnly().GetWeekStartDate().AddDays(-7),
+                    DateTo = DateTime.Today.ToDateOnly().GetWeekStartDate().AddDays(7),
+                })
+                .With(x => x.AllowCombining, true)
+                .With(x => x.FlexibilityType, LessonFlexibilityType.Flexible)
+                .Without(x => x.HoursCost)
+                .Without(x => x.TotalHoursCount)
+                .Without(x => x.Comment)
+                .Create(),
+            _fixture.Build<LessonBatchInfo>()
+                .With(x => x.Id, Guid.NewGuid())
+                .With(x => x.AcademicDisciplineId, academicDisciplineId)
+                .Without(x => x.AcademicDiscipline)
+                .With(x => x.Type, AcademicDisciplineType.Lab)
+                .With(x => x.StudentGroups, [new StudentGroup { Id = Guid.NewGuid() }])
+                .With(x => x.Teachers, [new Teacher { Id = Guid.NewGuid() }])
+                .With(x => x.Rooms, [new Room { Id = Guid.NewGuid() }])
+                .With(x => x.LessonsPerWeekCount, 2)
+                .With(x => x.DayOfWeekTimeIntervals, [
+                    new DayOfWeekTimeIntervalAssignment
+                    {
+                        Id = Guid.NewGuid(),
+                        DayOfWeekTimeInterval = new DayOfWeekTimeInterval
+                        {
+                            DayOfWeek = DayOfWeek.Monday,
+                            TimeInterval = new TimeInterval
+                            {
+                                TimeFrom = new TimeOnly(9, 0),
+                                TimeTo = new TimeOnly(10, 30),
+                            },
+                        },
+                    },
+                ])
+                .With(x => x.RepeatType, DisciplineLessonRepeatType.OddWeeks)
+                .With(x => x.DateInterval, new DateInterval
+                {
+                    DateFrom = DateTime.Today.ToDateOnly().GetWeekStartDate().AddDays(-7),
+                    DateTo = DateTime.Today.ToDateOnly().GetWeekStartDate().AddDays(7),
+                })
+                .With(x => x.AllowCombining, true)
+                .With(x => x.FlexibilityType, LessonFlexibilityType.Flexible)
+                .Without(x => x.HoursCost)
+                .Without(x => x.TotalHoursCount)
+                .Without(x => x.Comment)
+                .Create(),
+        };
+
+        var studentGroup1 = new StudentGroup { Id = Guid.NewGuid() };
+        var studentGroup2 = new StudentGroup { Id = Guid.NewGuid(), Parents = [studentGroup1] };
+        _studentGroupRepositoryMock.Setup(x =>
+                x.SelectAsync(lessonBatchInfos.SelectMany(y =>
+                    y.StudentGroups.Select(z => z.Id!.Value)).Distinct().ToArray(),
+                    CancellationToken.None))
+            .ReturnsAsync([studentGroup1, studentGroup2]);
+        _teacherRepositoryMock.Setup(x =>
+            x.SelectAsync(lessonBatchInfos.SelectMany(y =>
+                    y.Teachers.Select(z => z.Id!.Value)).Distinct().ToArray(),
+                CancellationToken.None))
+            .ReturnsAsync([new Teacher { Id = Guid.NewGuid()}]);
+        _roomRepositoryMock.Setup(x =>
+                x.SelectAsync(lessonBatchInfos.SelectMany(y =>
+                        y.Rooms.Select(z => z.Id!.Value)).Distinct().ToArray(),
+                    CancellationToken.None))
+            .ReturnsAsync([new Room { Id = Guid.NewGuid()}]);
+
+        _lessonRepositoryMock.Setup(x =>
+                x.SearchAsync(It.Is<LessonSearchModel>(s =>
+                    s.ScheduleId == schedule.Id
+                    && s.AcademicDisciplineId == academicDisciplineId
+                    && s.LessonBatchInfoIds == lessonBatchInfos
+                        .Select(l => l.Id!.Value).ToArray())))
+            .ReturnsAsync([new Lesson { DayOfWeekTimeIntervalAssignmentId = Guid.NewGuid() }]);
+
+        var service = CreateService(withMockValidation: true);
+
+        // Act
+        await service.UpdateLessonsByBatches(schedule.Id!.Value, lessonBatchInfos);
+
+        // Assert
     }
 
     [Fact]
@@ -69,85 +206,81 @@ public class LessonServiceTests
         // Arrange
         var affectedByTeacherId = Guid.NewGuid();
         var lessonIds = new[] { Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid() };
+        var createStudentGroup = () => _fixture.Build<StudentGroup>()
+            .Without(x => x.Parents)
+            .Without(x => x.Children)
+            .Create();
         var lessons = new[]
         {
             _fixture.Build<Lesson>()
                 .With(x => x.Id, lessonIds[0])
-                .Without(x => x.Schedule)
-                .Without(x => x.AcademicDisciplineId)
-                .Without(x => x.AcademicDiscipline)
-                .Without(x => x.AcademicDisciplineType)
-                .With(x => x.StudentGroups, [new StudentGroup { Id = Guid.NewGuid(), Name = _fixture.Create<string>() }])
-                .With(x => x.Teachers, [new Teacher { Id = Guid.NewGuid(), Fullname = _fixture.Create<string>(), Contacts = _fixture.Create<string>() }])
-                .With(x => x.Rooms, [new Room { Id = Guid.NewGuid(), Name = _fixture.Create<string>() }])
+                .With(x => x.StudentGroups, [createStudentGroup()])
+                .With(x => x.Teachers, [_fixture.Create<Teacher>()])
+                .With(x => x.Rooms, [_fixture.Create<Room>()])
                 .With(x => x.DateWithTimeInterval, _fixture.Create<DateWithTimeInterval>())
                 .With(x => x.FlexibilityType, LessonFlexibilityType.Fixed)
                 .With(x => x.AllowCombining, true)
-                .Without(x => x.HoursCost)
-                .Without(x => x.LessonBatchInfoId)
-                .Without(x => x.LessonBatchInfo)
+                .With(x => x.LessonBatchInfo,
+                    _fixture.Build<LessonBatchInfo>()
+                        .With(x => x.AcademicDiscipline,
+                            _fixture.Build<AcademicDiscipline>()
+                                .Without(x => x.LessonBatchInfos)
+                                .Create())
+                        .Without(x => x.StudentGroups)
+                        .Create())
                 .With(x => x.Violations,
                 [
-                    new LessonPolicyViolation
-                    {
-                        Id = Guid.NewGuid(),
-                        LessonId = lessonIds[0],
-                        ErrorType = LessonValidationErrorType.Error,
-                        Payload = new LessonValidationPayload { AffectedByTeacherId = affectedByTeacherId },
-                        Code = LessonPolicyViolationCode.RestrictedRoomTeacherPreferenceTypeConflict,
-                    }
+                    _fixture.Build<LessonPolicyViolation>()
+                        .With(x => x.LessonId, lessonIds[0])
+                        .Without(x => x.Lesson)
+                        .With(x => x.ErrorType, LessonValidationErrorType.Error)
+                        .With(x => x.Targets, [new LessonPolicyViolationTarget { TargetId = affectedByTeacherId, TargetType = LessonPolicyViolationTargetType.Teacher }])
+                        .With(x => x.Code, LessonPolicyViolationCode.RestrictedRoomTeacherPreferenceTypeConflict)
+                        .Create(),
                 ])
                 .Create(),
             _fixture.Build<Lesson>()
                 .With(x => x.Id, lessonIds[1])
-                .Without(x => x.Schedule)
-                .Without(x => x.AcademicDisciplineId)
-                .With(x => x.AcademicDiscipline, new AcademicDiscipline { Name = _fixture.Create<string>() })
-                .With(x => x.AcademicDisciplineType, AcademicDisciplineType.Lecture)
-                .With(x => x.StudentGroups, [new StudentGroup { Id = Guid.NewGuid() }])
-                .Without(x => x.Teachers)
-                .With(x => x.Rooms, [new Room { Id = Guid.NewGuid() }])
-                .Without(x => x.DateWithTimeInterval)
+                .With(x => x.StudentGroups, [createStudentGroup()])
+                .With(x => x.Rooms, [_fixture.Create<Room>()])
                 .With(x => x.FlexibilityType, LessonFlexibilityType.Fixed)
-                .Without(x => x.AllowCombining)
-                .Without(x => x.HoursCost)
-                .Without(x => x.LessonBatchInfoId)
-                .Without(x => x.LessonBatchInfo)
-                .With(x => x.Violations, [])
+                .With(x => x.LessonBatchInfo,
+                    _fixture.Build<LessonBatchInfo>()
+                        .With(x => x.AcademicDiscipline,
+                            _fixture.Build<AcademicDiscipline>()
+                                .Without(x => x.LessonBatchInfos)
+                                .Create())
+                        .Without(x => x.StudentGroups)
+                        .Create())
+                .Without(x => x.Violations)
                 .Create(),
             _fixture.Build<Lesson>()
                 .With(x => x.Id, lessonIds[2])
-                .Without(x => x.Schedule)
-                .Without(x => x.AcademicDisciplineId)
-                .Without(x => x.AcademicDiscipline)
-                .Without(x => x.AcademicDisciplineType)
-                .With(x => x.StudentGroups, [new StudentGroup { Id = Guid.NewGuid() }])
-                .Without(x => x.Teachers)
-                .Without(x => x.Rooms)
-                .Without(x => x.DateWithTimeInterval)
-                .Without(x => x.FlexibilityType)
-                .Without(x => x.AllowCombining)
-                .Without(x => x.HoursCost)
-                .With(x => x.LessonBatchInfoId, Guid.NewGuid())
-                .With(x => x.LessonBatchInfo, new LessonBatchInfo())
+                .With(x => x.StudentGroups, [createStudentGroup()])
+                .With(x => x.LessonBatchInfo,
+                    _fixture.Build<LessonBatchInfo>()
+                        .With(x => x.AcademicDiscipline,
+                            _fixture.Build<AcademicDiscipline>()
+                                .Without(x => x.LessonBatchInfos)
+                                .Create())
+                        .Without(x => x.StudentGroups)
+                        .Create())
                 .With(x => x.Violations,
                     [
-                        new LessonPolicyViolation
-                        {
-                            Id = Guid.NewGuid(),
-                            LessonId = lessonIds[2],
-                            ErrorType = LessonValidationErrorType.Warning,
-                            Payload = new LessonValidationPayload { AffectedByTeacherId = affectedByTeacherId },
-                            Code = LessonPolicyViolationCode.RestrictedRoomTeacherPreferenceTypeConflict,
-                        },
-                        new LessonPolicyViolation
-                        {
-                            Id = Guid.NewGuid(),
-                            LessonId = lessonIds[2],
-                            ErrorType = LessonValidationErrorType.Warning,
-                            Payload = new LessonValidationPayload { AffectedByTeacherId = affectedByTeacherId },
-                            Code = LessonPolicyViolationCode.RestrictedRoomTeacherPreferenceTypeConflict,
-                        },
+                        _fixture.Build<LessonPolicyViolation>()
+                            .With(x => x.LessonId, lessonIds[2])
+                            .Without(x => x.Lesson)
+                            .With(x => x.ErrorType, LessonValidationErrorType.Warning)
+                            .With(x => x.Targets, [new LessonPolicyViolationTarget { TargetId = affectedByTeacherId, TargetType = LessonPolicyViolationTargetType.Teacher }])
+                            .With(x => x.Code, LessonPolicyViolationCode.RestrictedRoomTeacherPreferenceTypeConflict)
+                            .Create(),
+                        _fixture.Build<LessonPolicyViolation>()
+                            .With(x => x.LessonId, lessonIds[2])
+                            .Without(x => x.Lesson)
+                            .With(x => x.ErrorType, LessonValidationErrorType.Warning)
+                            .With(x => x.Targets, [new LessonPolicyViolationTarget { TargetId = affectedByTeacherId, TargetType = LessonPolicyViolationTargetType.Teacher }])
+                            .With(x => x.Code, LessonPolicyViolationCode.RestrictedRoomTeacherPreferenceTypeConflict)
+                            .Create(),
                     ])
                 .Create(),
         };
@@ -155,12 +288,13 @@ public class LessonServiceTests
         var expectedLessons = lessons
             .Select(lesson => _fixture.Build<LessonShortDto>()
                 .With(x => x.Id, lesson.Id!.Value)
-                .With(x => x.AcademicDisciplineId, lesson.AcademicDisciplineId)
-                .With(x => x.AcademicDisciplineName, lesson.AcademicDiscipline?.Name)
-                .With(x => x.AcademicDisciplineType, lesson.AcademicDisciplineType)
+                .With(x => x.AcademicDisciplineId, lesson.LessonBatchInfo.AcademicDisciplineId)
+                .With(x => x.AcademicDisciplineName, lesson.LessonBatchInfo.AcademicDiscipline.Name)
+                .With(x => x.AcademicDisciplineType, lesson.LessonBatchInfo.Type)
                 .With(x => x.StudentGroups, lesson.StudentGroups.Select(x => new StudentGroupShortDto { Id = x.Id!.Value, Name = x.Name }).ToArray())
                 .With(x => x.Teachers, lesson.Teachers.Select(x => new TeacherShortDto { Id = x.Id!.Value, Fullname = x.Fullname, Contacts = x.Contacts }).ToArray())
-                .With(x => x.Rooms, lesson.Rooms.Select(x => new RoomShortDto { Id = x.Id!.Value, Name = x.Name }).ToArray())
+                .With(x => x.Rooms, lesson.Rooms.Select(x => new RoomShortDto { Id = x.Id!.Value, Name = x.Name, CampusId = x.CampusId, CampusName = x.Campus.Name, RoomType = x.RoomType, Capacity = x.Capacity, RoomBoardType = x.RoomBoardType, HasProjector = x.HasProjector }).ToArray())
+                .With(x => x.DayOfWeekTimeIntervalAssignmentId, lesson.DayOfWeekTimeIntervalAssignmentId)
                 .With(x => x.DateWithTimeInterval, lesson.DateWithTimeInterval)
                 .With(x => x.FlexibilityType, lesson.FlexibilityType)
                 .With(x => x.AllowCombining, lesson.AllowCombining)
@@ -173,6 +307,14 @@ public class LessonServiceTests
                 .Create())
             .ToArray();
 
+        var dateFrom = _fixture.Create<DateOnly>();
+        var schedule = _fixture.Build<Schedule>()
+            .With(x => x.DateInterval, new DateInterval { DateFrom = dateFrom, DateTo = dateFrom.AddDays(7) })
+            .Create();
+
+        _scheduleRepositoryMock.Setup(r => r.GetAsync(schedule.Id!.Value, CancellationToken.None))
+            .ReturnsAsync(schedule);
+
         _lessonRepositoryMock.Setup(r => r.SearchAsync(It.IsAny<LessonSearchModel>()))
             .ReturnsAsync(lessons);
 
@@ -182,7 +324,7 @@ public class LessonServiceTests
         var service = CreateService();
 
         // Act
-        var actualLessons = await service.SearchWeekAsync(Guid.Empty, DateOnly.MinValue, DateOnly.MaxValue);
+        var actualLessons = await service.SearchWeekAsync(schedule.Id!.Value, schedule.DateInterval.DateFrom, schedule.DateInterval.DateTo);
 
         // Assert
         Assert.Equal(expectedLessons.Length, actualLessons.Length);
@@ -202,74 +344,61 @@ public class LessonServiceTests
     {
         // Arrange
         var academicDisciplineId = Guid.NewGuid();
-        var studentGroupId = Guid.NewGuid();
-        var teacherId = Guid.NewGuid();
+        var studentGroup = _fixture.Build<StudentGroup>()
+            .Without(x => x.Parents)
+            .Without(x => x.Children)
+            .Create();
+        var teacher = _fixture.Create<Teacher>();
         var lessonBatchInfoId = Guid.NewGuid();
         var lesson = _fixture.Build<Lesson>()
-            .With(x => x.Id, Guid.NewGuid())
-            .With(x => x.ScheduleId, Guid.NewGuid())
-            .Without(x => x.Schedule)
-            .With(x => x.AcademicDisciplineId, academicDisciplineId)
-            .Without(x => x.AcademicDiscipline)
-            .Without(x => x.AcademicDisciplineType)
-            .With(x => x.StudentGroups, [new StudentGroup { Id = studentGroupId }])
-            .With(x => x.Teachers, [new Teacher { Id = teacherId }])
-            .Without(x => x.Rooms)
-            .With(x => x.DateWithTimeInterval, _fixture.Create<DateWithTimeInterval>())
+            .With(x => x.StudentGroups, [studentGroup])
+            .With(x => x.Teachers, [teacher])
             .With(x => x.FlexibilityType, LessonFlexibilityType.Fixed)
             .With(x => x.AllowCombining, true)
-            .Without(x => x.HoursCost)
             .With(x => x.LessonBatchInfoId, lessonBatchInfoId)
             .With(x => x.LessonBatchInfo, _fixture.Build<LessonBatchInfo>()
                 .With(x => x.Id, lessonBatchInfoId)
                 .With(x => x.AcademicDisciplineId, academicDisciplineId)
-                .Without(x => x.AcademicDiscipline)
-                .With(x => x.StudentGroups, [new StudentGroup { Id = studentGroupId }])
-                .With(x => x.Teachers, [new Teacher { Id = teacherId }])
-                .Without(x => x.Rooms)
-                .Without(x => x.LessonsPerWeekCount)
-                .Without(x => x.DayOfWeekTimeIntervals)
-                .Without(x => x.RepeatType)
+                .With(x => x.AcademicDiscipline, _fixture.Build<AcademicDiscipline>()
+                    .Without(x => x.LessonBatchInfos)
+                    .Create())
+                .With(x => x.StudentGroups, [studentGroup])
+                .With(x => x.Teachers, [teacher])
                 .With(x => x.DateInterval, new DateInterval
                 {
                     DateFrom = DateTime.Today.ToDateOnly().GetWeekStartDate().AddDays(-7),
                     DateTo = DateTime.Today.ToDateOnly().GetWeekStartDate().AddDays(7),
                 })
-                .Without(x => x.AllowCombining)
-                .Without(x => x.FlexibilityType)
-                .Without(x => x.HoursCost)
-                .Without(x => x.TotalHoursCount)
                 .Create())
             .Without(x => x.Violations)
             .Create();
 
-        _studentGroupRepositoryMock.Setup(r => r.GetStudentGroupTreeIdsAsync(
-                new[] { lesson.LessonBatchInfo!.StudentGroups.First().Id!.Value }))
-            .ReturnsAsync(new Dictionary<Guid, List<Guid>>
-            {
-                {
-                    lesson.LessonBatchInfo!.StudentGroups.First().Id!.Value,
-                    [lesson.LessonBatchInfo.StudentGroups.First().Id!.Value]
-                }
-            });
+        var conflictingLesson = _fixture.Build<Lesson>()
+            .With(x => x.StudentGroups, lesson.StudentGroups)
+            .With(x => x.FlexibilityType, LessonFlexibilityType.Fixed)
+            .With(x => x.LessonBatchInfo, _fixture.Build<LessonBatchInfo>()
+                .With(x => x.AcademicDiscipline, _fixture.Build<AcademicDiscipline>()
+                    .Without(x => x.LessonBatchInfos)
+                    .Create())
+                .Without(x => x.StudentGroups)
+                .Create())
+            .Without(x => x.Violations)
+            .Create();
 
-        var conflictingLesson = new Lesson
-        {
-            Id = Guid.NewGuid(),
-            StudentGroups = lesson.StudentGroups,
-            DateWithTimeInterval = _fixture.Create<DateWithTimeInterval>(),
-            FlexibilityType = LessonFlexibilityType.Fixed,
-        };
+        var conflictingTeacherPreference = _fixture.Build<TeacherPreference>()
+            .With(x => x.TeacherId, teacher.Id)
+            .With(x => x.Teacher, teacher)
+            .Without(x => x.RoomId)
+            .Without(x => x.Room)
+            .With(x => x.TeacherPreferenceType, TeacherPreferenceType.Undesirable)
+            .Create();
+
+        _studentGroupRepositoryMock.Setup(r => r.GetStudentGroupTreeIdsAsync(new[] { studentGroup.Id!.Value }))
+            .ReturnsAsync(new Dictionary<Guid, List<Guid>> { { studentGroup.Id!.Value, [studentGroup.Id!.Value] } });
+
         _lessonRepositoryMock.Setup(r => r.SearchAsync(It.IsAny<LessonSearchModel>()))
             .ReturnsAsync([conflictingLesson]);
 
-        var conflictingTeacherPreference = new TeacherPreference
-        {
-            Id = Guid.NewGuid(),
-            TeacherId = lesson.Teachers.First().Id!.Value,
-            DayOfWeekTimeInterval = _fixture.Create<DayOfWeekTimeInterval>(),
-            TeacherPreferenceType = TeacherPreferenceType.Undesirable,
-        };
         _teacherPreferenceRepositoryMock.Setup(r => r.SearchAsync(It.IsAny<TeacherPreferenceSearchModel>()))
             .ReturnsAsync([conflictingTeacherPreference]);
 
@@ -288,11 +417,8 @@ public class LessonServiceTests
         var result = await service.GetLessonSeriesConflictsAsync(lesson);
 
         // Assert
-        if (conflictingTeacherPreference.DayOfWeekTimeInterval.HasIntersection(new DayOfWeekTimeInterval
-            {
-                DayOfWeek = conflictingLesson.DateWithTimeInterval.Date.DayOfWeek,
-                TimeInterval = conflictingLesson.DateWithTimeInterval.TimeInterval,
-            }))
+        if (conflictingTeacherPreference.DayOfWeekTimeInterval!.HasIntersection(
+                conflictingLesson.DateWithTimeInterval!.ToDayOfWeekTimeInterval()))
         {
             Assert.Single(result);
         }
@@ -307,20 +433,8 @@ public class LessonServiceTests
     {
         // Arrange
         var academicDiscipline = _fixture.Build<AcademicDiscipline>()
-            .With(x => x.Id, Guid.NewGuid())
-            .With(x => x.ScheduleId, Guid.NewGuid())
-            .Without(x => x.Schedule)
-            .Without(x => x.Name)
-            .Without(x => x.AssociatedNames)
             .With(x => x.SemesterNumber, 5)
-            .With(x => x.AcademicDisciplineTargetType, AcademicDisciplineTargetType.ByChoice)
             .With(x => x.AllowedLessonTypes, [AcademicDisciplineType.Lecture])
-            .Without(x => x.LectureLessonBatchInfos)
-            .Without(x => x.PracticeLessonBatchInfos)
-            .Without(x => x.LabLessonBatchInfos)
-            .Without(x => x.ExamLessonBatchInfos)
-            .Without(x => x.TestLessonBatchInfos)
-            .Without(x => x.Comment)
             .Create();
 
         _lessonRepositoryMock.Setup(r => r.SearchAsync(It.Is<LessonSearchModel>(x =>
@@ -331,14 +445,22 @@ public class LessonServiceTests
                 new Lesson
                 {
                     Id = Guid.NewGuid(),
-                    StudentGroups = [new StudentGroup { Id = Guid.NewGuid(), SemesterNumber = 6 }],
-                    AcademicDisciplineType = AcademicDisciplineType.Lecture,
+                    StudentGroups = [_fixture.Build<StudentGroup>()
+                        .Without(x => x.Parents)
+                        .Without(x => x.Children)
+                        .With(x => x.SemesterNumber, 6)
+                        .Create()],
+                    LessonBatchInfo = new LessonBatchInfo { Type = AcademicDisciplineType.Lecture },
                 },
                 new Lesson
                 {
                     Id = Guid.NewGuid(),
-                    StudentGroups = [new StudentGroup { Id = Guid.NewGuid(), SemesterNumber = academicDiscipline.SemesterNumber }],
-                    AcademicDisciplineType = AcademicDisciplineType.Practice,
+                    StudentGroups = [_fixture.Build<StudentGroup>()
+                        .Without(x => x.Parents)
+                        .Without(x => x.Children)
+                        .With(x => x.SemesterNumber, academicDiscipline.SemesterNumber)
+                        .Create()],
+                    LessonBatchInfo = new LessonBatchInfo { Type = AcademicDisciplineType.Practice },
                 },
             ]);
 
@@ -368,25 +490,34 @@ public class LessonServiceTests
         var secondTimeInterval = new TimeInterval { TimeFrom = new TimeOnly(10, 0), TimeTo = new TimeOnly(11, 30) };
         var academicDiscipline = _fixture.Build<AcademicDiscipline>()
             .With(x => x.Id, academicDisciplineId)
-            .With(x => x.ScheduleId, Guid.NewGuid())
-            .Without(x => x.Schedule)
-            .With(x => x.Name, _fixture.Create<string>())
             .With(x => x.SemesterNumber, 5)
             .With(x => x.AcademicDisciplineTargetType, AcademicDisciplineTargetType.ByChoice)
             .With(x => x.AllowedLessonTypes, [AcademicDisciplineType.Lecture])
-            .With(x => x.LectureLessonBatchInfos, [_fixture
+            .With(x => x.LessonBatchInfos, [_fixture
                 .Build<LessonBatchInfo>()
-                .With(x => x.Id, Guid.NewGuid())
                 .With(x => x.AcademicDisciplineId, academicDisciplineId)
-                .Without(x => x.AcademicDiscipline)
                 .With(x => x.StudentGroups, [new StudentGroup { Id = Guid.NewGuid() }])
-                .Without(x => x.Teachers)
-                .Without(x => x.Rooms)
                 .With(x => x.LessonsPerWeekCount, 2)
                 .With(x => x.DayOfWeekTimeIntervals,
                 [
-                    new DayOfWeekTimeInterval { DayOfWeek = DayOfWeek.Tuesday, TimeInterval = firstTimeInterval },
-                    new DayOfWeekTimeInterval { DayOfWeek = DayOfWeek.Thursday, TimeInterval = secondTimeInterval },
+                    new DayOfWeekTimeIntervalAssignment
+                    {
+                        Id = Guid.NewGuid(),
+                        DayOfWeekTimeInterval = new DayOfWeekTimeInterval
+                        {
+                            DayOfWeek = DayOfWeek.Tuesday,
+                            TimeInterval = firstTimeInterval,
+                        },
+                    },
+                    new DayOfWeekTimeIntervalAssignment
+                    {
+                        Id = Guid.NewGuid(),
+                        DayOfWeekTimeInterval = new DayOfWeekTimeInterval
+                        {
+                            DayOfWeek = DayOfWeek.Thursday,
+                            TimeInterval = secondTimeInterval,
+                        },
+                    },
                 ])
                 .With(x => x.RepeatType, DisciplineLessonRepeatType.Weekly)
                 .With(x => x.DateInterval,
@@ -400,11 +531,6 @@ public class LessonServiceTests
                 .With(x => x.HoursCost, _fixture.Create<int>())
                 .With(x => x.TotalHoursCount, _fixture.Create<int>())
                 .Create()])
-            .Without(x => x.PracticeLessonBatchInfos)
-            .Without(x => x.LabLessonBatchInfos)
-            .Without(x => x.ExamLessonBatchInfos)
-            .Without(x => x.TestLessonBatchInfos)
-            .Without(x => x.Comment)
             .Create();
 
         _academicDisciplineRepositoryMock.Setup(r => r.GetAsync(academicDiscipline.Id!.Value, CancellationToken.None))
@@ -421,8 +547,8 @@ public class LessonServiceTests
             });
 
         _studentGroupRepositoryMock.Setup(r => r.SelectAsync(
-                new[] { academicDiscipline.LectureLessonBatchInfos.First().StudentGroups.First().Id!.Value }, CancellationToken.None))
-            .ReturnsAsync(academicDiscipline.LectureLessonBatchInfos.First().StudentGroups);
+                new[] { academicDiscipline.LessonBatchInfos.First().StudentGroups.First().Id!.Value }, CancellationToken.None))
+            .ReturnsAsync(academicDiscipline.LessonBatchInfos.First().StudentGroups);
 
         _teacherRepositoryMock.Setup(r => r.SelectAsync(It.IsAny<Guid[]>(), CancellationToken.None))
             .ReturnsAsync([]);
@@ -449,12 +575,12 @@ public class LessonServiceTests
             .ReturnsAsync(true);
 
         _studentGroupRepositoryMock.Setup(r => r.GetStudentGroupTreeIdsAsync(
-                new[] { academicDiscipline.LectureLessonBatchInfos.First().StudentGroups.First().Id!.Value }))
+                new[] { academicDiscipline.LessonBatchInfos.First().StudentGroups.First().Id!.Value }))
             .ReturnsAsync(new Dictionary<Guid, List<Guid>>
             {
                 {
-                    academicDiscipline.LectureLessonBatchInfos.First().StudentGroups.First().Id!.Value,
-                    [academicDiscipline.LectureLessonBatchInfos.First().StudentGroups.First().Id!.Value]
+                    academicDiscipline.LessonBatchInfos.First().StudentGroups.First().Id!.Value,
+                    [academicDiscipline.LessonBatchInfos.First().StudentGroups.First().Id!.Value]
                 }
             });
 
@@ -467,7 +593,7 @@ public class LessonServiceTests
                 new Lesson
                 {
                     Id = Guid.NewGuid(),
-                    StudentGroups = [new StudentGroup { Id = academicDiscipline.LectureLessonBatchInfos.First().StudentGroups.First().Id!.Value }],
+                    StudentGroups = [new StudentGroup { Id = academicDiscipline.LessonBatchInfos.First().StudentGroups.First().Id!.Value }],
                     FlexibilityType = LessonFlexibilityType.Fixed,
                     DateWithTimeInterval = new DateWithTimeInterval
                     {
@@ -486,8 +612,7 @@ public class LessonServiceTests
 
         // Act
         await service.UpdateLessonsByBatches(academicDiscipline.ScheduleId,
-            academicDiscipline.LectureLessonBatchInfos,
-            [academicDiscipline.LectureLessonBatchInfos.First().Id!.Value]);
+            academicDiscipline.LessonBatchInfos);
 
         // Assert
         Assert.Equal(8, actualLessons.Count);
@@ -525,8 +650,24 @@ public class LessonServiceTests
                 .With(x => x.LessonsPerWeekCount, 2)
                 .With(x => x.DayOfWeekTimeIntervals,
                 [
-                    new DayOfWeekTimeInterval { DayOfWeek = DayOfWeek.Tuesday, TimeInterval = firstTimeInterval },
-                    new DayOfWeekTimeInterval { DayOfWeek = DayOfWeek.Thursday, TimeInterval = secondTimeInterval },
+                    new DayOfWeekTimeIntervalAssignment
+                    {
+                        Id = Guid.NewGuid(),
+                        DayOfWeekTimeInterval = new DayOfWeekTimeInterval
+                        {
+                            DayOfWeek = DayOfWeek.Tuesday,
+                            TimeInterval = firstTimeInterval,
+                        },
+                    },
+                    new DayOfWeekTimeIntervalAssignment
+                    {
+                        Id = Guid.NewGuid(),
+                        DayOfWeekTimeInterval = new DayOfWeekTimeInterval
+                        {
+                            DayOfWeek = DayOfWeek.Thursday,
+                            TimeInterval = secondTimeInterval,
+                        },
+                    },
                 ])
                 .With(x => x.RepeatType, DisciplineLessonRepeatType.Weekly)
                 .With(x => x.DateInterval,
@@ -545,16 +686,11 @@ public class LessonServiceTests
         var academicDiscipline = _fixture.Build<AcademicDiscipline>()
             .With(x => x.Id, academicDisciplineId)
             .With(x => x.ScheduleId, Guid.NewGuid())
-            .Without(x => x.Schedule)
             .With(x => x.Name, _fixture.Create<string>())
             .With(x => x.SemesterNumber, 5)
             .With(x => x.AcademicDisciplineTargetType, AcademicDisciplineTargetType.ByChoice)
             .With(x => x.AllowedLessonTypes, [AcademicDisciplineType.Practice, AcademicDisciplineType.Lab])
-            .Without(x => x.LectureLessonBatchInfos)
-            .With(x => x.PracticeLessonBatchInfos, payloadFixture)
-            .With(x => x.LabLessonBatchInfos, payloadFixture)
-            .Without(x => x.ExamLessonBatchInfos)
-            .Without(x => x.TestLessonBatchInfos)
+            .With(x => x.LessonBatchInfos, payloadFixture)
             .Without(x => x.Comment)
             .Create();
 
@@ -637,13 +773,12 @@ public class LessonServiceTests
 
         // Act
         await service.UpdateLessonsByBatches(academicDiscipline.ScheduleId,
-            academicDiscipline.PracticeLessonBatchInfos.Concat(academicDiscipline.LabLessonBatchInfos).ToArray(),
-            academicDiscipline.PracticeLessonBatchInfos.Concat(academicDiscipline.LabLessonBatchInfos).Select(x => x.Id!.Value).ToArray());
+            academicDiscipline.LessonBatchInfos.ToArray());
 
         // Assert
         Assert.Equal(16, actualLessons.Count);
-        Assert.Equal(8, actualLessons.Count(x => x.AcademicDisciplineType == AcademicDisciplineType.Lab));
-        Assert.Equal(8, actualLessons.Count(x => x.AcademicDisciplineType == AcademicDisciplineType.Practice));
+        Assert.Equal(8, actualLessons.Count(x => x.LessonBatchInfo.Type == AcademicDisciplineType.Lab));
+        Assert.Equal(8, actualLessons.Count(x => x.LessonBatchInfo.Type == AcademicDisciplineType.Practice));
     }
 
     [Fact]
@@ -756,7 +891,7 @@ public class LessonServiceTests
                 new Lesson
                 {
                     Id = Guid.NewGuid(),
-                    AcademicDiscipline = new AcademicDiscipline { Id = Guid.NewGuid(), SemesterNumber = 6 },
+                    LessonBatchInfo = new LessonBatchInfo { AcademicDiscipline = new AcademicDiscipline { Id = Guid.NewGuid(), SemesterNumber = 6 } },
                 },
                 new Lesson
                 {
@@ -772,11 +907,7 @@ public class LessonServiceTests
                         },
                     },
                     FlexibilityType = LessonFlexibilityType.Fixed,
-                    AcademicDiscipline = new AcademicDiscipline
-                    {
-                        Id = Guid.NewGuid(),
-                        SemesterNumber = studentGroup.SemesterNumber,
-                    }
+                    LessonBatchInfo = new LessonBatchInfo { AcademicDiscipline = new AcademicDiscipline { Id = Guid.NewGuid(), SemesterNumber = studentGroup.SemesterNumber } },
                 },
                 new Lesson
                 {
@@ -792,11 +923,7 @@ public class LessonServiceTests
                         },
                     },
                     FlexibilityType = LessonFlexibilityType.Fixed,
-                    AcademicDiscipline = new AcademicDiscipline
-                    {
-                        Id = Guid.NewGuid(),
-                        SemesterNumber = studentGroup.SemesterNumber,
-                    }
+                    LessonBatchInfo = new LessonBatchInfo { AcademicDiscipline = new AcademicDiscipline { Id = Guid.NewGuid(), SemesterNumber = studentGroup.SemesterNumber } },
                 },
                 new Lesson
                 {
@@ -812,11 +939,7 @@ public class LessonServiceTests
                         },
                     },
                     FlexibilityType = LessonFlexibilityType.Fixed,
-                    AcademicDiscipline = new AcademicDiscipline
-                    {
-                        Id = Guid.NewGuid(),
-                        SemesterNumber = studentGroup.SemesterNumber,
-                    }
+                    LessonBatchInfo = new LessonBatchInfo { AcademicDiscipline = new AcademicDiscipline { Id = Guid.NewGuid(), SemesterNumber = studentGroup.SemesterNumber } },
                 },
             ]);
 
@@ -836,15 +959,15 @@ public class LessonServiceTests
             x => x.Code == LessonPolicyViolationCode.MismatchedSemesterNumber);
         Assert.Contains(actualViolations, x =>
             x.Code == LessonPolicyViolationCode.FixedLessonTypeConflictByGroup &&
-            x.Payload.AffectedByLessonId == secondExpectedLessonId);
+            x.Targets.Single().TargetId == secondExpectedLessonId);
         Assert.Contains(actualViolations, x =>
             x.Code == LessonPolicyViolationCode.FixedLessonTypeConflictByGroup &&
-            x.Payload.AffectedByLessonId == firstExpectedLessonId);
+            x.Targets.Single().TargetId == firstExpectedLessonId);
         Assert.Contains(actualViolations, x =>
             x.Code == LessonPolicyViolationCode.FixedLessonTypeConflictByGroup &&
-            x.Payload.AffectedByLessonId == thirdExpectedLessonId);
+            x.Targets.Single().TargetId == thirdExpectedLessonId);
         Assert.Contains(actualViolations, x =>
             x.Code == LessonPolicyViolationCode.FixedLessonTypeConflictByGroup &&
-            x.Payload.AffectedByLessonId == secondExpectedLessonId);
+            x.Targets.Single().TargetId == secondExpectedLessonId);
     }
 }

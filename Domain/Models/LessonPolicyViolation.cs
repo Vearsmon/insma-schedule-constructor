@@ -28,7 +28,12 @@ public class LessonPolicyViolation : IModelWithId
     public LessonPolicyViolationCode Code { get; set; }
 
     /// <summary>
-    /// Оказавшие влияние данные
+    /// Оказавшие влияние сущности
     /// </summary>
-    public LessonValidationPayload Payload { get; set; } = null!;
+    public LessonPolicyViolationTarget[] Targets { get; set; } = [];
+
+    /// <summary>
+    /// День недели и отрезок времени, оказавшие влияние (реквизит в БД не сохраняется)
+    /// </summary>
+    public DayOfWeekTimeInterval? DayOfWeekTimeInterval { get; set; }
 }

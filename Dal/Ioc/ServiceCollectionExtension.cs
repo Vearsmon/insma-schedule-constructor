@@ -73,8 +73,8 @@ public static class ServiceCollectionExtension
             .AddScoped<IPredicateBuilder<DbLesson, LessonRegistryInternalSearchModel>, LessonRegistryPredicateBuilder>()
 
             .AddScoped<ILessonPolicyViolationRepository, LessonPolicyViolationRepository>()
-            .AddScoped<IRepositoryMapper<DbLessonPolicyViolation, LessonPolicyViolation>, LessonPolicyViolationMapper>()
-            .AddScoped<IPredicateBuilder<DbLessonPolicyViolation, LessonPolicyViolationSearchModel>, LessonPolicyViolationPredicateBuilder>()
+            .AddScoped<IRepositoryMapper<DbPolicyViolation, LessonPolicyViolation>, LessonPolicyViolationMapper>()
+            .AddScoped<IPredicateBuilder<DbPolicyViolation, LessonPolicyViolationSearchModel>, LessonPolicyViolationPredicateBuilder>()
 
             .AddScoped<IRoomRepository, RoomRepository>()
             .AddScoped<IRepositoryMapper<DbRoom, Room>, RoomMapper>()

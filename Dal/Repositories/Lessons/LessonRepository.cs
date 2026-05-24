@@ -38,7 +38,7 @@ public class LessonRepository(
             return id.Value;
         }
 
-        await Context.Set<DbLessonPolicyViolation>().Where(x => x.LessonId == previousLesson.Id).ExecuteDeleteAsync(cancellationToken);
+        await Context.Set<DbPolicyViolation>().Where(x => x.LessonId == previousLesson.Id).ExecuteDeleteAsync(cancellationToken);
 
         var removedStudentGroups = previousLesson.StudentGroups
             .Where(x => model.StudentGroups.All(y => y.Id != x.Id))
@@ -67,7 +67,7 @@ public class LessonRepository(
             .Where(x => x.Id.HasValue).Select(x => x.Id!.Value).ToArray(), cancellationToken))
             .ToDictionary(x => x.Id!.Value);
 
-        await Context.Set<DbLessonPolicyViolation>().Where(x => previousLessonsById.Keys.Contains(x.LessonId)).ExecuteDeleteAsync(cancellationToken);
+        await Context.Set<DbPolicyViolation>().Where(x => previousLessonsById.Keys.Contains(x.LessonId)).ExecuteDeleteAsync(cancellationToken);
 
         var saveExpressions = new List<string>();
         var deleteExpressions = new List<string>();
@@ -118,19 +118,21 @@ public class LessonRepository(
     }
 
     protected override IQueryable<DbLesson> Query() => Context.Set<DbLesson>()
-        .Include(x => x.AcademicDiscipline)
         .Include(x => x.StudentGroups)
         .Include(x => x.Teachers)
         .Include(x => x.Rooms)
         .Include(x => x.DayOfWeekTimeIntervalAssignment)
         .Include(x => x.LessonBatchInfo)
-        .ThenInclude(x => x!.StudentGroups)
+        .ThenInclude(x => x.AcademicDiscipline)
+        .ThenInclude(x => x.Schedule)
         .Include(x => x.LessonBatchInfo)
-        .ThenInclude(x => x!.Teachers)
+        .ThenInclude(x => x.StudentGroups)
         .Include(x => x.LessonBatchInfo)
-        .ThenInclude(x => x!.Rooms)
+        .ThenInclude(x => x.Teachers)
         .Include(x => x.LessonBatchInfo)
-        .ThenInclude(x => x!.DayOfWeekTimeIntervals)
+        .ThenInclude(x => x.Rooms)
+        .Include(x => x.LessonBatchInfo)
+        .ThenInclude(x => x.DayOfWeekTimeIntervals)
         .Include(x => x.Violations);
 
     private string? BuildSaveReferencesExpression(Lesson model)

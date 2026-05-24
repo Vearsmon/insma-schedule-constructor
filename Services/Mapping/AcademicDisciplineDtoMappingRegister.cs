@@ -3,6 +3,7 @@ using Domain.Dto.SaveDto;
 using Domain.Dto.ShortDto;
 using Domain.Dto.ViewDto;
 using Domain.Models;
+using Domain.Models.Enums;
 using Domain.Models.RegistryItemModels;
 using Riok.Mapperly.Abstractions;
 
@@ -16,11 +17,11 @@ public static partial class AcademicDisciplineDtoMappingRegister
     {
         var viewDto = AutoMapModelToViewDto(model);
         if (model == null) return viewDto;
-        viewDto!.LectureLessonBatchInfos = model.LectureLessonBatchInfos.Select(LessonBatchInfoDtoMappingRegister.MapModelToDto).ToArray()!;
-        viewDto.LabLessonBatchInfos = model.LabLessonBatchInfos.Select(LessonBatchInfoDtoMappingRegister.MapModelToDto).ToArray()!;
-        viewDto.PracticeLessonBatchInfos = model.PracticeLessonBatchInfos.Select(LessonBatchInfoDtoMappingRegister.MapModelToDto).ToArray()!;
-        viewDto.ExamLessonBatchInfos = model.ExamLessonBatchInfos.Select(LessonBatchInfoDtoMappingRegister.MapModelToDto).ToArray()!;
-        viewDto.TestLessonBatchInfos = model.TestLessonBatchInfos.Select(LessonBatchInfoDtoMappingRegister.MapModelToDto).ToArray()!;
+        viewDto!.LectureLessonBatchInfos = model.LessonBatchInfos.Where(x => x.Type == AcademicDisciplineType.Lecture).Select(LessonBatchInfoDtoMappingRegister.MapModelToDto).ToArray()!;
+        viewDto.LabLessonBatchInfos = model.LessonBatchInfos.Where(x => x.Type == AcademicDisciplineType.Lab).Select(LessonBatchInfoDtoMappingRegister.MapModelToDto).ToArray()!;
+        viewDto.PracticeLessonBatchInfos = model.LessonBatchInfos.Where(x => x.Type == AcademicDisciplineType.Practice).Select(LessonBatchInfoDtoMappingRegister.MapModelToDto).ToArray()!;
+        viewDto.ExamLessonBatchInfos = model.LessonBatchInfos.Where(x => x.Type == AcademicDisciplineType.Exam).Select(LessonBatchInfoDtoMappingRegister.MapModelToDto).ToArray()!;
+        viewDto.TestLessonBatchInfos = model.LessonBatchInfos.Where(x => x.Type == AcademicDisciplineType.Test).Select(LessonBatchInfoDtoMappingRegister.MapModelToDto).ToArray()!;
         return viewDto;
     }
 
@@ -29,11 +30,37 @@ public static partial class AcademicDisciplineDtoMappingRegister
     {
         var model = AutoMapSaveDtoToModel(dto);
         if (dto == null) return model;
-        model!.LectureLessonBatchInfos = dto.LectureLessonBatchInfos.Select(LessonBatchInfoDtoMappingRegister.MapSaveDtoToModel).ToArray()!;
-        model.LabLessonBatchInfos = dto.LabLessonBatchInfos.Select(LessonBatchInfoDtoMappingRegister.MapSaveDtoToModel).ToArray()!;
-        model.PracticeLessonBatchInfos = dto.PracticeLessonBatchInfos.Select(LessonBatchInfoDtoMappingRegister.MapSaveDtoToModel).ToArray()!;
-        model.ExamLessonBatchInfos = dto.ExamLessonBatchInfos.Select(LessonBatchInfoDtoMappingRegister.MapSaveDtoToModel).ToArray()!;
-        model.TestLessonBatchInfos = dto.TestLessonBatchInfos.Select(LessonBatchInfoDtoMappingRegister.MapSaveDtoToModel).ToArray()!;
+        model!.LessonBatchInfos = dto.LectureLessonBatchInfos.Select(x =>
+            {
+                var y = LessonBatchInfoDtoMappingRegister.MapSaveDtoToModel(x)!;
+                y.Type = AcademicDisciplineType.Lecture;
+                return y;
+            })
+            .Concat(dto.LabLessonBatchInfos.Select(x =>
+            {
+                var y = LessonBatchInfoDtoMappingRegister.MapSaveDtoToModel(x)!;
+                y.Type = AcademicDisciplineType.Lab;
+                return y;
+            }))
+            .Concat(dto.PracticeLessonBatchInfos.Select(x =>
+            {
+                var y = LessonBatchInfoDtoMappingRegister.MapSaveDtoToModel(x)!;
+                y.Type = AcademicDisciplineType.Practice;
+                return y;
+            }))
+            .Concat(dto.ExamLessonBatchInfos.Select(x =>
+            {
+                var y = LessonBatchInfoDtoMappingRegister.MapSaveDtoToModel(x)!;
+                y.Type = AcademicDisciplineType.Exam;
+                return y;
+            }))
+            .Concat(dto.TestLessonBatchInfos.Select(x =>
+            {
+                var y = LessonBatchInfoDtoMappingRegister.MapSaveDtoToModel(x)!;
+                y.Type = AcademicDisciplineType.Test;
+                return y;
+            }))
+            .ToArray();
         return model;
     }
 
@@ -42,11 +69,37 @@ public static partial class AcademicDisciplineDtoMappingRegister
     {
         AutoUpdateModelWithSaveDto(dto, model);
         if (dto == null) return;
-        model!.LectureLessonBatchInfos = dto.LectureLessonBatchInfos.Select(LessonBatchInfoDtoMappingRegister.MapSaveDtoToModel).ToArray()!;
-        model.LabLessonBatchInfos = dto.LabLessonBatchInfos.Select(LessonBatchInfoDtoMappingRegister.MapSaveDtoToModel).ToArray()!;
-        model.PracticeLessonBatchInfos = dto.PracticeLessonBatchInfos.Select(LessonBatchInfoDtoMappingRegister.MapSaveDtoToModel).ToArray()!;
-        model.ExamLessonBatchInfos = dto.ExamLessonBatchInfos.Select(LessonBatchInfoDtoMappingRegister.MapSaveDtoToModel).ToArray()!;
-        model.TestLessonBatchInfos = dto.TestLessonBatchInfos.Select(LessonBatchInfoDtoMappingRegister.MapSaveDtoToModel).ToArray()!;
+        model!.LessonBatchInfos = dto.LectureLessonBatchInfos.Select(x =>
+            {
+                var y = LessonBatchInfoDtoMappingRegister.MapSaveDtoToModel(x)!;
+                y.Type = AcademicDisciplineType.Lecture;
+                return y;
+            })
+            .Concat(dto.LabLessonBatchInfos.Select(x =>
+            {
+                var y = LessonBatchInfoDtoMappingRegister.MapSaveDtoToModel(x)!;
+                y.Type = AcademicDisciplineType.Lab;
+                return y;
+            }))
+            .Concat(dto.PracticeLessonBatchInfos.Select(x =>
+            {
+                var y = LessonBatchInfoDtoMappingRegister.MapSaveDtoToModel(x)!;
+                y.Type = AcademicDisciplineType.Practice;
+                return y;
+            }))
+            .Concat(dto.ExamLessonBatchInfos.Select(x =>
+            {
+                var y = LessonBatchInfoDtoMappingRegister.MapSaveDtoToModel(x)!;
+                y.Type = AcademicDisciplineType.Exam;
+                return y;
+            }))
+            .Concat(dto.TestLessonBatchInfos.Select(x =>
+            {
+                var y = LessonBatchInfoDtoMappingRegister.MapSaveDtoToModel(x)!;
+                y.Type = AcademicDisciplineType.Test;
+                return y;
+            }))
+            .ToArray();
     }
 
     [UserMapping(Default = true)]
@@ -68,21 +121,13 @@ public static partial class AcademicDisciplineDtoMappingRegister
     [MapperIgnoreSource(nameof(AcademicDiscipline.SemesterNumber))]
     [MapperIgnoreSource(nameof(AcademicDiscipline.AcademicDisciplineTargetType))]
     [MapperIgnoreSource(nameof(AcademicDiscipline.AllowedLessonTypes))]
-    [MapperIgnoreSource(nameof(AcademicDiscipline.LectureLessonBatchInfos))]
-    [MapperIgnoreSource(nameof(AcademicDiscipline.PracticeLessonBatchInfos))]
-    [MapperIgnoreSource(nameof(AcademicDiscipline.LabLessonBatchInfos))]
-    [MapperIgnoreSource(nameof(AcademicDiscipline.ExamLessonBatchInfos))]
-    [MapperIgnoreSource(nameof(AcademicDiscipline.TestLessonBatchInfos))]
+    [MapperIgnoreSource(nameof(AcademicDiscipline.LessonBatchInfos))]
     [MapperIgnoreSource(nameof(AcademicDiscipline.Comment))]
     public static partial AcademicDisciplineShortDto? MapModelToShortDto(AcademicDiscipline? model);
 
     [MapperIgnoreSource(nameof(AcademicDiscipline.ScheduleId))]
     [MapperIgnoreSource(nameof(AcademicDiscipline.Schedule))]
-    [MapperIgnoreSource(nameof(AcademicDiscipline.LectureLessonBatchInfos))]
-    [MapperIgnoreSource(nameof(AcademicDiscipline.LabLessonBatchInfos))]
-    [MapperIgnoreSource(nameof(AcademicDiscipline.PracticeLessonBatchInfos))]
-    [MapperIgnoreSource(nameof(AcademicDiscipline.ExamLessonBatchInfos))]
-    [MapperIgnoreSource(nameof(AcademicDiscipline.TestLessonBatchInfos))]
+    [MapperIgnoreSource(nameof(AcademicDiscipline.LessonBatchInfos))]
     [MapperIgnoreTarget(nameof(AcademicDisciplineViewDto.LectureLessonBatchInfos))]
     [MapperIgnoreTarget(nameof(AcademicDisciplineViewDto.LabLessonBatchInfos))]
     [MapperIgnoreTarget(nameof(AcademicDisciplineViewDto.PracticeLessonBatchInfos))]
@@ -96,11 +141,7 @@ public static partial class AcademicDisciplineDtoMappingRegister
     [MapperIgnoreSource(nameof(AcademicDisciplineSaveDto.ExamLessonBatchInfos))]
     [MapperIgnoreSource(nameof(AcademicDisciplineSaveDto.TestLessonBatchInfos))]
     [MapperIgnoreTarget(nameof(AcademicDiscipline.Schedule))]
-    [MapperIgnoreTarget(nameof(AcademicDiscipline.LectureLessonBatchInfos))]
-    [MapperIgnoreTarget(nameof(AcademicDiscipline.LabLessonBatchInfos))]
-    [MapperIgnoreTarget(nameof(AcademicDiscipline.PracticeLessonBatchInfos))]
-    [MapperIgnoreTarget(nameof(AcademicDiscipline.ExamLessonBatchInfos))]
-    [MapperIgnoreTarget(nameof(AcademicDiscipline.TestLessonBatchInfos))]
+    [MapperIgnoreTarget(nameof(AcademicDiscipline.LessonBatchInfos))]
     private static partial AcademicDiscipline? AutoMapSaveDtoToModel(AcademicDisciplineSaveDto? dto);
 
     [MapperIgnoreSource(nameof(AcademicDisciplineSaveDto.LectureLessonBatchInfos))]
@@ -109,11 +150,7 @@ public static partial class AcademicDisciplineDtoMappingRegister
     [MapperIgnoreSource(nameof(AcademicDisciplineSaveDto.ExamLessonBatchInfos))]
     [MapperIgnoreSource(nameof(AcademicDisciplineSaveDto.TestLessonBatchInfos))]
     [MapperIgnoreTarget(nameof(AcademicDiscipline.Schedule))]
-    [MapperIgnoreTarget(nameof(AcademicDiscipline.LectureLessonBatchInfos))]
-    [MapperIgnoreTarget(nameof(AcademicDiscipline.LabLessonBatchInfos))]
-    [MapperIgnoreTarget(nameof(AcademicDiscipline.PracticeLessonBatchInfos))]
-    [MapperIgnoreTarget(nameof(AcademicDiscipline.ExamLessonBatchInfos))]
-    [MapperIgnoreTarget(nameof(AcademicDiscipline.TestLessonBatchInfos))]
+    [MapperIgnoreTarget(nameof(AcademicDiscipline.LessonBatchInfos))]
     private static partial void AutoUpdateModelWithSaveDto(AcademicDisciplineSaveDto? dto, AcademicDiscipline? model);
 
     [MapperIgnoreSource(nameof(AcademicDisciplineRegistryItem.LectureLessonBatchInfos))]

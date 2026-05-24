@@ -1,6 +1,7 @@
 ﻿using AutoFixture;
 using Dal.RegistryRepositories.AcademicDiscipline;
 using Dal.Repositories.AcademicDisciplines;
+using Dal.Repositories.DayOfWeekTimeIntervalAssignments;
 using Dal.Repositories.LessonBatchInfo;
 using Dal.Repositories.Lessons;
 using Dal.Repositories.Schedules;
@@ -23,6 +24,7 @@ public class AcademicDisciplineServiceTests
     private readonly Mock<ILessonService> _lessonServiceMock = new();
     private readonly Mock<ILessonRepository> _lessonRepositoryMock = new();
     private readonly Mock<ILessonBatchInfoRepository> _lessonBatchInfoRepositoryMock = new();
+    private readonly Mock<IDayOfWeekTimeIntervalAssignmentRepository> _dayOfWeekTimeIntervalAssignmentRepositoryMock = new();
 
     private AcademicDisciplineService CreateService() => new(
         _academicDisciplineRepositoryMock.Object,
@@ -30,7 +32,8 @@ public class AcademicDisciplineServiceTests
         _scheduleRepositoryMock.Object,
         _lessonServiceMock.Object,
         _lessonRepositoryMock.Object,
-        _lessonBatchInfoRepositoryMock.Object
+        _lessonBatchInfoRepositoryMock.Object,
+        _dayOfWeekTimeIntervalAssignmentRepositoryMock.Object
     );
 
     [Fact]

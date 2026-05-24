@@ -23,12 +23,11 @@ public static partial class LessonMappingRegister
                 TimeTo = entity.TimeTo!.Value,
             },
         } : null;
-        model.AcademicDiscipline = AcademicDisciplineMappingRegister.MapEntityToModel(entity.AcademicDiscipline);
         model.StudentGroups = entity.StudentGroups.Select(StudentGroupMappingRegister.MapEntityToModel).ToArray()!;
         model.Teachers = entity.Teachers.Select(TeacherMappingRegister.MapEntityToModel).ToArray()!;
         model.Rooms = entity.Rooms.Select(RoomMappingRegister.MapEntityToModel).ToArray()!;
         model.DayOfWeekTimeIntervalAssignment = DayOfWeekTimeIntervalAssignmentMappingRegister.MapEntityToModel(entity.DayOfWeekTimeIntervalAssignment)!;
-        model.LessonBatchInfo = LessonBatchInfoMappingRegister.MapEntityToModel(entity.LessonBatchInfo);
+        model.LessonBatchInfo = LessonBatchInfoMappingRegister.MapEntityToModel(entity.LessonBatchInfo)!;
         model.Violations = entity.Violations.Select(LessonPolicyViolationMappingRegister.MapEntityToModel).ToArray()!;
         return model;
     }
@@ -59,7 +58,9 @@ public static partial class LessonMappingRegister
     {
         var item = AutoMapEntityToRegistryItem(entity);
         if (entity == null) return item;
-        item!.DateWithTimeInterval = entity.Date.HasValue ? new DateWithTimeInterval
+        item!.AcademicDisciplineId = entity.LessonBatchInfo.AcademicDisciplineId;
+        item.AcademicDisciplineType = entity.LessonBatchInfo.Type;
+        item.DateWithTimeInterval = entity.Date.HasValue ? new DateWithTimeInterval
         {
             Date = entity.Date!.Value,
             TimeInterval = new TimeInterval
@@ -75,8 +76,6 @@ public static partial class LessonMappingRegister
         return item;
     }
 
-    [MapperIgnoreSource(nameof(DbLesson.Schedule))]
-    [MapperIgnoreSource(nameof(DbLesson.AcademicDiscipline))]
     [MapperIgnoreSource(nameof(DbLesson.Date))]
     [MapperIgnoreSource(nameof(DbLesson.TimeFrom))]
     [MapperIgnoreSource(nameof(DbLesson.TimeTo))]
@@ -86,8 +85,6 @@ public static partial class LessonMappingRegister
     [MapperIgnoreSource(nameof(DbLesson.DayOfWeekTimeIntervalAssignment))]
     [MapperIgnoreSource(nameof(DbLesson.LessonBatchInfo))]
     [MapperIgnoreSource(nameof(DbLesson.Violations))]
-    [MapperIgnoreTarget(nameof(Lesson.Schedule))]
-    [MapperIgnoreTarget(nameof(Lesson.AcademicDiscipline))]
     [MapperIgnoreTarget(nameof(Lesson.DateWithTimeInterval))]
     [MapperIgnoreTarget(nameof(Lesson.StudentGroups))]
     [MapperIgnoreTarget(nameof(Lesson.Teachers))]
@@ -97,8 +94,6 @@ public static partial class LessonMappingRegister
     [MapperIgnoreTarget(nameof(Lesson.Violations))]
     private static partial Lesson? AutoMapEntityToModel(DbLesson? entity);
 
-    [MapProperty(nameof(Lesson.Schedule), nameof(DbLesson.Schedule), Use = nameof(@ScheduleMappingRegister.MapModelToEntity))]
-    [MapProperty(nameof(Lesson.AcademicDiscipline), nameof(DbLesson.AcademicDiscipline), Use = nameof(@AcademicDisciplineMappingRegister.MapModelToEntity))]
     [MapperIgnoreSource(nameof(Lesson.DateWithTimeInterval))]
     [MapperIgnoreSource(nameof(Lesson.StudentGroups))]
     [MapperIgnoreSource(nameof(Lesson.Teachers))]
@@ -117,8 +112,6 @@ public static partial class LessonMappingRegister
     [MapperIgnoreTarget(nameof(DbLesson.Violations))]
     private static partial DbLesson? AutoMapModelToEntity(Lesson? model);
 
-    [MapperIgnoreSource(nameof(Lesson.Schedule))]
-    [MapperIgnoreSource(nameof(Lesson.AcademicDiscipline))]
     [MapperIgnoreSource(nameof(Lesson.DateWithTimeInterval))]
     [MapperIgnoreSource(nameof(Lesson.StudentGroups))]
     [MapperIgnoreSource(nameof(Lesson.Teachers))]
@@ -126,8 +119,6 @@ public static partial class LessonMappingRegister
     [MapperIgnoreSource(nameof(Lesson.DayOfWeekTimeIntervalAssignment))]
     [MapperIgnoreSource(nameof(Lesson.LessonBatchInfo))]
     [MapperIgnoreSource(nameof(Lesson.Violations))]
-    [MapperIgnoreTarget(nameof(DbLesson.Schedule))]
-    [MapperIgnoreTarget(nameof(DbLesson.AcademicDiscipline))]
     [MapperIgnoreTarget(nameof(DbLesson.Date))]
     [MapperIgnoreTarget(nameof(DbLesson.TimeFrom))]
     [MapperIgnoreTarget(nameof(DbLesson.TimeTo))]
@@ -139,9 +130,6 @@ public static partial class LessonMappingRegister
     [MapperIgnoreTarget(nameof(DbLesson.Violations))]
     private static partial void AutoUpdateEntityWithModel(Lesson? model, DbLesson? entity);
 
-    [MapperIgnoreSource(nameof(DbLesson.ScheduleId))]
-    [MapperIgnoreSource(nameof(DbLesson.Schedule))]
-    [MapperIgnoreSource(nameof(DbLesson.AcademicDiscipline))]
     [MapperIgnoreSource(nameof(DbLesson.Date))]
     [MapperIgnoreSource(nameof(DbLesson.TimeFrom))]
     [MapperIgnoreSource(nameof(DbLesson.TimeTo))]
@@ -154,6 +142,8 @@ public static partial class LessonMappingRegister
     [MapperIgnoreSource(nameof(DbLesson.LessonBatchInfoId))]
     [MapperIgnoreSource(nameof(DbLesson.LessonBatchInfo))]
     [MapperIgnoreSource(nameof(DbLesson.Violations))]
+    [MapperIgnoreTarget(nameof(LessonRegistryItem.AcademicDisciplineId))]
+    [MapperIgnoreTarget(nameof(LessonRegistryItem.AcademicDisciplineType))]
     [MapperIgnoreTarget(nameof(LessonRegistryItem.DateWithTimeInterval))]
     [MapperIgnoreTarget(nameof(LessonRegistryItem.StudentGroupIds))]
     [MapperIgnoreTarget(nameof(LessonRegistryItem.TeacherIds))]

@@ -16,12 +16,12 @@ public static partial class LessonDtoMappingRegister
     public static LessonViewDto? MapModelToViewDto(Lesson? model)
     {
         var dto = AutoMapModelToViewDto(model);
-        if (model != null && dto != null)
-        {
-            dto.StudentGroupIds = model.StudentGroups.Select(x => x.Id!.Value).ToArray();
-            dto.TeacherIds = model.Teachers.Select(x => x.Id!.Value).ToArray();
-            dto.RoomIds = model.Rooms.Select(x => x.Id!.Value).ToArray();
-        }
+        if (model == null) return dto;
+        dto!.AcademicDisciplineId = model.LessonBatchInfo.AcademicDisciplineId;
+        dto.AcademicDisciplineType = model.LessonBatchInfo.Type;
+        dto.StudentGroupIds = model.StudentGroups.Select(x => x.Id!.Value).ToArray();
+        dto.TeacherIds = model.Teachers.Select(x => x.Id!.Value).ToArray();
+        dto.RoomIds = model.Rooms.Select(x => x.Id!.Value).ToArray();
         return dto;
     }
 
@@ -41,7 +41,10 @@ public static partial class LessonDtoMappingRegister
     {
         var shortDto = AutoMapModelToShortDto(model);
         if (model == null) return shortDto;
-        shortDto!.StudentGroups = model.StudentGroups.Select(StudentGroupDtoMappingRegister.MapModelToShortDto).ToArray()!;
+        shortDto!.AcademicDisciplineId = model.LessonBatchInfo.AcademicDisciplineId;
+        shortDto.AcademicDisciplineType = model.LessonBatchInfo.Type;
+        shortDto.AcademicDisciplineName = model.LessonBatchInfo.AcademicDiscipline.Name;
+        shortDto.StudentGroups = model.StudentGroups.Select(StudentGroupDtoMappingRegister.MapModelToShortDto).ToArray()!;
         shortDto.Teachers = model.Teachers.Select(TeacherDtoMappingRegister.MapModelToShortDto).ToArray()!;
         shortDto.Rooms = model.Rooms.Select(RoomDtoMappingRegister.MapModelToShortDto).ToArray()!;
         return shortDto;
@@ -59,9 +62,6 @@ public static partial class LessonDtoMappingRegister
 
     public static partial LessonRegistryItemDto? MapItemToItemDto(LessonRegistryItem? item);
 
-    [MapperIgnoreSource(nameof(Lesson.ScheduleId))]
-    [MapperIgnoreSource(nameof(Lesson.Schedule))]
-    [MapperIgnoreSource(nameof(Lesson.AcademicDiscipline))]
     [MapperIgnoreSource(nameof(Lesson.StudentGroups))]
     [MapperIgnoreSource(nameof(Lesson.Teachers))]
     [MapperIgnoreSource(nameof(Lesson.Rooms))]
@@ -69,23 +69,21 @@ public static partial class LessonDtoMappingRegister
     [MapperIgnoreSource(nameof(Lesson.DetachedFromBatch))]
     [MapperIgnoreSource(nameof(Lesson.LessonBatchInfoId))]
     [MapperIgnoreSource(nameof(Lesson.LessonBatchInfo))]
+    [MapperIgnoreTarget(nameof(LessonViewDto.AcademicDisciplineId))]
+    [MapperIgnoreTarget(nameof(LessonViewDto.AcademicDisciplineType))]
     [MapperIgnoreTarget(nameof(LessonViewDto.StudentGroupIds))]
     [MapperIgnoreTarget(nameof(LessonViewDto.TeacherIds))]
     [MapperIgnoreTarget(nameof(LessonViewDto.RoomIds))]
     private static partial LessonViewDto? AutoMapModelToViewDto(Lesson? model);
 
-    [MapperIgnoreSource(nameof(LessonSaveDto.UpdateBatch))]
     [MapperIgnoreSource(nameof(LessonSaveDto.StudentGroupIds))]
     [MapperIgnoreSource(nameof(LessonSaveDto.TeacherIds))]
     [MapperIgnoreSource(nameof(LessonSaveDto.RoomIds))]
-    [MapperIgnoreTarget(nameof(Lesson.ScheduleId))]
-    [MapperIgnoreTarget(nameof(Lesson.Schedule))]
-    [MapperIgnoreTarget(nameof(Lesson.AcademicDisciplineId))]
-    [MapperIgnoreTarget(nameof(Lesson.AcademicDiscipline))]
-    [MapperIgnoreTarget(nameof(Lesson.AcademicDisciplineType))]
+    [MapperIgnoreSource(nameof(LessonSaveDto.UpdateBatch))]
     [MapperIgnoreTarget(nameof(Lesson.StudentGroups))]
     [MapperIgnoreTarget(nameof(Lesson.Teachers))]
     [MapperIgnoreTarget(nameof(Lesson.Rooms))]
+    [MapperIgnoreTarget(nameof(Lesson.DayOfWeekTimeIntervalAssignmentId))]
     [MapperIgnoreTarget(nameof(Lesson.DayOfWeekTimeIntervalAssignment))]
     [MapperIgnoreTarget(nameof(Lesson.LessonBatchInfoId))]
     [MapperIgnoreTarget(nameof(Lesson.LessonBatchInfo))]
@@ -93,8 +91,6 @@ public static partial class LessonDtoMappingRegister
     [MapperIgnoreTarget(nameof(Lesson.Violations))]
     private static partial Lesson? AutoMapSaveDtoToModel(LessonSaveDto? dto);
 
-    [MapperIgnoreSource(nameof(Lesson.ScheduleId))]
-    [MapperIgnoreSource(nameof(Lesson.Schedule))]
     [MapperIgnoreSource(nameof(Lesson.StudentGroups))]
     [MapperIgnoreSource(nameof(Lesson.Teachers))]
     [MapperIgnoreSource(nameof(Lesson.Rooms))]
@@ -103,6 +99,9 @@ public static partial class LessonDtoMappingRegister
     [MapperIgnoreSource(nameof(Lesson.LessonBatchInfoId))]
     [MapperIgnoreSource(nameof(Lesson.LessonBatchInfo))]
     [MapperIgnoreSource(nameof(Lesson.DetachedFromBatch))]
+    [MapperIgnoreTarget(nameof(LessonShortDto.AcademicDisciplineId))]
+    [MapperIgnoreTarget(nameof(LessonShortDto.AcademicDisciplineType))]
+    [MapperIgnoreTarget(nameof(LessonShortDto.AcademicDisciplineName))]
     [MapperIgnoreTarget(nameof(LessonShortDto.StudentGroups))]
     [MapperIgnoreTarget(nameof(LessonShortDto.Teachers))]
     [MapperIgnoreTarget(nameof(LessonShortDto.Rooms))]
@@ -114,14 +113,10 @@ public static partial class LessonDtoMappingRegister
     [MapperIgnoreSource(nameof(LessonSaveDto.StudentGroupIds))]
     [MapperIgnoreSource(nameof(LessonSaveDto.TeacherIds))]
     [MapperIgnoreSource(nameof(LessonSaveDto.RoomIds))]
-    [MapperIgnoreTarget(nameof(Lesson.ScheduleId))]
-    [MapperIgnoreTarget(nameof(Lesson.Schedule))]
-    [MapperIgnoreTarget(nameof(Lesson.AcademicDisciplineId))]
-    [MapperIgnoreTarget(nameof(Lesson.AcademicDiscipline))]
-    [MapperIgnoreTarget(nameof(Lesson.AcademicDisciplineType))]
     [MapperIgnoreTarget(nameof(Lesson.StudentGroups))]
     [MapperIgnoreTarget(nameof(Lesson.Teachers))]
     [MapperIgnoreTarget(nameof(Lesson.Rooms))]
+    [MapperIgnoreTarget(nameof(Lesson.DayOfWeekTimeIntervalAssignmentId))]
     [MapperIgnoreTarget(nameof(Lesson.DayOfWeekTimeIntervalAssignment))]
     [MapperIgnoreTarget(nameof(Lesson.LessonBatchInfoId))]
     [MapperIgnoreTarget(nameof(Lesson.LessonBatchInfo))]

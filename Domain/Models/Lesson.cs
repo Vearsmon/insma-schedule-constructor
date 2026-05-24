@@ -11,31 +11,6 @@ public class Lesson : IModelWithId
     public Guid? Id { get; set; }
 
     /// <summary>
-    /// Проект расписания
-    /// </summary>
-    public Guid ScheduleId { get; set; }
-
-    /// <summary>
-    /// Проект расписания
-    /// </summary>
-    public Schedule Schedule { get; set; } = null!;
-
-    /// <summary>
-    /// Дисциплина в учебном плане
-    /// </summary>
-    public Guid? AcademicDisciplineId { get; set; }
-
-    /// <summary>
-    /// Дисциплина в учебном плане
-    /// </summary>
-    public AcademicDiscipline? AcademicDiscipline { get; set; }
-
-    /// <summary>
-    /// Вид занятия, проводимого по дисциплине в учебном плане
-    /// </summary>
-    public AcademicDisciplineType? AcademicDisciplineType { get; set; }
-
-    /// <summary>
     /// Академические группы
     /// </summary>
     public StudentGroup[] StudentGroups { get; set; } = [];
@@ -88,12 +63,12 @@ public class Lesson : IModelWithId
     /// <summary>
     /// Сведения о созданных занятиях, к которым относится данное
     /// </summary>
-    public Guid? LessonBatchInfoId { get; set; }
+    public Guid LessonBatchInfoId { get; set; }
 
     /// <summary>
     /// Сведения о созданных занятиях, к которым относится данное
     /// </summary>
-    public LessonBatchInfo? LessonBatchInfo { get; set; }
+    public LessonBatchInfo LessonBatchInfo { get; set; } = null!;
 
     /// <summary>
     /// Сообщения валидации

@@ -7,10 +7,10 @@ namespace Dal.Repositories.LessonPolicyViolations;
 
 public class LessonPolicyViolationRepository(
     InsmaScheduleContext context,
-    IRepositoryMapper<DbLessonPolicyViolation, LessonPolicyViolation> mapper,
+    IRepositoryMapper<DbPolicyViolation, LessonPolicyViolation> mapper,
     ITransactionalService transactionalService,
-    IPredicateBuilder<DbLessonPolicyViolation, LessonPolicyViolationSearchModel> predicateBuilder)
-    : Repository<InsmaScheduleContext, DbLessonPolicyViolation, LessonPolicyViolation>(context, mapper, transactionalService), ILessonPolicyViolationRepository
+    IPredicateBuilder<DbPolicyViolation, LessonPolicyViolationSearchModel> predicateBuilder)
+    : Repository<InsmaScheduleContext, DbPolicyViolation, LessonPolicyViolation>(context, mapper, transactionalService), ILessonPolicyViolationRepository
 {
     public async Task<LessonPolicyViolation[]> SearchAsync(LessonPolicyViolationSearchModel searchModel)
     {

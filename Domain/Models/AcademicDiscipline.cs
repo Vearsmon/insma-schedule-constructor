@@ -46,49 +46,15 @@ public class AcademicDiscipline : IModelWithId
     public AcademicDisciplineType[] AllowedLessonTypes { get; set; } = [];
 
     /// <summary>
-    /// Сведения о созданных через академическую дисциплину лекционных занятиях
+    /// Сведения о созданных через академическую дисциплину наборах занятий
     /// </summary>
-    public LessonBatchInfo[] LectureLessonBatchInfos { get; set; } = [];
-
-    /// <summary>
-    /// Сведения о созданных через академическую дисциплину практических занятиях
-    /// </summary>
-    public LessonBatchInfo[] PracticeLessonBatchInfos { get; set; } = [];
-
-    /// <summary>
-    /// Сведения о созданных через академическую дисциплину лабораторных занятиях
-    /// </summary>
-    public LessonBatchInfo[] LabLessonBatchInfos { get; set; } = [];
-
-    /// <summary>
-    /// Сведения о созданных через академическую дисциплину экзаменах
-    /// </summary>
-    public LessonBatchInfo[] ExamLessonBatchInfos { get; set; } = [];
-
-    /// <summary>
-    /// Сведения о созданных через академическую дисциплину зачетах
-    /// </summary>
-    public LessonBatchInfo[] TestLessonBatchInfos { get; set; } = [];
+    public LessonBatchInfo[] LessonBatchInfos { get; set; } = [];
 
     /// <summary>
     /// Комментарий
     /// </summary>
     public string? Comment { get; set; }
 
-    public LessonBatchInfo[] GetBatchInfosByType(AcademicDisciplineType type) => type switch
-    {
-        AcademicDisciplineType.Lecture => LectureLessonBatchInfos,
-        AcademicDisciplineType.Practice => PracticeLessonBatchInfos,
-        AcademicDisciplineType.Lab => LabLessonBatchInfos,
-        AcademicDisciplineType.Exam => ExamLessonBatchInfos,
-        AcademicDisciplineType.Test => TestLessonBatchInfos,
-        _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
-    };
-
-    public LessonBatchInfo[] GetAllBatchInfos() => LectureLessonBatchInfos
-        .Concat(PracticeLessonBatchInfos)
-        .Concat(LabLessonBatchInfos)
-        .Concat(ExamLessonBatchInfos)
-        .Concat(TestLessonBatchInfos)
-        .ToArray();
+    public LessonBatchInfo[] GetBatchInfosByType(AcademicDisciplineType type) =>
+        LessonBatchInfos.Where(x => x.Type == type).ToArray();
 }

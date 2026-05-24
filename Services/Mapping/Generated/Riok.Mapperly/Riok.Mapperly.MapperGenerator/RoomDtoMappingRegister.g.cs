@@ -17,6 +17,7 @@ namespace Services.Mapping
             }
             target.Name = model.Name;
             target.CampusId = model.CampusId;
+            target.CampusName = model.Campus.Name;
             target.RoomType = model.RoomType;
             target.Capacity = model.Capacity;
             target.RoomBoardType = model.RoomBoardType;
@@ -86,6 +87,7 @@ namespace Services.Mapping
             }
             target.Name = model.Name;
             target.CampusId = model.CampusId;
+            target.CampusName = model.Campus.Name;
             target.RoomType = model.RoomType;
             target.Capacity = model.Capacity;
             target.RoomBoardType = model.RoomBoardType;

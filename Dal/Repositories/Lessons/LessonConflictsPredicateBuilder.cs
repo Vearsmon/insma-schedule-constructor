@@ -16,7 +16,7 @@ public class LessonConflictsPredicateBuilder : IPredicateBuilder<DbLesson, Lesso
                                              || searchModel.RoomIds.Length > 0;
 
         return Predicate
-                .AndIf(searchModel.ScheduleId.HasValue, f => f.ScheduleId == searchModel.ScheduleId)
+                .AndIf(searchModel.ScheduleId.HasValue, f => f.LessonBatchInfo.AcademicDiscipline.ScheduleId == searchModel.ScheduleId)
                 .AndIf(lessonComponentsOrBlockAllowed, PredicateBuilderExtensions.False<DbLesson>()
                     .OrIf(searchModel.StudentGroupIds.Length > 0, f => f.StudentGroups.Any(x => searchModel.StudentGroupIds.Contains(x.Id)))
                     .OrIf(searchModel.TeacherIds.Length > 0, f => f.Teachers.Any(x => searchModel.TeacherIds.Contains(x.Id)))

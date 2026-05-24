@@ -18,7 +18,7 @@ public class LessonPredicateBuilder : IPredicateBuilder<DbLesson, LessonSearchMo
                                   || searchModel.RoomIds.Length > 0;
 
             return Predicate
-                    .AndIf(searchModel.ScheduleId.HasValue, f => f.ScheduleId == searchModel.ScheduleId)
+                    .AndIf(searchModel.ScheduleId.HasValue, f => f.LessonBatchInfo.AcademicDiscipline.ScheduleId == searchModel.ScheduleId)
                     .AndIf(orBlocksAllowed, PredicateBuilderExtensions.False<DbLesson>()
                         .OrIf(searchModel.StudentGroupIds.Length > 0, f => f.StudentGroups.Any(x => searchModel.StudentGroupIds.Contains(x.Id)))
                         .OrIf(searchModel.TeacherIds.Length > 0, f => f.Teachers.Any(x => searchModel.TeacherIds.Contains(x.Id)))
@@ -29,12 +29,13 @@ public class LessonPredicateBuilder : IPredicateBuilder<DbLesson, LessonSearchMo
                     .AndIf(searchModel.TimeIntervals.Length > 0, BuildTimeIntervalExpression(searchModel))
                     .AndIf(searchModel.ExcludeAllowCombining, f => f.AllowCombining == false)
                     .AndIf(searchModel.ExcludeLessonIds.Length > 0, f => !searchModel.ExcludeLessonIds.Contains(f.Id))
+                    .AndIf(searchModel.ExcludeLessonBatchInfoId.HasValue, f => f.LessonBatchInfoId != searchModel.ExcludeLessonBatchInfoId)
                 ;
         }
         return Predicate
-                .AndIf(searchModel.ScheduleId.HasValue, f => f.ScheduleId == searchModel.ScheduleId)
-                .AndIf(searchModel.AcademicDisciplineId.HasValue, f => f.AcademicDisciplineId == searchModel.AcademicDisciplineId)
-                .AndIf(searchModel.Types.Length > 0, f => f.AcademicDisciplineType != null && searchModel.Types.Contains(f.AcademicDisciplineType!.Value))
+                .AndIf(searchModel.ScheduleId.HasValue, f => f.LessonBatchInfo.AcademicDiscipline.ScheduleId == searchModel.ScheduleId)
+                .AndIf(searchModel.AcademicDisciplineId.HasValue, f => f.LessonBatchInfo.AcademicDisciplineId == searchModel.AcademicDisciplineId)
+                .AndIf(searchModel.Types.Length > 0, f => searchModel.Types.Contains(f.LessonBatchInfo.Type))
                 .AndIf(searchModel.StudentGroupIds.Length > 0, f => f.StudentGroups.Any(x => searchModel.StudentGroupIds.Contains(x.Id)))
                 .AndIf(searchModel.TeacherIds.Length > 0, f => f.Teachers.Any(x => searchModel.TeacherIds.Contains(x.Id)))
                 .AndIf(searchModel.RoomIds.Length > 0, f => f.Rooms.Any(x => searchModel.RoomIds.Contains(x.Id)))
@@ -45,7 +46,7 @@ public class LessonPredicateBuilder : IPredicateBuilder<DbLesson, LessonSearchMo
                 .AndIf(searchModel.DayOfWeekTimeIntervals.Length > 0, BuildDayOfWeekTimeIntervalExpression(searchModel))
                 .AndIf(searchModel.ExcludeAllowCombining, f => f.AllowCombining == false)
                 .AndIf(searchModel.ExcludeLessonIds.Length > 0, f => !searchModel.ExcludeLessonIds.Contains(f.Id))
-                .AndIf(searchModel.LessonBatchInfoIds.Length > 0, f => f.LessonBatchInfoId.HasValue && searchModel.LessonBatchInfoIds.Contains(f.LessonBatchInfoId!.Value))
+                .AndIf(searchModel.LessonBatchInfoIds.Length > 0, f => searchModel.LessonBatchInfoIds.Contains(f.LessonBatchInfoId))
                 .AndIf(searchModel.HasNoTimeAssignment, f => f.Date == null && f.TimeFrom == null && f.TimeTo == null)
             ;
     }

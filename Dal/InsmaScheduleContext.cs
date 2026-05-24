@@ -23,7 +23,8 @@ public class InsmaScheduleContext(DbContextOptions options) : DbContextBase(opti
         builder.Entity<DbDayOfWeekTimeIntervalAssignment>(DayOfWeekTimeIntervalAssignmentConfigure);
         builder.Entity<DbLessonBatchInfo>(LessonBatchInfoConfigure);
         builder.Entity<DbLesson>(LessonConfigure);
-        builder.Entity<DbLessonPolicyViolation>(LessonPolicyViolationConfigure);
+        builder.Entity<DbPolicyViolation>(LessonPolicyViolationConfigure);
+        builder.Entity<DbPolicyViolationTarget>(LessonPolicyViolationTargetConfigure);
 
         base.OnModelCreating(builder);
     }
@@ -126,16 +127,6 @@ public class InsmaScheduleContext(DbContextOptions options) : DbContextBase(opti
 
     private void LessonConfigure(EntityTypeBuilder<DbLesson> builder)
     {
-        builder.HasOne(x => x.Schedule)
-            .WithMany()
-            .HasForeignKey(x => x.ScheduleId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        builder.HasOne(x => x.AcademicDiscipline)
-            .WithMany()
-            .HasForeignKey(x => x.AcademicDisciplineId)
-            .OnDelete(DeleteBehavior.Cascade);
-
         builder.HasMany(x => x.StudentGroups)
             .WithMany()
             .UsingEntity<Dictionary<string, object>>("lesson_student_group",
@@ -201,9 +192,6 @@ public class InsmaScheduleContext(DbContextOptions options) : DbContextBase(opti
             .HasForeignKey(x => x.DayOfWeekTimeIntervalAssignmentId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.Property(x => x.AcademicDisciplineType)
-            .HasConversion(new EnumToStringConverter<AcademicDisciplineType>());
-
         builder.Property(x => x.FlexibilityType)
             .HasConversion(new EnumToStringConverter<LessonFlexibilityType>());
 
@@ -218,46 +206,17 @@ public class InsmaScheduleContext(DbContextOptions options) : DbContextBase(opti
             .OnDelete(DeleteBehavior.Cascade);
     }
 
-    private void LessonPolicyViolationConfigure(EntityTypeBuilder<DbLessonPolicyViolation> builder)
+    private void LessonPolicyViolationConfigure(EntityTypeBuilder<DbPolicyViolation> builder)
     {
         builder.Property(x => x.ErrorType)
             .HasConversion(new EnumToStringConverter<LessonValidationErrorType>());
 
         builder.Property(x => x.Code)
             .HasConversion(new EnumToStringConverter<LessonPolicyViolationCode>());
+    }
 
-        builder.HasOne(x => x.AffectedByAcademicDiscipline)
-            .WithMany()
-            .HasForeignKey(x => x.AffectedByAcademicDisciplineId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        builder.Property(x => x.AffectedByAcademicDisciplineType)
-            .HasConversion(new EnumToStringConverter<AcademicDisciplineType>());
-
-        builder.HasOne(x => x.AffectedByLesson)
-            .WithMany()
-            .HasForeignKey(x => x.AffectedByLessonId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        builder.HasOne(x => x.AffectedByStudentGroup)
-            .WithMany()
-            .HasForeignKey(x => x.AffectedByStudentGroupId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        builder.HasOne(x => x.AffectedByTeacher)
-            .WithMany()
-            .HasForeignKey(x => x.AffectedByTeacherId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        builder.HasOne(x => x.AffectedByRoom)
-            .WithMany()
-            .HasForeignKey(x => x.AffectedByRoomId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        builder.HasOne(x => x.AffectedByTeacherPreference)
-            .WithMany()
-            .HasForeignKey(x => x.AffectedByTeacherPreferenceId)
-            .OnDelete(DeleteBehavior.Cascade);
+    private void LessonPolicyViolationTargetConfigure(EntityTypeBuilder<DbPolicyViolationTarget> builder)
+    {
     }
 
     private void RoomConfigure(EntityTypeBuilder<DbRoom> builder)

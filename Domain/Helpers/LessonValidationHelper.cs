@@ -1,4 +1,5 @@
 ﻿using Domain.Models;
+using Domain.Models.Common;
 using Domain.Models.Enums;
 
 namespace Domain.Helpers;
@@ -6,31 +7,52 @@ namespace Domain.Helpers;
 public static class LessonValidationHelper
 {
     public static void AddError(this List<LessonPolicyViolation> violations,
-        LessonValidationPayload payload, LessonPolicyViolationCode code, Guid? lessonId = null)
+        LessonPolicyViolationTargetIdentity[] targetIdentities,
+        LessonPolicyViolationCode code,
+        Guid? lessonId = null,
+        DayOfWeekTimeInterval? dayOfWeekTimeInterval = null)
     {
-        violations.AddErrorIf(true, payload, code, lessonId);
+        violations.AddErrorIf(true, targetIdentities, code, lessonId, dayOfWeekTimeInterval);
     }
 
     public static void AddErrorIf(this List<LessonPolicyViolation> violations,
-        bool condition, LessonValidationPayload payload, LessonPolicyViolationCode code, Guid? lessonId = null)
+        bool condition,
+        LessonPolicyViolationTargetIdentity[] targetIdentities,
+        LessonPolicyViolationCode code,
+        Guid? lessonId = null,
+        DayOfWeekTimeInterval? dayOfWeekTimeInterval = null)
     {
-        violations.AddValidationMessageIf(condition, payload, LessonValidationErrorType.Error, code, lessonId);
+        violations.AddValidationMessageIf(condition, targetIdentities, LessonValidationErrorType.Error, code, lessonId,
+            dayOfWeekTimeInterval);
     }
 
     public static void AddWarning(this List<LessonPolicyViolation> violations,
-        LessonValidationPayload payload, LessonPolicyViolationCode code, Guid? lessonId = null)
+        LessonPolicyViolationTargetIdentity[] targetIdentities,
+        LessonPolicyViolationCode code,
+        Guid? lessonId = null,
+        DayOfWeekTimeInterval? dayOfWeekTimeInterval = null)
     {
-        violations.AddWarningIf(true, payload, code, lessonId);
+        violations.AddWarningIf(true, targetIdentities, code, lessonId, dayOfWeekTimeInterval);
     }
 
     public static void AddWarningIf(this List<LessonPolicyViolation> violations,
-        bool condition, LessonValidationPayload payload, LessonPolicyViolationCode code, Guid? lessonId = null)
+        bool condition,
+        LessonPolicyViolationTargetIdentity[] targetIdentities,
+        LessonPolicyViolationCode code,
+        Guid? lessonId = null,
+        DayOfWeekTimeInterval? dayOfWeekTimeInterval = null)
     {
-        violations.AddValidationMessageIf(condition, payload, LessonValidationErrorType.Warning, code, lessonId);
+        violations.AddValidationMessageIf(condition, targetIdentities, LessonValidationErrorType.Warning, code,
+            lessonId, dayOfWeekTimeInterval);
     }
 
     private static void AddValidationMessageIf(this List<LessonPolicyViolation> violations,
-        bool condition, LessonValidationPayload payload, LessonValidationErrorType type, LessonPolicyViolationCode code, Guid? lessonId = null)
+        bool condition,
+        LessonPolicyViolationTargetIdentity[] targetIdentities,
+        LessonValidationErrorType type,
+        LessonPolicyViolationCode code,
+        Guid? lessonId = null,
+        DayOfWeekTimeInterval? dayOfWeekTimeInterval = null)
     {
         if (condition)
         {
@@ -39,7 +61,14 @@ public static class LessonValidationHelper
                 LessonId = lessonId ?? Guid.Empty,
                 ErrorType = type,
                 Code = code,
-                Payload = payload,
+                Targets = targetIdentities
+                    .Where(x => x.TargetId.HasValue)
+                    .Select(x => new LessonPolicyViolationTarget
+                    {
+                        TargetId = x.TargetId!.Value,
+                        TargetType = x.TargetType,
+                    }).ToArray(),
+                DayOfWeekTimeInterval = dayOfWeekTimeInterval,
             });
         }
     }

@@ -11,31 +11,6 @@ public class DbLesson : IDbEntityWithId
     public Guid Id { get; set; }
 
     /// <summary>
-    /// Проект расписания
-    /// </summary>
-    public Guid ScheduleId { get; set; }
-
-    /// <summary>
-    /// Проект расписания
-    /// </summary>
-    public DbSchedule Schedule { get; set; } = null!;
-
-    /// <summary>
-    /// Дисциплина в учебном плане
-    /// </summary>
-    public Guid? AcademicDisciplineId { get; set; }
-
-    /// <summary>
-    /// Дисциплина в учебном плане
-    /// </summary>
-    public DbAcademicDiscipline? AcademicDiscipline { get; set; }
-
-    /// <summary>
-    /// Вид занятия, проводимого по дисциплине в учебном плане
-    /// </summary>
-    public AcademicDisciplineType? AcademicDisciplineType { get; set; }
-
-    /// <summary>
     /// Академические группы
     /// </summary>
     public ICollection<DbStudentGroup> StudentGroups { get; set; } = [];
@@ -101,15 +76,15 @@ public class DbLesson : IDbEntityWithId
     /// <summary>
     /// Сведения о созданных занятиях, к которым относится данное
     /// </summary>
-    public Guid? LessonBatchInfoId { get; set; }
+    public Guid LessonBatchInfoId { get; set; }
 
     /// <summary>
     /// Сведения о созданных занятиях, к которым относится данное
     /// </summary>
-    public DbLessonBatchInfo? LessonBatchInfo { get; set; }
+    public DbLessonBatchInfo LessonBatchInfo { get; set; } = null!;
 
     /// <summary>
     /// Сообщения валидации
     /// </summary>
-    public ICollection<DbLessonPolicyViolation> Violations { get; set; } = [];
+    public ICollection<DbPolicyViolation> Violations { get; set; } = [];
 }

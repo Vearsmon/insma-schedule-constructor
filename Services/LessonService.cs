@@ -53,7 +53,7 @@ public class LessonService(
             DateTo = dateTo,
         });
         var lessonsCountByBatchId = lessons
-            .GroupBy(x => x.LessonBatchInfoId!.Value)
+            .GroupBy(x => x.LessonBatchInfoId)
             .ToDictionary(x => x.Key, x => x.Count());
         var lessonBatchInfos = await lessonBatchInfoRepository.SearchAsync(new LessonBatchInfoSearchModel
         {
@@ -74,8 +74,8 @@ public class LessonService(
                 LessonBatchInfoIds = notFullyPresentedLessonBatchInfos.Select(x => x.Id!.Value).ToArray(),
             }) : [];
         var noTimeAssignmentLessons = batchLessons
-            .GroupBy(x => x.LessonBatchInfoId!.Value)
-            .SelectMany(x => x.Take(x.First().LessonBatchInfo!.LessonsPerWeekCount - (lessonsCountByBatchId.GetValueOrDefault(x.Key, 0))))
+            .GroupBy(x => x.LessonBatchInfoId)
+            .SelectMany(x => x.Take(x.First().LessonBatchInfo.LessonsPerWeekCount - (lessonsCountByBatchId.GetValueOrDefault(x.Key, 0))))
             .ToArray();
 
         var lessonsToReturn = lessons
@@ -119,53 +119,8 @@ public class LessonService(
 
     public async Task SaveAsync(LessonSaveDto lessonSaveDto)
     {
-        var validationMessages = new List<ValidationMessage>();
-        if (!lessonSaveDto.Id.HasValue)
-        {
-            throw new ServiceException(new ValidationMessage("Не допускается сохранение занятий без создания академической дисциплины"));
-        }
-
         var lesson = await lessonRepository.GetAsync(lessonSaveDto.Id!.Value);
-        var schedule = await scheduleRepository.GetAsync(lesson.ScheduleId);
-
-        if (lessonSaveDto.DateWithTimeInterval != null)
-        {
-            if (!schedule.DateInterval.HasIntersection(lessonSaveDto.DateWithTimeInterval!.Date)
-                || (!lesson.DetachedFromBatch &&
-                    !lesson.LessonBatchInfo!.DateInterval.HasIntersection(lessonSaveDto.DateWithTimeInterval.Date)))
-            {
-                validationMessages.Add(new ValidationMessage("Дата сохраняемого занятия не входит в отрезок дат расписания или своего шаблона"));
-            }
-            else
-            {
-                var intersectsEvenWeek = lessonSaveDto.DateWithTimeInterval.Date.IntersectsEvenWeek(schedule.DateInterval);
-                switch (lesson.LessonBatchInfo!.RepeatType)
-                {
-                    case DisciplineLessonRepeatType.EvenWeeks when !intersectsEvenWeek:
-                        validationMessages.Add(new ValidationMessage("Занятие может быть сохранено только в четные недели согласно шаблону дисциплины"));
-                        break;
-                    case DisciplineLessonRepeatType.OddWeeks when intersectsEvenWeek:
-                        validationMessages.Add(new ValidationMessage("Занятие может быть сохранено только в нечетные недели согласно шаблону дисциплины"));
-                        break;
-                }
-            }
-
-            if (lesson.DateWithTimeInterval != null
-                && lesson.LessonBatchInfo!.DayOfWeekTimeIntervals.Length > lesson.LessonBatchInfo.LessonsPerWeekCount)
-            {
-                validationMessages.Add(new ValidationMessage("Количество занятий в неделю превышает допустимое для шаблона занятий данного вида и дисциплины"));
-            }
-        }
-
-        if (lessonSaveDto.UpdateBatch && lesson.DetachedFromBatch)
-        {
-            validationMessages.Add(new ValidationMessage("Занятие было откреплено от своего шаблона и не может быть изменено вместе с другими занятиями шаблона"));
-        }
-
-        if (validationMessages.Count > 0)
-        {
-            throw new ServiceException(validationMessages.ToArray());
-        }
+        ValidateAsync(lessonSaveDto, lesson);
 
         var toSave = new List<Lesson>();
         var toDeleteIds = new List<Guid>();
@@ -175,148 +130,63 @@ public class LessonService(
         {
             var batchLessons = await lessonRepository.SearchAsync(new LessonSearchModel
             {
-                ScheduleId = lesson.ScheduleId,
-                AcademicDisciplineId = lesson.AcademicDisciplineId,
-                LessonBatchInfoIds = [lesson.LessonBatchInfoId!.Value],
+                ScheduleId = lesson.LessonBatchInfo.AcademicDiscipline.ScheduleId,
+                AcademicDisciplineId = lesson.LessonBatchInfo.AcademicDisciplineId,
+                LessonBatchInfoIds = [lesson.LessonBatchInfoId],
             });
-
-            UpdateBatchLessons(lessonSaveDto, batchLessons, lesson.LessonBatchInfo!);
-            updatedLessonBatchInfoToSave = lesson.LessonBatchInfo;
 
             if (lessonSaveDto.DateWithTimeInterval == null && lesson.DayOfWeekTimeIntervalAssignmentId.HasValue)
             {
-                lesson.LessonBatchInfo!.DayOfWeekTimeIntervals = lesson.LessonBatchInfo.DayOfWeekTimeIntervals
+                lesson.LessonBatchInfo.DayOfWeekTimeIntervals = lesson.LessonBatchInfo.DayOfWeekTimeIntervals
                     .Where(x => x.Id != lesson.DayOfWeekTimeIntervalAssignmentId!.Value)
                     .ToArray();
                 toDeleteIds.AddRange(batchLessons.Where(x => x.DayOfWeekTimeIntervalAssignmentId == lesson.DayOfWeekTimeIntervalAssignmentId!.Value).Select(x => x.Id!.Value));
             }
 
+            var batch = lesson.LessonBatchInfo;
+            var schedule = batch.AcademicDiscipline.Schedule;
+            var rootGroups = lessonSaveDto.StudentGroupIds.Select(x => new StudentGroup { Id = x }).ToArray();
+            var teachers = lessonSaveDto.TeacherIds.Select(x => new Teacher { Id = x }).ToArray();
+            var rooms = lessonSaveDto.RoomIds.Select(x => new Room { Id = x }).ToArray();
+
             if (lessonSaveDto.DateWithTimeInterval != null)
             {
-                DayOfWeekTimeIntervalAssignment batchTimeAssignment;
-                if (lesson.DayOfWeekTimeIntervalAssignmentId.HasValue)
+                var batchTimeAssignment = new DayOfWeekTimeIntervalAssignment
                 {
-                    var newTimeAssignment = new DayOfWeekTimeIntervalAssignment
-                    {
-                        Id = lesson.DayOfWeekTimeIntervalAssignmentId!.Value,
-                        LessonBatchInfoId = lesson.LessonBatchInfoId!.Value,
-                        DayOfWeekTimeInterval = lessonSaveDto.DateWithTimeInterval.ToDayOfWeekTimeInterval(),
-                    };
-                    await dayOfWeekTimeIntervalAssignmentRepository.SaveAsync(newTimeAssignment);
+                    Id = lesson.DayOfWeekTimeIntervalAssignmentId,
+                    LessonBatchInfoId = batch.Id!.Value,
+                    DayOfWeekTimeInterval = lessonSaveDto.DateWithTimeInterval.ToDayOfWeekTimeInterval(),
+                };
+                var id = await dayOfWeekTimeIntervalAssignmentRepository.SaveAsync(batchTimeAssignment);
 
-                    lesson.LessonBatchInfo!.DayOfWeekTimeIntervals = lesson.LessonBatchInfo!.DayOfWeekTimeIntervals
-                        .Where(x => x.Id != lesson.DayOfWeekTimeIntervalAssignmentId!.Value)
-                        .Concat([newTimeAssignment])
-                        .ToArray();
-                    batchTimeAssignment = newTimeAssignment;
-                }
-                else
-                {
-                    var timeAssignment = new DayOfWeekTimeIntervalAssignment
-                    {
-                        LessonBatchInfoId = lesson.LessonBatchInfo!.Id!.Value,
-                        DayOfWeekTimeInterval = lessonSaveDto.DateWithTimeInterval.ToDayOfWeekTimeInterval(),
-                    };
-                    var id = await dayOfWeekTimeIntervalAssignmentRepository.SaveAsync(timeAssignment);
-                    timeAssignment.Id = id;
-                    lesson.LessonBatchInfo!.DayOfWeekTimeIntervals = lesson.LessonBatchInfo!.DayOfWeekTimeIntervals
-                        .Concat([timeAssignment])
-                        .ToArray();
-                    lesson.DayOfWeekTimeIntervalAssignmentId = id;
-                    batchTimeAssignment = timeAssignment;
-                }
-
-                var existingLessonsWithTimeAssignment = batchLessons
-                    .Where(x => x.DayOfWeekTimeIntervalAssignmentId == lesson.DayOfWeekTimeIntervalAssignmentId!.Value)
-                    .OrderBy(x => x.DateWithTimeInterval?.Date ?? DateOnly.MaxValue)
-                    .ThenBy(x => x.DateWithTimeInterval?.TimeInterval)
-                    .ToArray();
-                var existingLessonsWithoutTimeAssignment = batchLessons
-                    .Where(x => !x.DayOfWeekTimeIntervalAssignmentId.HasValue)
+                batchTimeAssignment.Id = id;
+                batch.DayOfWeekTimeIntervals = batch.DayOfWeekTimeIntervals
+                    .Where(x => x.Id != lesson.DayOfWeekTimeIntervalAssignmentId!.Value)
+                    .Concat([batchTimeAssignment])
                     .ToArray();
 
-                var dates = DateOnlyHelper.GetDatesInIntervalByDaysOfWeek(
-                    lesson.LessonBatchInfo!.DateInterval,
-                    [batchTimeAssignment.DayOfWeekTimeInterval.DayOfWeek],
-                    lesson.LessonBatchInfo.RepeatType,
-                    schedule.DateInterval);
-
-                for (var i = 0; i < dates.Length; i++)
-                {
-                    var newDateWithTimeInterval = new DateWithTimeInterval
-                    {
-                        Date = dates[i],
-                        TimeInterval = lessonSaveDto.DateWithTimeInterval.TimeInterval,
-                    };
-
-                    if (i < existingLessonsWithTimeAssignment.Length)
-                    {
-                        existingLessonsWithTimeAssignment[i].DateWithTimeInterval = newDateWithTimeInterval;
-                        existingLessonsWithTimeAssignment[i].DetachedFromBatch = false;
-                        toSave.Add(existingLessonsWithTimeAssignment[i]);
-                    }
-                    else if (i - existingLessonsWithTimeAssignment.Length < existingLessonsWithoutTimeAssignment.Length)
-                    {
-                        existingLessonsWithoutTimeAssignment[i - existingLessonsWithTimeAssignment.Length].DetachedFromBatch = false;
-                        existingLessonsWithoutTimeAssignment[i - existingLessonsWithTimeAssignment.Length].DayOfWeekTimeIntervalAssignmentId = batchTimeAssignment.Id;
-                        existingLessonsWithoutTimeAssignment[i - existingLessonsWithTimeAssignment.Length].DateWithTimeInterval = newDateWithTimeInterval;
-                        toSave.Add(existingLessonsWithoutTimeAssignment[i - existingLessonsWithTimeAssignment.Length]);
-                    }
-                    else
-                    {
-                        toSave.Add(new Lesson
-                        {
-                            ScheduleId = lesson.AcademicDiscipline!.ScheduleId,
-                            AcademicDisciplineId = lesson.LessonBatchInfo!.AcademicDisciplineId,
-                            AcademicDisciplineType = lesson.LessonBatchInfo.Type,
-                            StudentGroups = lessonSaveDto.StudentGroupIds.Select(x => new StudentGroup { Id = x }).ToArray(),
-                            Teachers = lessonSaveDto.TeacherIds.Select(x => new Teacher { Id = x }).ToArray(),
-                            Rooms = lessonSaveDto.RoomIds.Select(x => new Room { Id = x }).ToArray(),
-                            DayOfWeekTimeIntervalAssignmentId = batchTimeAssignment.Id!.Value,
-                            DateWithTimeInterval = newDateWithTimeInterval,
-                            FlexibilityType = lessonSaveDto.FlexibilityType,
-                            HoursCost = lessonSaveDto.HoursCost,
-                            AllowCombining = lessonSaveDto.AllowCombining,
-                            LessonBatchInfoId = lessonSaveDto.Id!.Value,
-                        });
-                    }
-                }
-
-                if (dates.Length < existingLessonsWithTimeAssignment.Length)
-                {
-                    for (var i = dates.Length; i < existingLessonsWithTimeAssignment.Length; i++)
-                    {
-                        toDeleteIds.Add(existingLessonsWithTimeAssignment[i].Id!.Value);
-                    }
-                }
+                Update(batchLessons,
+                    batchTimeAssignment,
+                    batch,
+                    schedule,
+                    toSave,
+                    toDeleteIds,
+                    rootGroups,
+                    teachers,
+                    rooms);
             }
 
-            if (lesson.LessonBatchInfo!.LessonsPerWeekCount - lesson.LessonBatchInfo.DayOfWeekTimeIntervals.Length > 0)
-            {
-                var lessonsWithoutTimeAssignmentTotalCount = DateOnlyHelper.GetDaysInDateIntervalCount(
-                    lesson.LessonBatchInfo.DateInterval,
-                    lesson.LessonBatchInfo.LessonsPerWeekCount - lesson.LessonBatchInfo.DayOfWeekTimeIntervals.Length,
-                    lesson.LessonBatchInfo.RepeatType,
-                    schedule.DateInterval) - toSave.Count(x => x.DayOfWeekTimeIntervalAssignmentId == null);
+            AddNewMissingLessons(batch,
+                schedule,
+                toSave,
+                rootGroups,
+                teachers,
+                rooms);
 
-                if (lessonsWithoutTimeAssignmentTotalCount > 0)
-                {
-                    toSave.AddRange(Enumerable.Range(0, lessonsWithoutTimeAssignmentTotalCount)
-                        .Select(_ => new Lesson
-                        {
-                            ScheduleId = lesson.AcademicDiscipline!.ScheduleId,
-                            AcademicDisciplineId = lesson.LessonBatchInfo!.AcademicDisciplineId,
-                            AcademicDisciplineType = lesson.LessonBatchInfo.Type,
-                            StudentGroups = lessonSaveDto.StudentGroupIds.Select(x => new StudentGroup { Id = x }).ToArray(),
-                            Teachers = lessonSaveDto.TeacherIds.Select(x => new Teacher { Id = x }).ToArray(),
-                            Rooms = lessonSaveDto.RoomIds.Select(x => new Room { Id = x }).ToArray(),
-                            FlexibilityType = lessonSaveDto.FlexibilityType,
-                            HoursCost = lessonSaveDto.HoursCost,
-                            AllowCombining = lessonSaveDto.AllowCombining,
-                            LessonBatchInfoId = lessonSaveDto.Id!.Value,
-                        }));
-                }
-            }
+            var toSaveArray = toSave.ToArray();
+            UpdateBatchLessons(lessonSaveDto, toSaveArray, lesson.LessonBatchInfo);
+            toSave = toSaveArray.ToList();
+            updatedLessonBatchInfoToSave = lesson.LessonBatchInfo;
         }
         else
         {
@@ -355,7 +225,7 @@ public class LessonService(
             lessonValidationService.ValidateAcademicDisciplineStudentGroupMatch(lesson, lessonPolicyViolations,
                 academicDiscipline, lesson.StudentGroups);
             lessonValidationService.ValidateAcademicDisciplineTypeMatch(lesson, lessonPolicyViolations,
-                academicDiscipline, lesson.AcademicDisciplineType!.Value);
+                academicDiscipline, lesson.LessonBatchInfo.Type);
         }
 
         await lessonValidationService.SaveAllAsync(lessonPolicyViolations.ToArray());
@@ -384,7 +254,7 @@ public class LessonService(
                 AcademicDisciplineId = lessonBatchInfos.First().AcademicDisciplineId,
                 LessonBatchInfoIds = lessonBatchInfos.Select(x => x.Id!.Value).ToArray(),
             }))
-            .GroupBy(x => x.LessonBatchInfoId!.Value)
+            .GroupBy(x => x.LessonBatchInfoId)
             .ToDictionary(x => x.Key, x => x.ToArray());
 
         var toSave = new List<Lesson>();
@@ -413,100 +283,27 @@ public class LessonService(
 
             foreach (var batchTimeAssignment in batch.DayOfWeekTimeIntervals)
             {
-                var existingLessonsWithTimeAssignment = existingLessons
-                    .Where(x => x.DayOfWeekTimeIntervalAssignmentId == batchTimeAssignment.Id)
-                    .OrderBy(x => x.DateWithTimeInterval?.Date ?? DateOnly.MaxValue)
-                    .ThenBy(x => x.DateWithTimeInterval?.TimeInterval)
-                    .ToArray();
-                var existingLessonsWithoutTimeAssignment = existingLessons
-                    .Where(x => !x.DayOfWeekTimeIntervalAssignmentId.HasValue)
-                    .ToArray();
-
-                var dates = DateOnlyHelper.GetDatesInIntervalByDaysOfWeek(
-                    batch.DateInterval,
-                    [batchTimeAssignment.DayOfWeekTimeInterval.DayOfWeek],
-                    batch.RepeatType,
-                    schedule.DateInterval);
-
-                for (var i = 0; i < dates.Length; i++)
-                {
-                    var newDateWithTimeInterval = new DateWithTimeInterval
-                    {
-                        Date = dates[i],
-                        TimeInterval = batchTimeAssignment.DayOfWeekTimeInterval.TimeInterval,
-                    };
-
-                    if (i < existingLessonsWithTimeAssignment.Length)
-                    {
-                        existingLessonsWithTimeAssignment[i].DetachedFromBatch = false;
-                        existingLessonsWithTimeAssignment[i].DateWithTimeInterval = newDateWithTimeInterval;
-                        toSaveForBatch.Add(existingLessonsWithTimeAssignment[i]);
-                    }
-                    else if (i - existingLessonsWithTimeAssignment.Length < existingLessonsWithoutTimeAssignment.Length)
-                    {
-                        existingLessonsWithoutTimeAssignment[i - existingLessonsWithTimeAssignment.Length].DetachedFromBatch = false;
-                        existingLessonsWithoutTimeAssignment[i - existingLessonsWithTimeAssignment.Length].DayOfWeekTimeIntervalAssignmentId = batchTimeAssignment.Id;
-                        existingLessonsWithoutTimeAssignment[i - existingLessonsWithTimeAssignment.Length].DateWithTimeInterval = newDateWithTimeInterval;
-                        toSaveForBatch.Add(existingLessonsWithoutTimeAssignment[i - existingLessonsWithTimeAssignment.Length]);
-                    }
-                    else
-                    {
-                        toSaveForBatch.Add(new Lesson
-                        {
-                            ScheduleId = scheduleId,
-                            AcademicDisciplineId = batch.AcademicDisciplineId,
-                            AcademicDisciplineType = batch.Type,
-                            StudentGroups = rootGroups,
-                            Teachers = teachers,
-                            Rooms = rooms,
-                            DayOfWeekTimeIntervalAssignmentId = batchTimeAssignment.Id!.Value,
-                            DateWithTimeInterval = newDateWithTimeInterval,
-                            FlexibilityType = batch.FlexibilityType,
-                            HoursCost = batch.HoursCost,
-                            AllowCombining = batch.AllowCombining,
-                            LessonBatchInfoId = batch.Id!.Value,
-                        });
-                    }
-                }
-
-                if (dates.Length < existingLessonsWithTimeAssignment.Length)
-                {
-                    for (var i = dates.Length; i < existingLessonsWithTimeAssignment.Length; i++)
-                    {
-                        toDeleteIds.Add(existingLessonsWithTimeAssignment[i].Id!.Value);
-                    }
-                }
+                Update(existingLessons,
+                    batchTimeAssignment,
+                    batch,
+                    schedule,
+                    toSaveForBatch,
+                    toDeleteIds,
+                    rootGroups,
+                    teachers,
+                    rooms);
             }
 
-            if (batch.LessonsPerWeekCount - batch.DayOfWeekTimeIntervals.Length > 0)
-            {
-                var lessonsWithoutTimeAssignmentTotalCount = DateOnlyHelper.GetDaysInDateIntervalCount(
-                    batch.DateInterval,
-                    batch.LessonsPerWeekCount - batch.DayOfWeekTimeIntervals.Length,
-                    batch.RepeatType,
-                    schedule.DateInterval) - toSave.Count(x => x.DayOfWeekTimeIntervalAssignmentId == null);
+            AddNewMissingLessons(batch,
+                schedule,
+                toSaveForBatch,
+                rootGroups,
+                teachers,
+                rooms);
 
-                if (lessonsWithoutTimeAssignmentTotalCount > 0)
-                {
-                    toSaveForBatch.AddRange(Enumerable.Range(0, lessonsWithoutTimeAssignmentTotalCount)
-                        .Select(_ => new Lesson
-                        {
-                            ScheduleId = scheduleId,
-                            AcademicDisciplineId = batch.AcademicDisciplineId,
-                            AcademicDisciplineType = batch.Type,
-                            StudentGroups = rootGroups,
-                            Teachers = teachers,
-                            Rooms = rooms,
-                            FlexibilityType = batch.FlexibilityType,
-                            HoursCost = batch.HoursCost,
-                            AllowCombining = batch.AllowCombining,
-                            LessonBatchInfoId = batch.Id!.Value,
-                        }));
-                }
-            }
-
-            UpdateBatchLessons(null, toSaveForBatch.ToArray(), batch);
-            toSave.AddRange(toSaveForBatch);
+            var toSaveForBatchArray = toSaveForBatch.ToArray();
+            UpdateBatchLessons(null, toSaveForBatchArray, batch);
+            toSave.AddRange(toSaveForBatchArray);
         }
 
         await lessonRepository.DeleteAsync(toDeleteIds.ToArray());
@@ -592,11 +389,10 @@ public class LessonService(
 
         if (studentGroup.SemesterNumber != null)
         {
-            foreach (var mismatchedDisciplineLesson in studentGroupHierarchyAttachmentLessons
-                         .Where(x => x.AcademicDiscipline != null))
+            foreach (var mismatchedDisciplineLesson in studentGroupHierarchyAttachmentLessons)
             {
                 lessonValidationService.ValidateAcademicDisciplineStudentGroupMatch(mismatchedDisciplineLesson,
-                    lessonPolicyViolations, mismatchedDisciplineLesson.AcademicDiscipline!, [studentGroup]);
+                    lessonPolicyViolations, mismatchedDisciplineLesson.LessonBatchInfo.AcademicDiscipline, [studentGroup]);
             }
         }
 
@@ -625,7 +421,7 @@ public class LessonService(
 
     public async Task<LessonSeriesConflictDto[]> GetLessonSeriesConflictsAsync(Lesson lesson)
     {
-        var studentGroupIds = lesson.LessonBatchInfo!.StudentGroups.Select(x => x.Id!.Value).ToArray();
+        var studentGroupIds = lesson.LessonBatchInfo.StudentGroups.Select(x => x.Id!.Value).ToArray();
         var teacherIds = lesson.LessonBatchInfo.Teachers.Select(x => x.Id!.Value).ToArray();
         var roomIds = lesson.LessonBatchInfo.Rooms.Select(x => x.Id!.Value).ToArray();
 
@@ -633,24 +429,22 @@ public class LessonService(
             await studentGroupRepository.GetStudentGroupTreeIdsAsync(studentGroupIds);
         var hierarchyIdsFlat = studentGroupHierarchyIdsByStudentGroupId.SelectMany(x => x.Value).ToArray();
 
-        var conflictingLessons = await lessonRepository.SearchAsync(new LessonSearchModel
+        var conflictingLessonsFromOtherBatches = await lessonRepository.SearchAsync(new LessonSearchModel
         {
-            ScheduleId = lesson.ScheduleId,
+            ScheduleId = lesson.LessonBatchInfo.AcademicDiscipline.ScheduleId,
             StudentGroupIds = hierarchyIdsFlat,
             TeacherIds = teacherIds,
             RoomIds = roomIds,
             DateFrom = lesson.LessonBatchInfo.DateInterval.DateFrom,
             DateTo = lesson.LessonBatchInfo.DateInterval.DateTo,
+            ExcludeLessonBatchInfoId = lesson.LessonBatchInfoId,
             ExcludeAllowCombining = true,
             SearchForConflicts = true,
         });
-        var conflictingLessonsFromOtherBatches = conflictingLessons
-            .Where(conflictingLesson => conflictingLesson.LessonBatchInfoId != lesson.LessonBatchInfoId!.Value)
-            .ToArray();
 
         var conflictingTeacherPreferences = await teacherPreferenceRepository.SearchAsync(new TeacherPreferenceSearchModel
         {
-            ScheduleId = lesson.ScheduleId,
+            ScheduleId = lesson.LessonBatchInfo.AcademicDiscipline.ScheduleId,
             TeacherIds = teacherIds,
             RoomIds = roomIds,
             TeacherPreferenceTypes = [TeacherPreferenceType.Restricted, TeacherPreferenceType.Undesirable],
@@ -674,10 +468,10 @@ public class LessonService(
             .SelectMany(group => group
                 .Select(violation => new LessonSeriesConflictDto
                 {
-                    DayOfWeekTimeInterval = violation.Payload.DayOfWeekTimeInterval!,
+                    DayOfWeekTimeInterval = violation.DayOfWeekTimeInterval!,
                     Messages = [new LessonSeriesConflictMessageDto
                     {
-                        TimeInterval = violation.Payload.DayOfWeekTimeInterval!.TimeInterval,
+                        TimeInterval = violation.DayOfWeekTimeInterval!.TimeInterval,
                         Message = messagesByLessonId[violation.LessonId][violation.Id!.Value],
                         ErrorType = violation.ErrorType,
                     }],
@@ -691,6 +485,155 @@ public class LessonService(
     public async Task DeleteAsync(Guid lessonId)
     {
         await lessonRepository.DeleteAsync(lessonId);
+    }
+
+    private void ValidateAsync(LessonSaveDto lessonSaveDto, Lesson lesson)
+    {
+        var validationMessages = new List<ValidationMessage>();
+
+        if (lessonSaveDto.DateWithTimeInterval != null)
+        {
+            if (!lesson.LessonBatchInfo.AcademicDiscipline.Schedule.DateInterval.HasIntersection(lessonSaveDto.DateWithTimeInterval!.Date)
+                || (!lesson.DetachedFromBatch &&
+                    !lesson.LessonBatchInfo.DateInterval.HasIntersection(lessonSaveDto.DateWithTimeInterval.Date)))
+            {
+                validationMessages.Add(new ValidationMessage("Дата сохраняемого занятия не входит в отрезок дат расписания или своего шаблона"));
+            }
+            else
+            {
+                var intersectsEvenWeek = lessonSaveDto.DateWithTimeInterval.Date.IntersectsEvenWeek(lesson.LessonBatchInfo.AcademicDiscipline.Schedule.DateInterval);
+                switch (lesson.LessonBatchInfo.RepeatType)
+                {
+                    case DisciplineLessonRepeatType.EvenWeeks when !intersectsEvenWeek:
+                        validationMessages.Add(new ValidationMessage("Занятие может быть сохранено только в четные недели согласно шаблону дисциплины"));
+                        break;
+                    case DisciplineLessonRepeatType.OddWeeks when intersectsEvenWeek:
+                        validationMessages.Add(new ValidationMessage("Занятие может быть сохранено только в нечетные недели согласно шаблону дисциплины"));
+                        break;
+                }
+            }
+
+            if (lesson.DateWithTimeInterval != null
+                && lesson.LessonBatchInfo.DayOfWeekTimeIntervals.Length > lesson.LessonBatchInfo.LessonsPerWeekCount)
+            {
+                validationMessages.Add(new ValidationMessage("Количество занятий в неделю превышает допустимое для шаблона занятий данного вида и дисциплины"));
+            }
+        }
+
+        if (lessonSaveDto.UpdateBatch && lesson.DetachedFromBatch)
+        {
+            validationMessages.Add(new ValidationMessage("Занятие было откреплено от своего шаблона и не может быть изменено вместе с другими занятиями шаблона"));
+        }
+
+        if (validationMessages.Count > 0)
+        {
+            throw new ServiceException(validationMessages.ToArray());
+        }
+    }
+
+    private void Update(Lesson[] batchLessons,
+        DayOfWeekTimeIntervalAssignment batchTimeAssignment,
+        LessonBatchInfo batch,
+        Schedule schedule,
+        List<Lesson> toSave,
+        List<Guid> toDeleteIds,
+        StudentGroup[] rootGroups,
+        Teacher[] teachers,
+        Room[] rooms)
+    {
+        var existingLessonsWithTimeAssignment = batchLessons
+            .Where(x => x.DayOfWeekTimeIntervalAssignmentId == batchTimeAssignment.Id!.Value)
+            .OrderBy(x => x.DateWithTimeInterval?.Date ?? DateOnly.MaxValue)
+            .ThenBy(x => x.DateWithTimeInterval?.TimeInterval)
+            .ToArray();
+        var existingLessonsWithoutTimeAssignment = batchLessons
+            .Where(x => !x.DayOfWeekTimeIntervalAssignmentId.HasValue)
+            .ToArray();
+
+        var dates = DateOnlyHelper.GetDatesInIntervalByDaysOfWeek(
+            batch.DateInterval,
+            [batchTimeAssignment.DayOfWeekTimeInterval.DayOfWeek],
+            batch.RepeatType,
+            schedule.DateInterval);
+
+        for (var i = 0; i < dates.Length; i++)
+        {
+            var newDateWithTimeInterval = new DateWithTimeInterval
+            {
+                Date = dates[i],
+                TimeInterval = batchTimeAssignment.DayOfWeekTimeInterval.TimeInterval,
+            };
+
+            if (i < existingLessonsWithTimeAssignment.Length)
+            {
+                existingLessonsWithTimeAssignment[i].DetachedFromBatch = false;
+                existingLessonsWithTimeAssignment[i].DateWithTimeInterval = newDateWithTimeInterval;
+                toSave.Add(existingLessonsWithTimeAssignment[i]);
+            }
+            else if (i - existingLessonsWithTimeAssignment.Length < existingLessonsWithoutTimeAssignment.Length)
+            {
+                existingLessonsWithoutTimeAssignment[i - existingLessonsWithTimeAssignment.Length].DetachedFromBatch = false;
+                existingLessonsWithoutTimeAssignment[i - existingLessonsWithTimeAssignment.Length].DayOfWeekTimeIntervalAssignmentId = batchTimeAssignment.Id;
+                existingLessonsWithoutTimeAssignment[i - existingLessonsWithTimeAssignment.Length].DateWithTimeInterval = newDateWithTimeInterval;
+                toSave.Add(existingLessonsWithoutTimeAssignment[i - existingLessonsWithTimeAssignment.Length]);
+            }
+            else
+            {
+                toSave.Add(new Lesson
+                {
+                    StudentGroups = rootGroups,
+                    Teachers = teachers,
+                    Rooms = rooms,
+                    DayOfWeekTimeIntervalAssignmentId = batchTimeAssignment.Id!.Value,
+                    DateWithTimeInterval = newDateWithTimeInterval,
+                    FlexibilityType = batch.FlexibilityType,
+                    HoursCost = batch.HoursCost,
+                    AllowCombining = batch.AllowCombining,
+                    LessonBatchInfoId = batch.Id!.Value,
+                });
+            }
+        }
+
+        if (dates.Length >= existingLessonsWithTimeAssignment.Length)
+        {
+            return;
+        }
+        toDeleteIds.AddRange(Enumerable.Range(dates.Length, existingLessonsWithTimeAssignment.Length - dates.Length)
+            .Select(i => existingLessonsWithTimeAssignment[i].Id!.Value));
+    }
+
+    private void AddNewMissingLessons(LessonBatchInfo batch,
+        Schedule schedule,
+        List<Lesson> toSave,
+        StudentGroup[] rootGroups,
+        Teacher[] teachers,
+        Room[] rooms)
+    {
+        if (batch.LessonsPerWeekCount - batch.DayOfWeekTimeIntervals.Length <= 0)
+        {
+            return;
+        }
+
+        var lessonsWithoutTimeAssignmentTotalCount = DateOnlyHelper.GetDaysInDateIntervalCount(
+            batch.DateInterval,
+            batch.LessonsPerWeekCount - batch.DayOfWeekTimeIntervals.Length,
+            batch.RepeatType,
+            schedule.DateInterval) - toSave.Count(x => x.DayOfWeekTimeIntervalAssignmentId == null);
+
+        if (lessonsWithoutTimeAssignmentTotalCount > 0)
+        {
+            toSave.AddRange(Enumerable.Range(0, lessonsWithoutTimeAssignmentTotalCount)
+                .Select(_ => new Lesson
+                {
+                    StudentGroups = rootGroups,
+                    Teachers = teachers,
+                    Rooms = rooms,
+                    FlexibilityType = batch.FlexibilityType,
+                    HoursCost = batch.HoursCost,
+                    AllowCombining = batch.AllowCombining,
+                    LessonBatchInfoId = batch.Id!.Value,
+                }));
+        }
     }
 
     private void UpdateBatchLessons(LessonSaveDto? lessonSaveDto, Lesson[] lessons, LessonBatchInfo batchInfo)

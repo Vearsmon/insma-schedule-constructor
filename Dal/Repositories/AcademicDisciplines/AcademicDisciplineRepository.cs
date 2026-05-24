@@ -28,13 +28,12 @@ public class AcademicDisciplineRepository(
             return id.Value;
         }
 
-        var currentLessonBatchInfos = model.GetAllBatchInfos();
-        var removedLessonBatchInfoIds = previousAcademicDiscipline.GetAllBatchInfos()
-            .Where(x => currentLessonBatchInfos.All(y => y.Id != x.Id))
+        var removedLessonBatchInfoIds = previousAcademicDiscipline.LessonBatchInfos
+            .Where(x => model.LessonBatchInfos.All(y => y.Id != x.Id))
             .Select(x => x.Id!.Value)
             .ToArray();
 
-        await Context.Set<DbLessonPolicyViolation>().Where(x => removedLessonBatchInfoIds.Contains(x.Id)).ExecuteDeleteAsync(cancellationToken);
+        await Context.Set<DbPolicyViolation>().Where(x => removedLessonBatchInfoIds.Contains(x.Id)).ExecuteDeleteAsync(cancellationToken);
 
         await base.SaveAsync(model, cancellationToken);
 

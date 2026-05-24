@@ -15,11 +15,7 @@ public static partial class AcademicDisciplineMappingRegister
         var model = AutoMapEntityToModel(entity);
         if (model == null || entity == null) return null;
         model.Schedule = ScheduleMappingRegister.MapEntityToModel(entity.Schedule)!;
-        model.LectureLessonBatchInfos = entity.LessonBatchInfos.Where(x => x.Type == AcademicDisciplineType.Lecture).Select(LessonBatchInfoMappingRegister.MapEntityToModel).ToArray()!;
-        model.LabLessonBatchInfos = entity.LessonBatchInfos.Where(x => x.Type == AcademicDisciplineType.Lab).Select(LessonBatchInfoMappingRegister.MapEntityToModel).ToArray()!;
-        model.PracticeLessonBatchInfos = entity.LessonBatchInfos.Where(x => x.Type == AcademicDisciplineType.Practice).Select(LessonBatchInfoMappingRegister.MapEntityToModel).ToArray()!;
-        model.ExamLessonBatchInfos = entity.LessonBatchInfos.Where(x => x.Type == AcademicDisciplineType.Exam).Select(LessonBatchInfoMappingRegister.MapEntityToModel).ToArray()!;
-        model.TestLessonBatchInfos = entity.LessonBatchInfos.Where(x => x.Type == AcademicDisciplineType.Test).Select(LessonBatchInfoMappingRegister.MapEntityToModel).ToArray()!;
+        model.LessonBatchInfos = entity.LessonBatchInfos.Select(LessonBatchInfoMappingRegister.MapEntityToModel).ToArray()!;
         return model;
     }
 
@@ -37,21 +33,13 @@ public static partial class AcademicDisciplineMappingRegister
     }
 
     [MapperIgnoreSource(nameof(AcademicDiscipline.Schedule))]
-    [MapperIgnoreSource(nameof(AcademicDiscipline.LectureLessonBatchInfos))]
-    [MapperIgnoreSource(nameof(AcademicDiscipline.LabLessonBatchInfos))]
-    [MapperIgnoreSource(nameof(AcademicDiscipline.PracticeLessonBatchInfos))]
-    [MapperIgnoreSource(nameof(AcademicDiscipline.ExamLessonBatchInfos))]
-    [MapperIgnoreSource(nameof(AcademicDiscipline.TestLessonBatchInfos))]
+    [MapperIgnoreSource(nameof(AcademicDiscipline.LessonBatchInfos))]
     [MapperIgnoreTarget(nameof(DbAcademicDiscipline.Schedule))]
     [MapperIgnoreTarget(nameof(DbAcademicDiscipline.LessonBatchInfos))]
     public static partial DbAcademicDiscipline? MapModelToEntity(AcademicDiscipline? model);
 
     [MapperIgnoreSource(nameof(AcademicDiscipline.Schedule))]
-    [MapperIgnoreSource(nameof(AcademicDiscipline.LectureLessonBatchInfos))]
-    [MapperIgnoreSource(nameof(AcademicDiscipline.LabLessonBatchInfos))]
-    [MapperIgnoreSource(nameof(AcademicDiscipline.PracticeLessonBatchInfos))]
-    [MapperIgnoreSource(nameof(AcademicDiscipline.ExamLessonBatchInfos))]
-    [MapperIgnoreSource(nameof(AcademicDiscipline.TestLessonBatchInfos))]
+    [MapperIgnoreSource(nameof(AcademicDiscipline.LessonBatchInfos))]
     [MapperIgnoreTarget(nameof(DbAcademicDiscipline.Schedule))]
     [MapperIgnoreTarget(nameof(DbAcademicDiscipline.LessonBatchInfos))]
     public static partial void UpdateEntityWithModel(AcademicDiscipline? model, DbAcademicDiscipline? entity);
@@ -59,11 +47,7 @@ public static partial class AcademicDisciplineMappingRegister
     [MapperIgnoreSource(nameof(DbAcademicDiscipline.Schedule))]
     [MapperIgnoreSource(nameof(DbAcademicDiscipline.LessonBatchInfos))]
     [MapperIgnoreTarget(nameof(AcademicDiscipline.Schedule))]
-    [MapperIgnoreTarget(nameof(AcademicDiscipline.LectureLessonBatchInfos))]
-    [MapperIgnoreTarget(nameof(AcademicDiscipline.LabLessonBatchInfos))]
-    [MapperIgnoreTarget(nameof(AcademicDiscipline.PracticeLessonBatchInfos))]
-    [MapperIgnoreTarget(nameof(AcademicDiscipline.ExamLessonBatchInfos))]
-    [MapperIgnoreTarget(nameof(AcademicDiscipline.TestLessonBatchInfos))]
+    [MapperIgnoreTarget(nameof(AcademicDiscipline.LessonBatchInfos))]
     private static partial AcademicDiscipline? AutoMapEntityToModel(DbAcademicDiscipline? entity);
 
     [MapperIgnoreSource(nameof(DbAcademicDiscipline.ScheduleId))]

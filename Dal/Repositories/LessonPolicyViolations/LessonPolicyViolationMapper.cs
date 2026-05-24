@@ -5,12 +5,12 @@ using Domain.Models;
 
 namespace Dal.Repositories.LessonPolicyViolations;
 
-public class LessonPolicyViolationMapper : IRepositoryMapper<DbLessonPolicyViolation, LessonPolicyViolation>
+public class LessonPolicyViolationMapper : IRepositoryMapper<DbPolicyViolation, LessonPolicyViolation>
 {
     [return: NotNullIfNotNull("entity")]
-    public LessonPolicyViolation? Map(DbLessonPolicyViolation? entity) => LessonPolicyViolationMappingRegister.MapEntityToModel(entity);
+    public LessonPolicyViolation? Map(DbPolicyViolation? entity) => LessonPolicyViolationMappingRegister.MapEntityToModel(entity);
 
-    public void Update(DbLessonPolicyViolation entity, LessonPolicyViolation model)
+    public void Update(DbPolicyViolation entity, LessonPolicyViolation model)
     {
         LessonPolicyViolationMappingRegister.UpdateEntityWithModel(model, entity);
     }
