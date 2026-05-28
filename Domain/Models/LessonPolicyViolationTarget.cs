@@ -13,7 +13,7 @@ public class LessonPolicyViolationTarget : IModelWithId
     /// <summary>
     /// Нарушение валидации
     /// </summary>
-    public LessonPolicyViolation Violation { get; set; } = null!;
+    public Guid ViolationId { get; set; }
 
     /// <summary>
     /// Оказавшая влияние сущность

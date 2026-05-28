@@ -111,6 +111,7 @@ public class LessonBatchInfoRepository(
         .Include(x => x.StudentGroups)
         .Include(x => x.Teachers)
         .Include(x => x.Rooms)
+        .ThenInclude(x => x.Campus)
         .Include(x => x.DayOfWeekTimeIntervals);
 
     private string? BuildSaveReferencesExpression(Domain.Models.LessonBatchInfo model)

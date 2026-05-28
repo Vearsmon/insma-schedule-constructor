@@ -47,6 +47,7 @@ public static partial class LessonDtoMappingRegister
         shortDto.StudentGroups = model.StudentGroups.Select(StudentGroupDtoMappingRegister.MapModelToShortDto).ToArray()!;
         shortDto.Teachers = model.Teachers.Select(TeacherDtoMappingRegister.MapModelToShortDto).ToArray()!;
         shortDto.Rooms = model.Rooms.Select(RoomDtoMappingRegister.MapModelToShortDto).ToArray()!;
+        shortDto.Comment = model.LessonBatchInfo.Comment;
         return shortDto;
     }
 
@@ -106,6 +107,7 @@ public static partial class LessonDtoMappingRegister
     [MapperIgnoreTarget(nameof(LessonShortDto.Teachers))]
     [MapperIgnoreTarget(nameof(LessonShortDto.Rooms))]
     [MapperIgnoreTarget(nameof(LessonShortDto.LessonPolicyViolationDescription))]
+    [MapperIgnoreTarget(nameof(LessonShortDto.Comment))]
     [MapProperty(nameof(Lesson.Violations), nameof(LessonShortDto.CurrentErrorsMaxLevel), Use = nameof(GetViolationsMaxLevel))]
     private static partial LessonShortDto? AutoMapModelToShortDto(Lesson? model);
 

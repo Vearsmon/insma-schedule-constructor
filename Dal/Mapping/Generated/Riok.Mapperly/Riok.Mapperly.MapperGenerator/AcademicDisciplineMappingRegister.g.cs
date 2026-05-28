@@ -45,7 +45,7 @@ namespace Dal.Mapping
 
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
         [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(entity))]
-        private static partial global::Domain.Models.AcademicDiscipline? AutoMapEntityToModel(global::Dal.Entities.DbAcademicDiscipline? entity)
+        public static partial global::Domain.Models.AcademicDiscipline? AutoMapEntityToModel(global::Dal.Entities.DbAcademicDiscipline? entity)
         {
             if (entity == null)
                 return default;

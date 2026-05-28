@@ -14,11 +14,11 @@ public static partial class LessonBatchInfoMappingRegister
         var model = AutoMapEntityToModel(entity);
         if (entity == null) return model;
         model!.DateInterval = new DateInterval { DateFrom = entity.DateFrom, DateTo = entity.DateTo };
-        if (entity.AcademicDiscipline != null!)
+        model.AcademicDiscipline = AcademicDisciplineMappingRegister.AutoMapEntityToModel(entity.AcademicDiscipline)!;
+        if (model.AcademicDiscipline != null! && entity.AcademicDiscipline != null!)
         {
-            entity.AcademicDiscipline.LessonBatchInfos = [];
+            model.AcademicDiscipline.Schedule = ScheduleMappingRegister.MapEntityToModel(entity.AcademicDiscipline.Schedule)!;
         }
-        model.AcademicDiscipline = AcademicDisciplineMappingRegister.MapEntityToModel(entity.AcademicDiscipline)!;
         model.StudentGroups = entity.StudentGroups.Select(StudentGroupMappingRegister.MapEntityToModel).ToArray()!;
         model.Teachers = entity.Teachers.Select(TeacherMappingRegister.MapEntityToModel).ToArray()!;
         model.Rooms = entity.Rooms.Select(RoomMappingRegister.MapEntityToModel).ToArray()!;

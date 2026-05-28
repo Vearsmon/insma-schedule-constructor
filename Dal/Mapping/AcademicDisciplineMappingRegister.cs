@@ -48,7 +48,7 @@ public static partial class AcademicDisciplineMappingRegister
     [MapperIgnoreSource(nameof(DbAcademicDiscipline.LessonBatchInfos))]
     [MapperIgnoreTarget(nameof(AcademicDiscipline.Schedule))]
     [MapperIgnoreTarget(nameof(AcademicDiscipline.LessonBatchInfos))]
-    private static partial AcademicDiscipline? AutoMapEntityToModel(DbAcademicDiscipline? entity);
+    public static partial AcademicDiscipline? AutoMapEntityToModel(DbAcademicDiscipline? entity);
 
     [MapperIgnoreSource(nameof(DbAcademicDiscipline.ScheduleId))]
     [MapperIgnoreSource(nameof(DbAcademicDiscipline.Schedule))]

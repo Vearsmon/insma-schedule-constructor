@@ -22,6 +22,7 @@ internal class AcademicDisciplineRegistryRepository(
         .ThenInclude(x => x.Teachers)
         .Include(x => x.LessonBatchInfos)
         .ThenInclude(x => x.Rooms)
+        .ThenInclude(x => x.Campus)
         .Include(x => x.LessonBatchInfos)
         .ThenInclude(x => x.DayOfWeekTimeIntervals);
 }

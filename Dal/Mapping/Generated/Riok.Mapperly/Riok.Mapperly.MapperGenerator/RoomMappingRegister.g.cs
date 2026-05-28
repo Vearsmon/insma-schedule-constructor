@@ -14,6 +14,7 @@ namespace Dal.Mapping
             target.Id = entity.Id;
             target.Name = entity.Name;
             target.CampusId = entity.CampusId;
+            target.Campus = MapToCampus(entity.Campus);
             target.RoomType = entity.RoomType;
             target.Capacity = entity.Capacity;
             target.RoomBoardType = entity.RoomBoardType;
@@ -34,6 +35,7 @@ namespace Dal.Mapping
             }
             target.Name = model.Name;
             target.CampusId = model.CampusId;
+            target.Campus = MapToDbCampus(model.Campus);
             target.RoomType = model.RoomType;
             target.Capacity = model.Capacity;
             target.RoomBoardType = model.RoomBoardType;
@@ -52,6 +54,7 @@ namespace Dal.Mapping
             }
             entity.Name = model.Name;
             entity.CampusId = model.CampusId;
+            entity.Campus = MapToDbCampus(model.Campus);
             entity.RoomType = model.RoomType;
             entity.Capacity = model.Capacity;
             entity.RoomBoardType = model.RoomBoardType;
@@ -73,6 +76,27 @@ namespace Dal.Mapping
             target.Capacity = entity.Capacity;
             target.RoomBoardType = entity.RoomBoardType;
             target.HasProjector = entity.HasProjector;
+            return target;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        private static global::Domain.Models.Campus MapToCampus(global::Dal.Entities.DbCampus source)
+        {
+            var target = new global::Domain.Models.Campus();
+            target.Id = source.Id;
+            target.Name = source.Name;
+            return target;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        private static global::Dal.Entities.DbCampus MapToDbCampus(global::Domain.Models.Campus source)
+        {
+            var target = new global::Dal.Entities.DbCampus();
+            if (source.Id != null)
+            {
+                target.Id = source.Id.Value;
+            }
+            target.Name = source.Name;
             return target;
         }
     }

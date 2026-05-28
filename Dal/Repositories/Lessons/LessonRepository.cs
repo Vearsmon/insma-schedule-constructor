@@ -119,8 +119,12 @@ public class LessonRepository(
 
     protected override IQueryable<DbLesson> Query() => Context.Set<DbLesson>()
         .Include(x => x.StudentGroups)
+        .ThenInclude(x => x.Parents)
+        .Include(x => x.StudentGroups)
+        .ThenInclude(x => x.Children)
         .Include(x => x.Teachers)
         .Include(x => x.Rooms)
+        .ThenInclude(x => x.Campus)
         .Include(x => x.DayOfWeekTimeIntervalAssignment)
         .Include(x => x.LessonBatchInfo)
         .ThenInclude(x => x.AcademicDiscipline)
@@ -131,9 +135,11 @@ public class LessonRepository(
         .ThenInclude(x => x.Teachers)
         .Include(x => x.LessonBatchInfo)
         .ThenInclude(x => x.Rooms)
+        .ThenInclude(x => x.Campus)
         .Include(x => x.LessonBatchInfo)
         .ThenInclude(x => x.DayOfWeekTimeIntervals)
-        .Include(x => x.Violations);
+        .Include(x => x.Violations)
+        .ThenInclude(x => x.Targets);
 
     private string? BuildSaveReferencesExpression(Lesson model)
     {

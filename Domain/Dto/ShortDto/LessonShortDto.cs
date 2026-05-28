@@ -18,4 +18,5 @@ public class LessonShortDto
     public bool AllowCombining { get; set; }
     public string? LessonPolicyViolationDescription { get; set; }
     public LessonValidationErrorType? CurrentErrorsMaxLevel { get; set; }
+    public string? Comment { get; set; }
 }

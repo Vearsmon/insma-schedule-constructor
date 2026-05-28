@@ -35,7 +35,7 @@ public static class DateOnlyHelper
     public static bool IntersectsEvenWeek(this DateOnly date, DateInterval dateInterval) =>
         date < dateInterval.DateFrom || date > dateInterval.DateTo
             ? throw new ArgumentOutOfRangeException()
-            : (date.DayNumber - dateInterval.DateFrom.DayNumber) / 7 % 2 == 0;
+            : (date.DayNumber - dateInterval.DateFrom.DayNumber) / 7 % 2 == 1;
 
     public static int GetDaysInDateIntervalCount(DateInterval dateInterval,
         int daysPerWeekCount,

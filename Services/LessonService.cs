@@ -73,7 +73,10 @@ public class LessonService(
                 HasNoTimeAssignment = true,
                 LessonBatchInfoIds = notFullyPresentedLessonBatchInfos.Select(x => x.Id!.Value).ToArray(),
             }) : [];
+        var isEvenWeek = dateFrom.IntersectsEvenWeek(schedule.DateInterval);
         var noTimeAssignmentLessons = batchLessons
+            .Where(x => (isEvenWeek && x.LessonBatchInfo.RepeatType != DisciplineLessonRepeatType.OddWeeks)
+                        || (!isEvenWeek && x.LessonBatchInfo.RepeatType != DisciplineLessonRepeatType.EvenWeeks))
             .GroupBy(x => x.LessonBatchInfoId)
             .SelectMany(x => x.Take(x.First().LessonBatchInfo.LessonsPerWeekCount - (lessonsCountByBatchId.GetValueOrDefault(x.Key, 0))))
             .ToArray();
@@ -120,7 +123,7 @@ public class LessonService(
     public async Task SaveAsync(LessonSaveDto lessonSaveDto)
     {
         var lesson = await lessonRepository.GetAsync(lessonSaveDto.Id!.Value);
-        ValidateAsync(lessonSaveDto, lesson);
+        Validate(lessonSaveDto, lesson);
 
         var toSave = new List<Lesson>();
         var toDeleteIds = new List<Guid>();
@@ -130,8 +133,6 @@ public class LessonService(
         {
             var batchLessons = await lessonRepository.SearchAsync(new LessonSearchModel
             {
-                ScheduleId = lesson.LessonBatchInfo.AcademicDiscipline.ScheduleId,
-                AcademicDisciplineId = lesson.LessonBatchInfo.AcademicDisciplineId,
                 LessonBatchInfoIds = [lesson.LessonBatchInfoId],
             });
 
@@ -140,7 +141,9 @@ public class LessonService(
                 lesson.LessonBatchInfo.DayOfWeekTimeIntervals = lesson.LessonBatchInfo.DayOfWeekTimeIntervals
                     .Where(x => x.Id != lesson.DayOfWeekTimeIntervalAssignmentId!.Value)
                     .ToArray();
-                toDeleteIds.AddRange(batchLessons.Where(x => x.DayOfWeekTimeIntervalAssignmentId == lesson.DayOfWeekTimeIntervalAssignmentId!.Value).Select(x => x.Id!.Value));
+                toDeleteIds.AddRange(batchLessons
+                    .Where(x => x.DayOfWeekTimeIntervalAssignmentId == lesson.DayOfWeekTimeIntervalAssignmentId!.Value)
+                    .Select(x => x.Id!.Value));
             }
 
             var batch = lesson.LessonBatchInfo;
@@ -463,23 +466,40 @@ public class LessonService(
         var messagesByLessonId =
             (await lessonValidationService.GetValidationResultMessageAsync(lessonPolicyViolations.ToArray()))
             .ToDictionary(x => x.LessonId, x => x.MessagesByViolationId);
+
+        var includedKeys = new List<(DayOfWeekTimeInterval, string)>();
+
         var lessonSeriesConflicts = lessonPolicyViolations
             .GroupBy(x => x.LessonId)
             .SelectMany(group => group
-                .Select(violation => new LessonSeriesConflictDto
+                .Select(violation =>
                 {
-                    DayOfWeekTimeInterval = violation.DayOfWeekTimeInterval!,
-                    Messages = [new LessonSeriesConflictMessageDto
+                    var key = (violation.DayOfWeekTimeInterval!,
+                        messagesByLessonId[violation.LessonId][violation.Id!.Value]);
+                    if (includedKeys.Contains(key))
                     {
-                        TimeInterval = violation.DayOfWeekTimeInterval!.TimeInterval,
-                        Message = messagesByLessonId[violation.LessonId][violation.Id!.Value],
-                        ErrorType = violation.ErrorType,
-                    }],
-                    MaxErrorType = violation.ErrorType,
+                        return null;
+                    }
+                    includedKeys.Add(key);
+                    return new LessonSeriesConflictDto
+                    {
+                        DayOfWeekTimeInterval = violation.DayOfWeekTimeInterval!,
+                        Messages =
+                        [
+                            new LessonSeriesConflictMessageDto
+                            {
+                                TimeInterval = violation.DayOfWeekTimeInterval!.TimeInterval,
+                                Message = messagesByLessonId[violation.LessonId][violation.Id!.Value],
+                                ErrorType = violation.ErrorType,
+                            }
+                        ],
+                        MaxErrorType = violation.ErrorType,
+                    };
                 }))
+            .Where(x => x != null)
             .ToArray();
 
-        return lessonSeriesConflicts.MergeIntersections();
+        return lessonSeriesConflicts!.MergeIntersections();
     }
 
     public async Task DeleteAsync(Guid lessonId)
@@ -487,7 +507,7 @@ public class LessonService(
         await lessonRepository.DeleteAsync(lessonId);
     }
 
-    private void ValidateAsync(LessonSaveDto lessonSaveDto, Lesson lesson)
+    private void Validate(LessonSaveDto lessonSaveDto, Lesson lesson)
     {
         var validationMessages = new List<ValidationMessage>();
 

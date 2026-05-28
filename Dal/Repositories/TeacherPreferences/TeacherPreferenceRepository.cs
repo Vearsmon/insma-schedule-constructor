@@ -27,5 +27,6 @@ public class TeacherPreferenceRepository(
     protected override IQueryable<DbTeacherPreference> Query() => Context.Set<DbTeacherPreference>()
         .Include(x => x.Schedule)
         .Include(x => x.Teacher)
-        .Include(x => x.Room);
+        .Include(x => x.Room)
+        .ThenInclude(x => x.Campus);
 }

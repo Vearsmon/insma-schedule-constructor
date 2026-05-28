@@ -6,7 +6,7 @@ namespace Dal.Mapping
     {
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
         [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(entity))]
-        public static partial global::Domain.Models.LessonPolicyViolation? MapEntityToModel(global::Dal.Entities.DbPolicyViolation? entity)
+        private static partial global::Domain.Models.LessonPolicyViolation? AutoMapEntityToModel(global::Dal.Entities.DbPolicyViolation? entity)
         {
             if (entity == null)
                 return default;
@@ -15,13 +15,12 @@ namespace Dal.Mapping
             target.LessonId = entity.LessonId;
             target.ErrorType = entity.ErrorType;
             target.Code = entity.Code;
-            target.Targets = MapToLessonPolicyViolationTargetArray(entity.Targets);
             return target;
         }
 
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
         [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(model))]
-        public static partial global::Dal.Entities.DbPolicyViolation? MapModelToEntity(global::Domain.Models.LessonPolicyViolation? model)
+        private static partial global::Dal.Entities.DbPolicyViolation? AutoMapModelToEntity(global::Domain.Models.LessonPolicyViolation? model)
         {
             if (model == null)
                 return default;
@@ -33,12 +32,11 @@ namespace Dal.Mapping
             target.LessonId = model.LessonId;
             target.ErrorType = model.ErrorType;
             target.Code = model.Code;
-            target.Targets = MapToListOfDbPolicyViolationTarget(model.Targets);
             return target;
         }
 
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        public static partial void UpdateEntityWithModel(global::Domain.Models.LessonPolicyViolation? model, global::Dal.Entities.DbPolicyViolation? entity)
+        private static partial void AutoUpdateEntityWithModel(global::Domain.Models.LessonPolicyViolation? model, global::Dal.Entities.DbPolicyViolation? entity)
         {
             if (model == null || entity == null)
                 return;
@@ -49,60 +47,6 @@ namespace Dal.Mapping
             entity.LessonId = model.LessonId;
             entity.ErrorType = model.ErrorType;
             entity.Code = model.Code;
-            entity.Targets = MapToListOfDbPolicyViolationTarget(model.Targets);
-        }
-
-        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        private static global::Domain.Models.LessonPolicyViolationTarget MapToLessonPolicyViolationTarget(global::Dal.Entities.DbPolicyViolationTarget source)
-        {
-            var target = new global::Domain.Models.LessonPolicyViolationTarget();
-            target.Id = source.Id;
-            target.Violation = MapEntityToModel(source.Violation);
-            target.TargetId = source.TargetId;
-            target.TargetType = source.TargetType;
-            return target;
-        }
-
-        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        private static global::Domain.Models.LessonPolicyViolationTarget[] MapToLessonPolicyViolationTargetArray(global::System.Collections.Generic.ICollection<global::Dal.Entities.DbPolicyViolationTarget> source)
-        {
-            var target = new global::Domain.Models.LessonPolicyViolationTarget[source.Count];
-            var i = 0;
-            foreach (var item in source)
-            {
-                target[i] = MapToLessonPolicyViolationTarget(item);
-                i++;
-            }
-            return target;
-        }
-
-        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        private static global::Dal.Entities.DbPolicyViolationTarget MapToDbPolicyViolationTarget(global::Domain.Models.LessonPolicyViolationTarget source)
-        {
-            var target = new global::Dal.Entities.DbPolicyViolationTarget();
-            if (source.Id != null)
-            {
-                target.Id = source.Id.Value;
-            }
-            if (source.Violation.Id != null)
-            {
-                target.ViolationId = source.Violation.Id.Value;
-            }
-            target.Violation = MapModelToEntity(source.Violation);
-            target.TargetId = source.TargetId;
-            target.TargetType = source.TargetType;
-            return target;
-        }
-
-        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        private static global::System.Collections.Generic.List<global::Dal.Entities.DbPolicyViolationTarget> MapToListOfDbPolicyViolationTarget(global::System.Collections.Generic.IReadOnlyCollection<global::Domain.Models.LessonPolicyViolationTarget> source)
-        {
-            var target = new global::System.Collections.Generic.List<global::Dal.Entities.DbPolicyViolationTarget>(source.Count);
-            foreach (var item in source)
-            {
-                target.Add(MapToDbPolicyViolationTarget(item));
-            }
-            return target;
         }
     }
 }

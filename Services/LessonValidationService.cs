@@ -263,6 +263,8 @@ public class LessonValidationService(
     public async Task<LessonValidationMessageBatchDto[]> GetValidationResultMessageAsync(LessonPolicyViolation[] violations,
         Dictionary<Guid, int>? currentBatchLessonsTotalHoursByLessonId = null)
     {
+        var sourceLessonIds = violations.Select(x => x.LessonId).ToArray();
+        var sourceLessonsById = (await lessonRepository.SelectAsync(sourceLessonIds)).ToDictionary(x => x.Id!.Value);
         var disciplineIds = violations
             .SelectMany(x => x.Targets)
             .Where(x => x.TargetType == LessonPolicyViolationTargetType.AcademicDiscipline)
@@ -342,33 +344,37 @@ public class LessonValidationService(
                     discipline!.Name),
                 LessonPolicyViolationCode.FixedLessonTypeConflictByGroup => string.Format(
                     LessonPolicyViolationTemplates.FixedLessonTypeConflictByGroupTemplate,
-                    $"\"{affectedByLesson!.LessonBatchInfo.AcademicDiscipline.Name} ({affectedByLesson.LessonBatchInfo.Type.GetDescription()})\"",
+                    $"\"{affectedByLesson!.LessonBatchInfo.AcademicDiscipline.Name} ({affectedByLesson.LessonBatchInfo.Type.GetDescription()})\" ",
                     studentGroup!.Name,
-                    studentGroup.ChildrenFlat.Any(x => x.Id == violation.LessonId)
-                        ? "которой принадлежит отмеченная группы"
-                        : "которая принадлежит отмеченной группе"),
+                    sourceLessonsById[violation.LessonId].StudentGroups.Any(x => x.Id == studentGroup.Id)
+                        ? "которая совпадает с отмеченной группой"
+                        : sourceLessonsById[violation.LessonId].StudentGroups.SelectMany(x => x.Parents).Any(x => x.Id == studentGroup.Id)
+                            ? "которой принадлежит отмеченная группа"
+                            : "которая принадлежит отмеченной группе"),
                 LessonPolicyViolationCode.FlexibleLessonTypeConflictByGroup => string.Format(
                     LessonPolicyViolationTemplates.FlexibleLessonTypeConflictByGroupTemplate,
-                    $"\"{affectedByLesson!.LessonBatchInfo.AcademicDiscipline.Name} ({affectedByLesson.LessonBatchInfo.Type.GetDescription()})\"",
+                    $"\"{affectedByLesson!.LessonBatchInfo.AcademicDiscipline.Name} ({affectedByLesson.LessonBatchInfo.Type.GetDescription()})\" ",
                     studentGroup!.Name,
-                    studentGroup.ChildrenFlat.Any(x => x.Id == violation.LessonId)
-                        ? "которой принадлежит отмеченная группы"
-                        : "которая принадлежит отмеченной группе"),
+                    sourceLessonsById[violation.LessonId].StudentGroups.Any(x => x.Id == studentGroup.Id)
+                        ? "которая совпадает с отмеченной группой"
+                        : sourceLessonsById[violation.LessonId].StudentGroups.SelectMany(x => x.Parents).Any(x => x.Id == studentGroup.Id)
+                            ? "которой принадлежит отмеченная группа"
+                            : "которая принадлежит отмеченной группе"),
                 LessonPolicyViolationCode.FixedLessonTypeConflictByTeacher => string.Format(
                     LessonPolicyViolationTemplates.FixedLessonTypeConflictByTeacherTemplate,
-                    $"\"{affectedByLesson!.LessonBatchInfo.AcademicDiscipline.Name} ({affectedByLesson.LessonBatchInfo.Type.GetDescription()})\"",
+                    $"\"{affectedByLesson!.LessonBatchInfo.AcademicDiscipline.Name} ({affectedByLesson.LessonBatchInfo.Type.GetDescription()})\" ",
                     teacher!.Fullname),
                 LessonPolicyViolationCode.FlexibleLessonTypeConflictByTeacher => string.Format(
                     LessonPolicyViolationTemplates.FlexibleLessonTypeConflictByTeacherTemplate,
-                    $"\"{affectedByLesson!.LessonBatchInfo.AcademicDiscipline.Name} ({affectedByLesson.LessonBatchInfo.Type.GetDescription()})\"",
+                    $"\"{affectedByLesson!.LessonBatchInfo.AcademicDiscipline.Name} ({affectedByLesson.LessonBatchInfo.Type.GetDescription()})\" ",
                     teacher!.Fullname),
                 LessonPolicyViolationCode.FixedLessonTypeConflictByRoom => string.Format(
                     LessonPolicyViolationTemplates.FixedLessonTypeConflictByRoomTemplate,
-                    $"\"{affectedByLesson!.LessonBatchInfo.AcademicDiscipline.Name} ({affectedByLesson.LessonBatchInfo.Type.GetDescription()})\"",
+                    $"\"{affectedByLesson!.LessonBatchInfo.AcademicDiscipline.Name} ({affectedByLesson.LessonBatchInfo.Type.GetDescription()})\" ",
                     room!.Name),
                 LessonPolicyViolationCode.FlexibleLessonTypeConflictByRoom => string.Format(
                     LessonPolicyViolationTemplates.FlexibleLessonTypeConflictByRoomTemplate,
-                    $"\"{affectedByLesson!.LessonBatchInfo.AcademicDiscipline.Name} ({affectedByLesson.LessonBatchInfo.Type.GetDescription()})\"",
+                    $"\"{affectedByLesson!.LessonBatchInfo.AcademicDiscipline.Name} ({affectedByLesson.LessonBatchInfo.Type.GetDescription()})\" ",
                     room!.Name),
                 LessonPolicyViolationCode.RestrictedTimeTeacherPreferenceTypeConflict => string.Format(
                     LessonPolicyViolationTemplates.RestrictedTimeTeacherPreferenceTypeConflictTemplate,
