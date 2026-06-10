@@ -222,26 +222,25 @@ public class LessonValidationService(
     {
         var lessonConflicts = new List<LessonSeriesConflictDto>();
 
-        var affectedByLessonBatchInfoIds = lessons
-            .SelectMany(lesson => lesson.Violations
-                .SelectMany(violation => violation.Targets)
-                .Where(violation => violation.TargetType == LessonPolicyViolationTargetType.LessonBatch)
-                .Select(violation => violation.TargetId))
-            .ToArray();
+        // var affectedByLessonBatchInfoIds = lessons
+        //     .SelectMany(lesson => lesson.Violations
+        //         .SelectMany(violation => violation.Targets)
+        //         .Where(violation => violation.TargetType == LessonPolicyViolationTargetType.LessonBatch)
+        //         .Select(violation => violation.TargetId))
+        //     .ToArray();
 
-        var currentBatchLessons = await lessonRepository.SearchAsync(new LessonSearchModel
-        {
-            LessonBatchInfoIds = affectedByLessonBatchInfoIds,
-        });
+        // var currentBatchLessons = await lessonRepository.SearchAsync(new LessonSearchModel
+        // {
+        //     LessonBatchInfoIds = affectedByLessonBatchInfoIds,
+        // });
 
-        var currentBatchLessonsTotalHoursByLessonId = lessons
-            .ToDictionary(lesson => lesson.Id!.Value, lesson => currentBatchLessons
-                .Where(currentBatchLesson => currentBatchLesson.LessonBatchInfoId == lesson.LessonBatchInfoId)
-                .Sum(currentBatchLesson => currentBatchLesson.HoursCost ?? 0));
+        // var currentBatchLessonsTotalHoursByLessonId = lessons
+        //     .ToDictionary(lesson => lesson.Id!.Value, lesson => currentBatchLessons
+        //         .Where(currentBatchLesson => currentBatchLesson.LessonBatchInfoId == lesson.LessonBatchInfoId)
+        //         .Sum(currentBatchLesson => currentBatchLesson.HoursCost ?? 0));
 
         var messages = await GetValidationResultMessageAsync(
-            lessons.SelectMany(lesson => lesson.Violations).ToArray(),
-            currentBatchLessonsTotalHoursByLessonId);
+            lessons.SelectMany(lesson => lesson.Violations).ToArray());
         var messagesByLessonId = messages.ToDictionary(message => message.LessonId, message => message.MessagesByViolationId);
         lessonConflicts.AddRange(lessons.SelectMany(lesson => lesson.Violations
             .Select(violation => new LessonSeriesConflictDto

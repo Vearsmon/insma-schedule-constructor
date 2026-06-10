@@ -1,6 +1,8 @@
 ﻿using System.Linq.Expressions;
 using Dal.Entities;
 using Dal.Helpers;
+using Domain.Helpers;
+using Domain.Models.Common;
 using Domain.Models.SearchModels;
 
 namespace Dal.Repositories.Lessons;
@@ -11,6 +13,10 @@ public class LessonPredicateBuilder : IPredicateBuilder<DbLesson, LessonSearchMo
 
     public Expression<Func<DbLesson, bool>> Build(LessonSearchModel searchModel)
     {
+        var dates = searchModel is { DateFrom: not null, DateTo: not null }
+            ? new DateInterval { DateFrom = searchModel.DateFrom!.Value, DateTo = searchModel.DateTo!.Value }.ToDateSequence().ToArray()
+            : [];
+
         if (searchModel.SearchForConflicts)
         {
             var orBlocksAllowed = searchModel.StudentGroupIds.Length > 0
@@ -24,8 +30,9 @@ public class LessonPredicateBuilder : IPredicateBuilder<DbLesson, LessonSearchMo
                         .OrIf(searchModel.TeacherIds.Length > 0, f => f.Teachers.Any(x => searchModel.TeacherIds.Contains(x.Id)))
                         .OrIf(searchModel.RoomIds.Length > 0, f => f.Rooms.Any(x => searchModel.RoomIds.Contains(x.Id))))
                     .AndIf(searchModel.Date.HasValue, f => f.Date == searchModel.Date)
-                    .AndIf(searchModel.DateFrom.HasValue, f => f.Date >= searchModel.DateFrom)
-                    .AndIf(searchModel.DateTo.HasValue, f => f.Date <= searchModel.DateTo)
+                    .AndIf(dates.Length != 0, f => f.Date.HasValue && dates.Contains(f.Date!.Value))
+                    // .AndIf(searchModel.DateFrom.HasValue, f => f.Date >= searchModel.DateFrom)
+                    // .AndIf(searchModel.DateTo.HasValue, f => f.Date <= searchModel.DateTo)
                     .AndIf(searchModel.TimeIntervals.Length > 0, BuildTimeIntervalExpression(searchModel))
                     .AndIf(searchModel.ExcludeAllowCombining, f => f.AllowCombining == false)
                     .AndIf(searchModel.ExcludeLessonIds.Length > 0, f => !searchModel.ExcludeLessonIds.Contains(f.Id))
@@ -40,8 +47,9 @@ public class LessonPredicateBuilder : IPredicateBuilder<DbLesson, LessonSearchMo
                 .AndIf(searchModel.TeacherIds.Length > 0, f => f.Teachers.Any(x => searchModel.TeacherIds.Contains(x.Id)))
                 .AndIf(searchModel.RoomIds.Length > 0, f => f.Rooms.Any(x => searchModel.RoomIds.Contains(x.Id)))
                 .AndIf(searchModel.Date.HasValue, f => f.Date == searchModel.Date)
-                .AndIf(searchModel.DateFrom.HasValue, f => f.Date >= searchModel.DateFrom)
-                .AndIf(searchModel.DateTo.HasValue, f => f.Date <= searchModel.DateTo)
+                .AndIf(dates.Length != 0, f => f.Date.HasValue && dates.Contains(f.Date!.Value))
+                // .AndIf(searchModel.DateFrom.HasValue, f => f.Date >= searchModel.DateFrom)
+                // .AndIf(searchModel.DateTo.HasValue, f => f.Date <= searchModel.DateTo)
                 .AndIf(searchModel.TimeIntervals.Length > 0, BuildTimeIntervalExpression(searchModel))
                 .AndIf(searchModel.DayOfWeekTimeIntervals.Length > 0, BuildDayOfWeekTimeIntervalExpression(searchModel))
                 .AndIf(searchModel.ExcludeAllowCombining, f => f.AllowCombining == false)

@@ -472,6 +472,7 @@ public class LessonService(
         var lessonSeriesConflicts = lessonPolicyViolations
             .GroupBy(x => x.LessonId)
             .SelectMany(group => group
+                .Where(violation => violation.DayOfWeekTimeInterval != null)
                 .Select(violation =>
                 {
                     var key = (violation.DayOfWeekTimeInterval!,

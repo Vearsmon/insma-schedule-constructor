@@ -28,12 +28,13 @@ public class StudentGroupService(
 {
     public async Task<StudentGroupShortDto[]> SearchRootAsync(Guid scheduleId)
     {
-        var threadGroups = await studentGroupRepository.SearchAsync(new StudentGroupSearchModel
+        var threads = await studentGroupRepository.SearchAsync(new StudentGroupSearchModel
         {
             ScheduleId = scheduleId,
             StudentGroupTypes = [StudentGroupType.Thread],
+            IsEmptyParents = true,
         });
-        return threadGroups.Select(StudentGroupDtoMappingRegister.MapModelToShortDto).ToArray()!;
+        return threads.Select(StudentGroupDtoMappingRegister.MapModelToShortDto).ToArray()!;
     }
 
     public async Task<StudentGroupTreeDto[]> SearchTreeAsync(Guid scheduleId)
@@ -43,12 +44,23 @@ public class StudentGroupService(
             ScheduleId = scheduleId,
             StudentGroupTypes = [StudentGroupType.Thread, StudentGroupType.Group],
         });
-        var threads = studentGroups.Where(x => x.StudentGroupType == StudentGroupType.Thread).ToArray();
+
+        var threads = studentGroups
+            .Where(studentGroup => studentGroup.StudentGroupType == StudentGroupType.Thread)
+            .ToArray();
+
+        var rootThreads = threads
+            .Where(l => threads
+                .Where(x => x.Id != l.Id)
+                .All(r => l.Parents
+                    .All(x => x.Id!.Value != r.Id!.Value)))
+            .ToArray();
+
         var groupsWithoutParents = studentGroups
             .Where(x => x.StudentGroupType == StudentGroupType.Group
                         && threads.All(thread => thread.Children
                             .All(child => child.Id!.Value != x.Id!.Value)));
-        return threads.Concat(groupsWithoutParents).Select(StudentGroupDtoMappingRegister.MapModelToTreeDto).ToArray()!;
+        return rootThreads.Concat(groupsWithoutParents).Select(StudentGroupDtoMappingRegister.MapModelToTreeDto).ToArray()!;
     }
 
     public async Task<RegistryDto<StudentGroupRegistryItemDto>> SearchAsync(StudentGroupRegistrySearchModel searchModel)
@@ -167,11 +179,6 @@ public class StudentGroupService(
                 $"Указанный номер семестра ({studentGroupSaveDto.SemesterNumber}) должен лежать в интервале от 1 до 12"));
         }
 
-        if (studentGroupSaveDto is { StudentGroupType: StudentGroupType.Thread, ParentIds.Length: > 0 })
-        {
-            validationMessages.Add(new ValidationMessage("При создании потока не может указываться группа-предок"));
-        }
-
         if (studentGroupSaveDto is { StudentGroupType: StudentGroupType.SemiGroup, Children.Length: > 0 })
         {
             validationMessages.Add(
@@ -195,15 +202,25 @@ public class StudentGroupService(
             }
         }
 
+        var children = Array.Empty<StudentGroup>();
         var childIds = studentGroupSaveDto.Children.Where(x => x.Id.HasValue).Select(x => x.Id!.Value).Distinct().ToArray();
         if (childIds.Length != 0)
         {
-            var children = await studentGroupRepository.SelectAsync(childIds);
+            children = await studentGroupRepository.SelectAsync(childIds);
             if (children.Length != childIds.Length)
             {
                 validationMessages.Add(
                     new ValidationMessage("Не найдены группы-наследники для сохранения академической группы"));
             }
+        }
+
+        var childTypes = children.Select(x => x.StudentGroupType).ToHashSet();
+        if (studentGroupSaveDto.StudentGroupType == StudentGroupType.Thread
+            && childTypes.Contains(StudentGroupType.Thread)
+            && (childTypes.Contains(StudentGroupType.Group) || childTypes.Contains(StudentGroupType.SemiGroup)))
+        {
+            validationMessages.Add(
+                new ValidationMessage("Для потока наследниками могут быть или только группы, или только потоки"));
         }
 
         var previousStudentGroup = studentGroupSaveDto.Id.HasValue
