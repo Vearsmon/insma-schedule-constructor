@@ -30,7 +30,7 @@ public class LessonController(ILessonService lessonService) : ApiController
     [ProducesResponseType(typeof(ErrorDto), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ErrorDto), StatusCodes.Status500InternalServerError)]
     [HttpGet("search-week")]
-    public async Task<LessonShortDto[]> SearchWeek(Guid scheduleId, DateOnly dateFrom, DateOnly dateTo) =>
+    public async Task<WeekLessonsShortDto> SearchWeek(Guid scheduleId, DateOnly dateFrom, DateOnly dateTo) =>
         await lessonService.SearchWeekAsync(scheduleId, dateFrom, dateTo);
 
     /// <summary>

@@ -14,6 +14,7 @@ public static class ServiceCollectionExtension
             .AddScoped<ICampusService, CampusService>()
             .AddScoped<ILessonService, LessonService>()
             .AddScoped<ILessonValidationService, LessonValidationService>()
+            .AddScoped<ILessonBatchValidationService, LessonBatchValidationService>()
             .AddScoped<IRoomService, RoomService>()
             .AddScoped<IScheduleService, ScheduleService>()
             .AddScoped<IStudentGroupService, StudentGroupService>()

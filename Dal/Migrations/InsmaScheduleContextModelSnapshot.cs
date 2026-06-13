@@ -265,17 +265,32 @@ namespace Dal.Migrations
                         .HasColumnType("text")
                         .HasColumnName("code");
 
+                    b.Property<string>("DayOfWeekTimeInterval")
+                        .HasColumnType("text")
+                        .HasColumnName("day_of_week_time_interval");
+
                     b.Property<string>("ErrorType")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("error_type");
 
-                    b.Property<Guid>("LessonId")
+                    b.Property<Guid?>("LessonBatchInfoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("lesson_batch_info_id");
+
+                    b.Property<Guid?>("LessonId")
                         .HasColumnType("uuid")
                         .HasColumnName("lesson_id");
 
+                    b.Property<string>("Timestamp")
+                        .HasColumnType("text")
+                        .HasColumnName("timestamp");
+
                     b.HasKey("Id")
                         .HasName("pk_policy_violation");
+
+                    b.HasIndex("LessonBatchInfoId")
+                        .HasDatabaseName("ix_policy_violation_lesson_batch_info_id");
 
                     b.HasIndex("LessonId")
                         .HasDatabaseName("ix_policy_violation_lesson_id");
@@ -765,14 +780,21 @@ namespace Dal.Migrations
 
             modelBuilder.Entity("Dal.Entities.DbPolicyViolation", b =>
                 {
+                    b.HasOne("Dal.Entities.DbLessonBatchInfo", "LessonBatchInfo")
+                        .WithMany("Violations")
+                        .HasForeignKey("LessonBatchInfoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasConstraintName("fk_policy_violation_lesson_batch_info_lesson_batch_info_id");
+
                     b.HasOne("Dal.Entities.DbLesson", "Lesson")
                         .WithMany("Violations")
                         .HasForeignKey("LessonId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
                         .HasConstraintName("fk_policy_violation_lesson_lesson_id");
 
                     b.Navigation("Lesson");
+
+                    b.Navigation("LessonBatchInfo");
                 });
 
             modelBuilder.Entity("Dal.Entities.DbPolicyViolationTarget", b =>
@@ -993,6 +1015,8 @@ namespace Dal.Migrations
             modelBuilder.Entity("Dal.Entities.DbLessonBatchInfo", b =>
                 {
                     b.Navigation("DayOfWeekTimeIntervals");
+
+                    b.Navigation("Violations");
                 });
 
             modelBuilder.Entity("Dal.Entities.DbPolicyViolation", b =>

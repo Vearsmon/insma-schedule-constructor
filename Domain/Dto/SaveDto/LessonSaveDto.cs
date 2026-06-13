@@ -12,6 +12,8 @@ public class LessonSaveDto
     public DateWithTimeInterval? DateWithTimeInterval { get; set; }
     public LessonFlexibilityType FlexibilityType { get; set; }
     public bool AllowCombining { get; set; }
+    public Guid LessonBatchInfoId { get; set; }
+    public Guid? DayOfWeekTimeIntervalAssignmentId { get; set; }
     public int HoursCost { get; set; }
     public bool UpdateBatch { get; set; }
 }

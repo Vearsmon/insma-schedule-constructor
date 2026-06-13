@@ -87,7 +87,8 @@ public class AcademicDisciplineService(
     public async Task<LessonSeriesConflictDto[]> GetLessonSeriesConflictsAsync(Guid lessonId)
     {
         var lesson = await lessonRepository.GetAsync(lessonId);
-        return await lessonService.GetLessonSeriesConflictsAsync(lesson);
+        var batch = await lessonBatchInfoRepository.GetAsync(lesson.LessonBatchInfoId);
+        return await lessonService.GetLessonSeriesConflictsAsync(batch);
     }
 
     public async Task DeleteAsync(Guid academicDisciplineId)

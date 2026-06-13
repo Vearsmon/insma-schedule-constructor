@@ -6,4 +6,6 @@ public class LessonBatchInfoSearchModel
     public DateOnly? DateFrom { get; set; }
     public DateOnly? DateTo { get; set; }
     public Guid? AcademicDisciplineId { get; set; }
+    public bool IntersectsEvenWeek { get; set; }
+    public bool IntersectsOddWeek { get; set; }
 }

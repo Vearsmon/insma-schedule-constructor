@@ -67,7 +67,9 @@ public class LessonRepository(
             .Where(x => x.Id.HasValue).Select(x => x.Id!.Value).ToArray(), cancellationToken))
             .ToDictionary(x => x.Id!.Value);
 
-        await Context.Set<DbPolicyViolation>().Where(x => previousLessonsById.Keys.Contains(x.LessonId)).ExecuteDeleteAsync(cancellationToken);
+        await Context.Set<DbPolicyViolation>()
+            .Where(x => x.LessonId.HasValue && previousLessonsById.Keys.Contains(x.LessonId!.Value))
+            .ExecuteDeleteAsync(cancellationToken);
 
         var saveExpressions = new List<string>();
         var deleteExpressions = new List<string>();

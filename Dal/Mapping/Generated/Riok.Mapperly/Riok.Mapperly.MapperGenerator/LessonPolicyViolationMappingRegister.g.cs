@@ -13,8 +13,11 @@ namespace Dal.Mapping
             var target = new global::Domain.Models.LessonPolicyViolation();
             target.Id = entity.Id;
             target.LessonId = entity.LessonId;
+            target.LessonBatchInfoId = entity.LessonBatchInfoId;
             target.ErrorType = entity.ErrorType;
             target.Code = entity.Code;
+            target.DayOfWeekTimeInterval = entity.DayOfWeekTimeInterval;
+            target.Timestamp = entity.Timestamp;
             return target;
         }
 
@@ -30,8 +33,11 @@ namespace Dal.Mapping
                 target.Id = model.Id.Value;
             }
             target.LessonId = model.LessonId;
+            target.LessonBatchInfoId = model.LessonBatchInfoId;
             target.ErrorType = model.ErrorType;
             target.Code = model.Code;
+            target.DayOfWeekTimeInterval = model.DayOfWeekTimeInterval;
+            target.Timestamp = model.Timestamp;
             return target;
         }
 
@@ -45,8 +51,11 @@ namespace Dal.Mapping
                 entity.Id = model.Id.Value;
             }
             entity.LessonId = model.LessonId;
+            entity.LessonBatchInfoId = model.LessonBatchInfoId;
             entity.ErrorType = model.ErrorType;
             entity.Code = model.Code;
+            entity.DayOfWeekTimeInterval = model.DayOfWeekTimeInterval;
+            entity.Timestamp = model.Timestamp;
         }
     }
 }

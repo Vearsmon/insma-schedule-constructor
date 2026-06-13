@@ -53,10 +53,12 @@ namespace Services.Mapping
                 return default;
             var target = new global::Domain.Models.Lesson();
             target.Id = dto.Id;
+            target.DayOfWeekTimeIntervalAssignmentId = dto.DayOfWeekTimeIntervalAssignmentId;
             target.DateWithTimeInterval = dto.DateWithTimeInterval;
             target.FlexibilityType = dto.FlexibilityType;
             target.HoursCost = dto.HoursCost;
             target.AllowCombining = dto.AllowCombining;
+            target.LessonBatchInfoId = dto.LessonBatchInfoId;
             return target;
         }
 
@@ -82,10 +84,12 @@ namespace Services.Mapping
             if (dto == null || model == null)
                 return;
             model.Id = dto.Id;
+            model.DayOfWeekTimeIntervalAssignmentId = dto.DayOfWeekTimeIntervalAssignmentId;
             model.DateWithTimeInterval = dto.DateWithTimeInterval;
             model.FlexibilityType = dto.FlexibilityType;
             model.HoursCost = dto.HoursCost;
             model.AllowCombining = dto.AllowCombining;
+            model.LessonBatchInfoId = dto.LessonBatchInfoId;
         }
     }
 }

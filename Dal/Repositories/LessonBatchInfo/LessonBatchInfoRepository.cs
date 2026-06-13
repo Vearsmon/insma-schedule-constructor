@@ -11,12 +11,18 @@ public class LessonBatchInfoRepository(
     InsmaScheduleContext context,
     IRepositoryMapper<DbLessonBatchInfo, Domain.Models.LessonBatchInfo> mapper,
     ITransactionalService transactionalService,
-    IPredicateBuilder<DbLessonBatchInfo, LessonBatchInfoSearchModel> predicateBuilder)
+    IPredicateBuilder<DbLessonBatchInfo, LessonBatchInfoSearchModel> predicateBuilder,
+    IPredicateBuilder<DbLessonBatchInfo, LessonBatchInfoConflictsSearchModel> conflictsPredicateBuilder)
     : Repository<InsmaScheduleContext, DbLessonBatchInfo, Domain.Models.LessonBatchInfo>(context, mapper, transactionalService), ILessonBatchInfoRepository
 {
     public async Task<Domain.Models.LessonBatchInfo[]> SearchAsync(LessonBatchInfoSearchModel searchModel)
     {
         return await base.SearchAsync(predicateBuilder, searchModel);
+    }
+
+    public async Task<Domain.Models.LessonBatchInfo[]> SearchConflictsAsync(LessonBatchInfoConflictsSearchModel searchModel)
+    {
+        return await base.SearchAsync(conflictsPredicateBuilder, searchModel);
     }
 
     public override async Task<Guid> SaveAsync(Domain.Models.LessonBatchInfo model, CancellationToken cancellationToken = default)

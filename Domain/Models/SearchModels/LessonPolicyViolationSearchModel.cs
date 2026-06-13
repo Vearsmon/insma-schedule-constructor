@@ -7,5 +7,6 @@ public class LessonPolicyViolationSearchModel
     public Guid[] AffectedByLessonIds { get; set; } = [];
     public Guid[] AffectedByAcademicDisciplineIds { get; set; } = [];
     public Guid[] LessonIds { get; set; } = [];
+    public Guid[] LessonBatchInfoIds { get; set; } = [];
     public LessonPolicyViolationCode[] ValidationCodes { get; set; } = [];
 }

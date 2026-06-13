@@ -10,7 +10,7 @@ namespace Domain.Services;
 
 public interface ILessonService
 {
-    Task<LessonShortDto[]> SearchWeekAsync(Guid scheduleId, DateOnly dateFrom, DateOnly dateTo);
+    Task<WeekLessonsShortDto> SearchWeekAsync(Guid scheduleId, DateOnly dateFrom, DateOnly dateTo);
 
     Task<RegistryDto<LessonRegistryItemDto>> SearchAsync(LessonRegistrySearchModel searchModel);
 
@@ -26,7 +26,7 @@ public interface ILessonService
 
     Task RecalculateConflictsForNewStudentGroup(StudentGroup studentGroup);
 
-    Task<LessonSeriesConflictDto[]> GetLessonSeriesConflictsAsync(Lesson lesson);
+    Task<LessonSeriesConflictDto[]> GetLessonSeriesConflictsAsync(LessonBatchInfo batch);
 
     Task DeleteAsync(Guid lessonId);
 }

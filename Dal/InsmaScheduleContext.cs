@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using Dal.Entities;
+using Domain.Models.Common;
 using Domain.Models.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -123,6 +124,11 @@ public class InsmaScheduleContext(DbContextOptions options) : DbContextBase(opti
 
         builder.Property(x => x.FlexibilityType)
             .HasConversion(new EnumToStringConverter<LessonFlexibilityType>());
+
+        builder.HasMany(x => x.Violations)
+            .WithOne(x => x.LessonBatchInfo)
+            .HasForeignKey(x => x.LessonBatchInfoId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 
     private void LessonConfigure(EntityTypeBuilder<DbLesson> builder)
@@ -213,6 +219,18 @@ public class InsmaScheduleContext(DbContextOptions options) : DbContextBase(opti
 
         builder.Property(x => x.Code)
             .HasConversion(new EnumToStringConverter<LessonPolicyViolationCode>());
+
+        builder.Property(e => e.DayOfWeekTimeInterval)
+            .HasConversion(
+                v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null!),
+                v => JsonSerializer.Deserialize<DayOfWeekTimeInterval?>(v, (JsonSerializerOptions)null!)!
+            );
+
+        builder.Property(e => e.Timestamp)
+            .HasConversion(
+                v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null!),
+                v => JsonSerializer.Deserialize<DateWithTimeInterval?>(v, (JsonSerializerOptions)null!)!
+            );
     }
 
     private void LessonPolicyViolationTargetConfigure(EntityTypeBuilder<DbPolicyViolationTarget> builder)

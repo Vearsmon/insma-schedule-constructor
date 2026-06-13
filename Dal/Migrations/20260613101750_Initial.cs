@@ -452,13 +452,22 @@ namespace Dal.Migrations
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
-                    lesson_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    lesson_id = table.Column<Guid>(type: "uuid", nullable: true),
+                    lesson_batch_info_id = table.Column<Guid>(type: "uuid", nullable: true),
                     error_type = table.Column<string>(type: "text", nullable: false),
-                    code = table.Column<string>(type: "text", nullable: false)
+                    code = table.Column<string>(type: "text", nullable: false),
+                    day_of_week_time_interval = table.Column<string>(type: "text", nullable: true),
+                    timestamp = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("pk_policy_violation", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_policy_violation_lesson_batch_info_lesson_batch_info_id",
+                        column: x => x.lesson_batch_info_id,
+                        principalTable: "lesson_batch_info",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "fk_policy_violation_lesson_lesson_id",
                         column: x => x.lesson_id,
@@ -580,6 +589,11 @@ namespace Dal.Migrations
                 name: "ix_lesson_teacher_teacher_id",
                 table: "lesson_teacher",
                 column: "teacher_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_policy_violation_lesson_batch_info_id",
+                table: "policy_violation",
+                column: "lesson_batch_info_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_policy_violation_lesson_id",

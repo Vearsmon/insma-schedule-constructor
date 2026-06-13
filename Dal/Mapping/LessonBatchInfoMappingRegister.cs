@@ -23,6 +23,7 @@ public static partial class LessonBatchInfoMappingRegister
         model.Teachers = entity.Teachers.Select(TeacherMappingRegister.MapEntityToModel).ToArray()!;
         model.Rooms = entity.Rooms.Select(RoomMappingRegister.MapEntityToModel).ToArray()!;
         model.DayOfWeekTimeIntervals = entity.DayOfWeekTimeIntervals.Select(DayOfWeekTimeIntervalAssignmentMappingRegister.MapEntityToModel).ToArray()!;
+        model.Violations = entity.Violations.Select(LessonPolicyViolationMappingRegister.MapEntityToModel).ToArray()!;
         return model;
     }
 
@@ -52,12 +53,14 @@ public static partial class LessonBatchInfoMappingRegister
     [MapperIgnoreSource(nameof(DbLessonBatchInfo.Teachers))]
     [MapperIgnoreSource(nameof(DbLessonBatchInfo.Rooms))]
     [MapperIgnoreSource(nameof(DbLessonBatchInfo.DayOfWeekTimeIntervals))]
+    [MapperIgnoreSource(nameof(DbLessonBatchInfo.Violations))]
     [MapperIgnoreTarget(nameof(LessonBatchInfo.AcademicDiscipline))]
     [MapperIgnoreTarget(nameof(LessonBatchInfo.DateInterval))]
     [MapperIgnoreTarget(nameof(LessonBatchInfo.StudentGroups))]
     [MapperIgnoreTarget(nameof(LessonBatchInfo.Teachers))]
     [MapperIgnoreTarget(nameof(LessonBatchInfo.Rooms))]
     [MapperIgnoreTarget(nameof(LessonBatchInfo.DayOfWeekTimeIntervals))]
+    [MapperIgnoreTarget(nameof(LessonBatchInfo.Violations))]
     private static partial LessonBatchInfo? AutoMapEntityToModel(DbLessonBatchInfo? entity);
 
     [MapperIgnoreSource(nameof(LessonBatchInfo.AcademicDiscipline))]
@@ -66,6 +69,7 @@ public static partial class LessonBatchInfoMappingRegister
     [MapperIgnoreSource(nameof(LessonBatchInfo.Teachers))]
     [MapperIgnoreSource(nameof(LessonBatchInfo.Rooms))]
     [MapperIgnoreSource(nameof(LessonBatchInfo.DayOfWeekTimeIntervals))]
+    [MapperIgnoreSource(nameof(LessonBatchInfo.Violations))]
     [MapperIgnoreTarget(nameof(DbLessonBatchInfo.AcademicDiscipline))]
     [MapperIgnoreTarget(nameof(DbLessonBatchInfo.DateFrom))]
     [MapperIgnoreTarget(nameof(DbLessonBatchInfo.DateTo))]
@@ -73,6 +77,7 @@ public static partial class LessonBatchInfoMappingRegister
     [MapperIgnoreTarget(nameof(DbLessonBatchInfo.Teachers))]
     [MapperIgnoreTarget(nameof(DbLessonBatchInfo.Rooms))]
     [MapperIgnoreTarget(nameof(DbLessonBatchInfo.DayOfWeekTimeIntervals))]
+    [MapperIgnoreTarget(nameof(DbLessonBatchInfo.Violations))]
     private static partial DbLessonBatchInfo? AutoMapModelToEntity(LessonBatchInfo? model);
 
     [MapperIgnoreSource(nameof(LessonBatchInfo.AcademicDiscipline))]
@@ -81,6 +86,7 @@ public static partial class LessonBatchInfoMappingRegister
     [MapperIgnoreSource(nameof(LessonBatchInfo.Teachers))]
     [MapperIgnoreSource(nameof(LessonBatchInfo.Rooms))]
     [MapperIgnoreSource(nameof(LessonBatchInfo.DayOfWeekTimeIntervals))]
+    [MapperIgnoreSource(nameof(LessonBatchInfo.Violations))]
     [MapperIgnoreTarget(nameof(DbLessonBatchInfo.AcademicDiscipline))]
     [MapperIgnoreTarget(nameof(DbLessonBatchInfo.DateFrom))]
     [MapperIgnoreTarget(nameof(DbLessonBatchInfo.DateTo))]
@@ -88,5 +94,6 @@ public static partial class LessonBatchInfoMappingRegister
     [MapperIgnoreTarget(nameof(DbLessonBatchInfo.Teachers))]
     [MapperIgnoreTarget(nameof(DbLessonBatchInfo.Rooms))]
     [MapperIgnoreTarget(nameof(DbLessonBatchInfo.DayOfWeekTimeIntervals))]
+    [MapperIgnoreTarget(nameof(DbLessonBatchInfo.Violations))]
     private static partial void AutoUpdateEntityWithModel(LessonBatchInfo? model, DbLessonBatchInfo? entity);
 }

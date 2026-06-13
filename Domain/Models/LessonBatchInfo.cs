@@ -81,4 +81,9 @@ public class LessonBatchInfo : IModelWithId
     /// Комментарий
     /// </summary>
     public string? Comment { get; set; }
+
+    /// <summary>
+    /// Сообщения валидации
+    /// </summary>
+    public LessonPolicyViolation[] Violations { get; set; } = [];
 }

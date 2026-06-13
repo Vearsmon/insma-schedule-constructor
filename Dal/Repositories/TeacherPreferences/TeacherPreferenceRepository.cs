@@ -28,5 +28,5 @@ public class TeacherPreferenceRepository(
         .Include(x => x.Schedule)
         .Include(x => x.Teacher)
         .Include(x => x.Room)
-        .ThenInclude(x => x.Campus);
+        .ThenInclude(x => x!.Campus);
 }

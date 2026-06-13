@@ -19,7 +19,8 @@ public class LessonPolicyViolationPredicateBuilder : IPredicateBuilder<DbPolicyV
                 .AndIf(searchModel.AffectedByAcademicDisciplineIds.Length > 0,
                     f => f.Targets.Any(x => x.TargetType == LessonPolicyViolationTargetType.AcademicDiscipline
                                             && searchModel.AffectedByAcademicDisciplineIds.Contains(x.TargetId)))
-                .AndIf(searchModel.LessonIds.Length > 0, f => searchModel.LessonIds.Contains(f.LessonId))
+                .AndIf(searchModel.LessonIds.Length > 0, f => f.LessonId.HasValue && searchModel.LessonIds.Contains(f.LessonId!.Value))
+                .AndIf(searchModel.LessonBatchInfoIds.Length > 0, f => f.LessonBatchInfoId.HasValue && searchModel.LessonBatchInfoIds.Contains(f.LessonBatchInfoId!.Value))
                 .AndIf(searchModel.ValidationCodes.Length > 0, f => searchModel.ValidationCodes.Contains(f.Code))
             ;
     }

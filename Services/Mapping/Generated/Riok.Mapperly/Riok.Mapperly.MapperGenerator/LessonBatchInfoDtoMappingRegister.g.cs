@@ -5,25 +5,47 @@ namespace Services.Mapping
     public static partial class LessonBatchInfoDtoMappingRegister
     {
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(dto))]
-        public static partial global::Domain.Dto.LessonBatchInfoDto? MapModelToDto(global::Domain.Models.LessonBatchInfo? dto)
+        [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(model))]
+        public static partial global::Domain.Dto.LessonBatchInfoDto? MapModelToDto(global::Domain.Models.LessonBatchInfo? model)
         {
-            if (dto == null)
+            if (model == null)
                 return default;
             var target = new global::Domain.Dto.LessonBatchInfoDto();
-            target.Id = dto.Id;
-            target.StudentGroups = MapStudentGroupsCollection(dto.StudentGroups);
-            target.TeacherIds = MapTeachersCollection(dto.Teachers);
-            target.RoomIds = MapRoomsCollection(dto.Rooms);
-            target.LessonsPerWeekCount = dto.LessonsPerWeekCount;
-            target.DayOfWeekTimeIntervals = MapToDayOfWeekTimeIntervalAssignmentShortDtoArray(dto.DayOfWeekTimeIntervals);
-            target.RepeatType = dto.RepeatType;
-            target.DateInterval = dto.DateInterval;
-            target.AllowCombining = dto.AllowCombining;
-            target.FlexibilityType = dto.FlexibilityType;
-            target.HoursCost = dto.HoursCost;
-            target.TotalHoursCount = dto.TotalHoursCount;
-            target.Comment = dto.Comment;
+            target.Id = model.Id;
+            target.StudentGroups = MapStudentGroupsCollection(model.StudentGroups);
+            target.TeacherIds = MapTeachersCollection(model.Teachers);
+            target.RoomIds = MapRoomsCollection(model.Rooms);
+            target.LessonsPerWeekCount = model.LessonsPerWeekCount;
+            target.DayOfWeekTimeIntervals = MapToDayOfWeekTimeIntervalAssignmentShortDtoArray(model.DayOfWeekTimeIntervals);
+            target.RepeatType = model.RepeatType;
+            target.DateInterval = model.DateInterval;
+            target.AllowCombining = model.AllowCombining;
+            target.FlexibilityType = model.FlexibilityType;
+            target.HoursCost = model.HoursCost;
+            target.TotalHoursCount = model.TotalHoursCount;
+            target.Comment = model.Comment;
+            return target;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(model))]
+        public static partial global::Domain.Dto.ShortDto.LessonBatchInfoShortDto? MapModelToShortDto(global::Domain.Models.LessonBatchInfo? model)
+        {
+            if (model == null)
+                return default;
+            var target = new global::Domain.Dto.ShortDto.LessonBatchInfoShortDto();
+            target.Id = model.Id;
+            target.AcademicDisciplineId = model.AcademicDisciplineId;
+            target.AcademicDisciplineName = model.AcademicDiscipline.Name;
+            target.Type = model.Type;
+            target.LessonsPerWeekCount = model.LessonsPerWeekCount;
+            target.DayOfWeekTimeIntervals = MapToDayOfWeekTimeIntervalAssignmentShortDtoArray(model.DayOfWeekTimeIntervals);
+            target.AllowCombining = model.AllowCombining;
+            target.FlexibilityType = model.FlexibilityType;
+            target.HoursCost = model.HoursCost;
+            target.TotalHoursCount = model.TotalHoursCount;
+            target.CurrentErrorsMaxLevel = GetViolationsMaxLevel(model.Violations);
+            target.Comment = model.Comment;
             return target;
         }
 

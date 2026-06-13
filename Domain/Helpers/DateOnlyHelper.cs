@@ -103,17 +103,17 @@ public static class DateOnlyHelper
     public static LessonSeriesConflictDto[] MergeIntersections(this LessonSeriesConflictDto[] seriesConflicts)
     {
         var result = new List<LessonSeriesConflictDto>();
-        var seriesConflictsGroupByDayOfWeek = seriesConflicts.GroupBy(x => x.DayOfWeekTimeInterval.DayOfWeek);
+        var seriesConflictsGroupByDayOfWeek = seriesConflicts.GroupBy(x => x.DayOfWeekTimeInterval!.DayOfWeek);
         foreach (var group in seriesConflictsGroupByDayOfWeek)
         {
-            var sortedConflicts = group.OrderBy(x => x.DayOfWeekTimeInterval.TimeInterval.TimeFrom).ToArray();
+            var sortedConflicts = group.OrderBy(x => x.DayOfWeekTimeInterval!.TimeInterval.TimeFrom).ToArray();
             var dayOfWeekMergedIntersections = new List<LessonSeriesConflictDto> { sortedConflicts.First() };
             for (var i = 1; i < sortedConflicts.Length; i++)
             {
                 var lastConflict = dayOfWeekMergedIntersections.Last();
                 var current = sortedConflicts[i];
 
-                if (lastConflict.DayOfWeekTimeInterval.TimeInterval.TimeTo >= current.DayOfWeekTimeInterval.TimeInterval.TimeFrom)
+                if (lastConflict.DayOfWeekTimeInterval!.TimeInterval.TimeTo >= current.DayOfWeekTimeInterval!.TimeInterval.TimeFrom)
                 {
                     dayOfWeekMergedIntersections.Remove(lastConflict);
                     dayOfWeekMergedIntersections.Add(new LessonSeriesConflictDto

@@ -4,37 +4,37 @@ using Domain.Models.Enums;
 
 namespace Domain.Services;
 
-public interface ILessonValidationService
+public interface ILessonBatchValidationService
 {
-    Task SaveAllAsync(LessonPolicyViolation[] violations);
-
-    Task<LessonPolicyViolation[]> ValidateAsync(Lesson[] lessons);
+    Task<LessonPolicyViolation[]> ValidateBatchAsync(LessonBatchInfo lessonBatchInfo);
 
     void BuildPolicyViolations(List<LessonPolicyViolation> lessonPolicyViolations,
+        DayOfWeekTimeIntervalAssignment dayOfWeekTimeIntervalAssignment,
         Dictionary<Guid, List<Guid>> studentGroupHierarchyIdsByStudentGroupId,
         Lesson[] conflictingLessons,
         LessonBatchInfo[] conflictingBatches,
-        Lesson lesson,
+        LessonBatchInfo batch,
         Guid[] teacherIds,
         Guid[] roomIds,
         TeacherPreference[] conflictingTeacherPreferences,
         Schedule schedule,
         bool includeTiming = false);
 
-    Task<LessonSeriesConflictDto[]> FillValidationMessages(Lesson[] lessons);
+    Task<LessonSeriesConflictDto[]> FillValidationMessages(LessonBatchInfo[] batches);
 
-    public void ValidateAcademicDisciplineStudentGroupMatch(Lesson? lesson,
+    public void ValidateAcademicDisciplineStudentGroupMatch(LessonBatchInfo? batch,
         List<LessonPolicyViolation> violations,
         AcademicDiscipline academicDiscipline,
         StudentGroup[] studentGroups);
 
-    public void ValidateAcademicDisciplineTypeMatch(Lesson? lesson,
+    public void ValidateAcademicDisciplineTypeMatch(LessonBatchInfo? batch,
         List<LessonPolicyViolation> violations,
         AcademicDiscipline academicDiscipline,
         AcademicDisciplineType lessonAcademicDisciplineType);
 
     void ValidateConflictByGroup(
-        Lesson lesson,
+        LessonBatchInfo batch,
+        DayOfWeekTimeIntervalAssignment dayOfWeekTimeIntervalAssignment,
         Lesson[] conflictingByGroupLessons,
         LessonBatchInfo[] conflictingByGroupBatches,
         List<LessonPolicyViolation> violations,
@@ -43,14 +43,10 @@ public interface ILessonValidationService
         bool includeTiming = false);
 
     void ValidateTeacherPreferenceConflict(
-        Lesson lesson,
+        LessonBatchInfo batch,
+        DayOfWeekTimeIntervalAssignment dayOfWeekTimeIntervalAssignment,
         TeacherPreference[] conflictingTeacherPreferences,
         List<LessonPolicyViolation> violations,
+        Schedule schedule,
         bool includeTiming = false);
-
-    Task<LessonValidationMessageBatchDto[]> GetValidationResultMessageAsync(LessonPolicyViolation[] violations);
-
-    Task RemovePolicyViolations(Guid[] lessonIds, LessonPolicyViolationCode[] validationCodes);
-
-    Task RemovePolicyViolations(Guid academicDisciplineId);
 }

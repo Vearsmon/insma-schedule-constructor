@@ -91,4 +91,9 @@ public class DbLessonBatchInfo : IDbEntityWithId
     /// Комментарий
     /// </summary>
     public string? Comment { get; set; }
+
+    /// <summary>
+    /// Сообщения валидации
+    /// </summary>
+    public ICollection<DbPolicyViolation> Violations { get; set; } = [];
 }

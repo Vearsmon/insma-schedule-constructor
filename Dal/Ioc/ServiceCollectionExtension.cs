@@ -54,6 +54,7 @@ public static class ServiceCollectionExtension
             .AddScoped<ILessonBatchInfoRepository, LessonBatchInfoRepository>()
             .AddScoped<IRepositoryMapper<DbLessonBatchInfo, LessonBatchInfo>, LessonBatchInfoMapper>()
             .AddScoped<IPredicateBuilder<DbLessonBatchInfo, LessonBatchInfoSearchModel>, LessonBatchInfoPredicateBuilder>()
+            .AddScoped<IPredicateBuilder<DbLessonBatchInfo, LessonBatchInfoConflictsSearchModel>, LessonBatchInfoConflictsPredicateBuilder>()
 
             .AddScoped<ICampusRepository, CampusRepository>()
             .AddScoped<IRepositoryMapper<DbCampus, Campus>, CampusMapper>()

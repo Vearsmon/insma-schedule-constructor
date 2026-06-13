@@ -52,23 +52,26 @@ public static partial class LessonPolicyViolationMappingRegister
     }
 
     [MapperIgnoreSource(nameof(DbPolicyViolation.Lesson))]
+    [MapperIgnoreSource(nameof(DbPolicyViolation.LessonBatchInfo))]
     [MapperIgnoreSource(nameof(DbPolicyViolation.Targets))]
     [MapperIgnoreTarget(nameof(LessonPolicyViolation.Lesson))]
-    [MapperIgnoreTarget(nameof(LessonPolicyViolation.DayOfWeekTimeInterval))]
+    [MapperIgnoreTarget(nameof(LessonPolicyViolation.LessonBatchInfo))]
     [MapperIgnoreTarget(nameof(LessonPolicyViolation.Targets))]
     private static partial LessonPolicyViolation? AutoMapEntityToModel(DbPolicyViolation? entity);
 
     [MapperIgnoreSource(nameof(LessonPolicyViolation.Lesson))]
-    [MapperIgnoreSource(nameof(LessonPolicyViolation.DayOfWeekTimeInterval))]
+    [MapperIgnoreSource(nameof(LessonPolicyViolation.LessonBatchInfo))]
     [MapperIgnoreSource(nameof(LessonPolicyViolation.Targets))]
     [MapperIgnoreTarget(nameof(DbPolicyViolation.Lesson))]
+    [MapperIgnoreTarget(nameof(DbPolicyViolation.LessonBatchInfo))]
     [MapperIgnoreTarget(nameof(DbPolicyViolation.Targets))]
     private static partial DbPolicyViolation? AutoMapModelToEntity(LessonPolicyViolation? model);
 
     [MapperIgnoreSource(nameof(LessonPolicyViolation.Lesson))]
-    [MapperIgnoreSource(nameof(LessonPolicyViolation.DayOfWeekTimeInterval))]
+    [MapperIgnoreSource(nameof(LessonPolicyViolation.LessonBatchInfo))]
     [MapperIgnoreSource(nameof(LessonPolicyViolation.Targets))]
     [MapperIgnoreTarget(nameof(DbPolicyViolation.Lesson))]
+    [MapperIgnoreTarget(nameof(DbPolicyViolation.LessonBatchInfo))]
     [MapperIgnoreTarget(nameof(DbPolicyViolation.Targets))]
     private static partial void AutoUpdateEntityWithModel(LessonPolicyViolation? model, DbPolicyViolation? entity);
 }
