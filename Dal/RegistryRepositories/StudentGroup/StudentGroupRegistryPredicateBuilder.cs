@@ -13,6 +13,8 @@ public class StudentGroupRegistryPredicateBuilder
 
     public Expression<Func<DbStudentGroup, bool>> Build(StudentGroupRegistryInternalSearchModel searchModel)
     {
-        return Predicate;
+        return Predicate
+                .AndIf(searchModel.StudentGroupType.HasValue, f => f.StudentGroupType == searchModel.StudentGroupType)
+            ;
     }
 }

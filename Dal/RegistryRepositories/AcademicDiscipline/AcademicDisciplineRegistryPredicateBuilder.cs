@@ -14,6 +14,12 @@ public class AcademicDisciplineRegistryPredicateBuilder
     public Expression<Func<DbAcademicDiscipline, bool>> Build(
         AcademicDisciplineRegistryInternalSearchModel searchModel)
     {
-        return Predicate;
+        var nameLowerCaseTrimmed = string.IsNullOrEmpty(searchModel.Name) ? null : searchModel.Name!.ToLower().Trim().Replace("  ", " ");
+
+        return Predicate
+                .AndIf(!string.IsNullOrEmpty(nameLowerCaseTrimmed),
+                    f => f.Name.ToLower().Contains(nameLowerCaseTrimmed!)
+                         || f.AssociatedNames.Any(x => x.ToLower().Contains(nameLowerCaseTrimmed!)))
+            ;
     }
 }

@@ -1,5 +1,5 @@
 ﻿namespace Domain.Models.RegistrySearchModels;
 
-public class StudentGroupRegistryInternalSearchModel : AcademicDisciplineRegistrySearchModel
+public class StudentGroupRegistryInternalSearchModel : StudentGroupRegistrySearchModel
 {
 }
