@@ -207,7 +207,9 @@ public class LessonValidationService(
                 (isEvenWeek
                     ? conflictingBatch.RepeatType != DisciplineLessonRepeatType.OddWeeks
                     : conflictingBatch.RepeatType != DisciplineLessonRepeatType.EvenWeeks)
-                && conflictingBatch.DayOfWeekTimeIntervals.Any(x => x.DayOfWeekTimeInterval.HasIntersection(lesson.DateWithTimeInterval!))
+                && conflictingBatch.DayOfWeekTimeIntervals
+                    .Any(x => x.Id != lesson.DayOfWeekTimeIntervalAssignmentId
+                              && x.DayOfWeekTimeInterval.HasIntersection(lesson.DateWithTimeInterval!))
                 && (conflictingBatch.StudentGroups.Any(studentGroup =>
                         hierarchyIdsFlat.Contains(studentGroup.Id!.Value))
                     || (lesson.Teachers.Length != 0 && conflictingBatch.Teachers
@@ -321,6 +323,13 @@ public class LessonValidationService(
             .Distinct()
             .ToArray();
         var lessonsById = (await lessonRepository.SelectAsync(lessonIds)).ToDictionary(x => x.Id!.Value);
+        var lessonBatchIds = violations
+            .SelectMany(x => x.Targets)
+            .Where(x => x.TargetType == LessonPolicyViolationTargetType.LessonBatch)
+            .Select(x => x.TargetId)
+            .Distinct()
+            .ToArray();
+        var lessonBatchesById = (await lessonBatchInfoRepository.SelectAsync(lessonBatchIds)).ToDictionary(x => x.Id!.Value);
         var teacherIds = violations
             .SelectMany(x => x.Targets)
             .Where(x => x.TargetType == LessonPolicyViolationTargetType.Teacher)
@@ -351,6 +360,10 @@ public class LessonValidationService(
             var affectedByLesson = lessonViolationTarget != null
                 ? lessonsById[lessonViolationTarget.TargetId]
                 : null;
+            var lessonBatchViolationTarget = violation.Targets.FirstOrDefault(x => x.TargetType == LessonPolicyViolationTargetType.LessonBatch);
+            var affectedByLessonBatch = lessonBatchViolationTarget != null
+                ? lessonBatchesById[lessonBatchViolationTarget.TargetId]
+                : null;
             var teacherViolationTarget = violation.Targets.FirstOrDefault(x => x.TargetType == LessonPolicyViolationTargetType.Teacher);
             var teacher = teacherViolationTarget != null
                 ? teachersById[teacherViolationTarget.TargetId]
@@ -375,11 +388,12 @@ public class LessonValidationService(
                     discipline.SemesterNumber),
                 LessonPolicyViolationCode.MismatchedAcademicDisciplineType => string.Format(
                     LessonPolicyViolationTemplates.MismatchedAcademicDisciplineTypeTemplate,
-                    affectedByLesson!.LessonBatchInfo.Type.GetDescription(),
+                    affectedByLesson?.LessonBatchInfo.Type.GetDescription() ?? affectedByLessonBatch!.Type.GetDescription(),
                     discipline!.Name),
                 LessonPolicyViolationCode.FixedLessonTypeConflictByGroup => string.Format(
                     LessonPolicyViolationTemplates.FixedLessonTypeConflictByGroupTemplate,
-                    $"\"{affectedByLesson!.LessonBatchInfo.AcademicDiscipline.Name} ({affectedByLesson.LessonBatchInfo.Type.GetDescription()})\" ",
+                    $"\"{affectedByLesson?.LessonBatchInfo.AcademicDiscipline.Name ?? affectedByLessonBatch!.AcademicDiscipline.Name} " +
+                    $"({affectedByLesson?.LessonBatchInfo.Type.GetDescription() ?? affectedByLessonBatch!.Type.GetDescription()})\" ",
                     studentGroup!.Name,
                     sourceLessonsById[violation.LessonId!.Value].StudentGroups.Any(x => x.Id == studentGroup.Id)
                         ? "которая совпадает с отмеченной группой"
@@ -388,7 +402,8 @@ public class LessonValidationService(
                             : "которая принадлежит отмеченной группе"),
                 LessonPolicyViolationCode.FlexibleLessonTypeConflictByGroup => string.Format(
                     LessonPolicyViolationTemplates.FlexibleLessonTypeConflictByGroupTemplate,
-                    $"\"{affectedByLesson!.LessonBatchInfo.AcademicDiscipline.Name} ({affectedByLesson.LessonBatchInfo.Type.GetDescription()})\" ",
+                    $"\"{affectedByLesson?.LessonBatchInfo.AcademicDiscipline.Name ?? affectedByLessonBatch!.AcademicDiscipline.Name} " +
+                    $"({affectedByLesson?.LessonBatchInfo.Type.GetDescription() ?? affectedByLessonBatch!.Type.GetDescription()})\" ",
                     studentGroup!.Name,
                     sourceLessonsById[violation.LessonId!.Value].StudentGroups.Any(x => x.Id == studentGroup.Id)
                         ? "которая совпадает с отмеченной группой"
@@ -397,19 +412,23 @@ public class LessonValidationService(
                             : "которая принадлежит отмеченной группе"),
                 LessonPolicyViolationCode.FixedLessonTypeConflictByTeacher => string.Format(
                     LessonPolicyViolationTemplates.FixedLessonTypeConflictByTeacherTemplate,
-                    $"\"{affectedByLesson!.LessonBatchInfo.AcademicDiscipline.Name} ({affectedByLesson.LessonBatchInfo.Type.GetDescription()})\" ",
+                    $"\"{affectedByLesson?.LessonBatchInfo.AcademicDiscipline.Name ?? affectedByLessonBatch!.AcademicDiscipline.Name} " +
+                    $"({affectedByLesson?.LessonBatchInfo.Type.GetDescription() ?? affectedByLessonBatch!.Type.GetDescription()})\" ",
                     teacher!.Fullname),
                 LessonPolicyViolationCode.FlexibleLessonTypeConflictByTeacher => string.Format(
                     LessonPolicyViolationTemplates.FlexibleLessonTypeConflictByTeacherTemplate,
-                    $"\"{affectedByLesson!.LessonBatchInfo.AcademicDiscipline.Name} ({affectedByLesson.LessonBatchInfo.Type.GetDescription()})\" ",
+                    $"\"{affectedByLesson?.LessonBatchInfo.AcademicDiscipline.Name ?? affectedByLessonBatch!.AcademicDiscipline.Name} " +
+                    $"({affectedByLesson?.LessonBatchInfo.Type.GetDescription() ?? affectedByLessonBatch!.Type.GetDescription()})\" ",
                     teacher!.Fullname),
                 LessonPolicyViolationCode.FixedLessonTypeConflictByRoom => string.Format(
                     LessonPolicyViolationTemplates.FixedLessonTypeConflictByRoomTemplate,
-                    $"\"{affectedByLesson!.LessonBatchInfo.AcademicDiscipline.Name} ({affectedByLesson.LessonBatchInfo.Type.GetDescription()})\" ",
+                    $"\"{affectedByLesson?.LessonBatchInfo.AcademicDiscipline.Name ?? affectedByLessonBatch!.AcademicDiscipline.Name} " +
+                    $"({affectedByLesson?.LessonBatchInfo.Type.GetDescription() ?? affectedByLessonBatch!.Type.GetDescription()})\" ",
                     room!.Name),
                 LessonPolicyViolationCode.FlexibleLessonTypeConflictByRoom => string.Format(
                     LessonPolicyViolationTemplates.FlexibleLessonTypeConflictByRoomTemplate,
-                    $"\"{affectedByLesson!.LessonBatchInfo.AcademicDiscipline.Name} ({affectedByLesson.LessonBatchInfo.Type.GetDescription()})\" ",
+                    $"\"{affectedByLesson?.LessonBatchInfo.AcademicDiscipline.Name ?? affectedByLessonBatch!.AcademicDiscipline.Name} " +
+                    $"({affectedByLesson?.LessonBatchInfo.Type.GetDescription() ?? affectedByLessonBatch!.Type.GetDescription()})\" ",
                     room!.Name),
                 LessonPolicyViolationCode.RestrictedTimeTeacherPreferenceTypeConflict => string.Format(
                     LessonPolicyViolationTemplates.RestrictedTimeTeacherPreferenceTypeConflictTemplate,
@@ -520,13 +539,15 @@ public class LessonValidationService(
                         editedLessonTargetIdentities,
                         LessonPolicyViolationCode.FlexibleLessonTypeConflictByGroup,
                         lessonId: lesson.Id,
-                        conflictingDayOfWeekTimeInterval: includeTiming ? conflictingByGroupLesson.DateWithTimeInterval!.ToDayOfWeekTimeInterval() : null);
+                        conflictingDayOfWeekTimeInterval: includeTiming ? conflictingByGroupLesson.DateWithTimeInterval!.ToDayOfWeekTimeInterval() : null,
+                        violationTimestamp: lesson.DateWithTimeInterval);
                 violations
                     .AddErrorIf(conflictingByGroupLesson.FlexibilityType == LessonFlexibilityType.Fixed,
                         editedLessonTargetIdentities,
                         LessonPolicyViolationCode.FixedLessonTypeConflictByGroup,
                         lessonId: lesson.Id,
-                        conflictingDayOfWeekTimeInterval: includeTiming ? conflictingByGroupLesson.DateWithTimeInterval!.ToDayOfWeekTimeInterval() : null);
+                        conflictingDayOfWeekTimeInterval: includeTiming ? conflictingByGroupLesson.DateWithTimeInterval!.ToDayOfWeekTimeInterval() : null,
+                        violationTimestamp: lesson.DateWithTimeInterval);
             }
 
             foreach (var lessonHierarchyGroup in lesson.StudentGroups
@@ -541,12 +562,16 @@ public class LessonValidationService(
                     .AddErrorIf(lesson.FlexibilityType == LessonFlexibilityType.Fixed,
                         existedLessonTargetIdentities,
                         LessonPolicyViolationCode.FixedLessonTypeConflictByGroup,
-                        lessonId: conflictingByGroupLesson.Id!.Value);
+                        lessonId: conflictingByGroupLesson.Id,
+                        conflictingDayOfWeekTimeInterval: includeTiming ? lesson.DateWithTimeInterval!.ToDayOfWeekTimeInterval() : null,
+                        violationTimestamp: conflictingByGroupLesson.DateWithTimeInterval);
                 violations
                     .AddWarningIf(lesson.FlexibilityType == LessonFlexibilityType.Flexible,
                         existedLessonTargetIdentities,
                         LessonPolicyViolationCode.FlexibleLessonTypeConflictByGroup,
-                        lessonId: conflictingByGroupLesson.Id!.Value);
+                        lessonId: conflictingByGroupLesson.Id,
+                        conflictingDayOfWeekTimeInterval: includeTiming ? lesson.DateWithTimeInterval!.ToDayOfWeekTimeInterval() : null,
+                        violationTimestamp: conflictingByGroupLesson.DateWithTimeInterval);
             }
         }
 
@@ -605,12 +630,14 @@ public class LessonValidationService(
                                 existedLessonTargetIdentities,
                                 LessonPolicyViolationCode.FixedLessonTypeConflictByGroup,
                                 lessonBatchId: conflictingByGroupBatch.Id!.Value,
+                                conflictingDayOfWeekTimeInterval: lesson.DateWithTimeInterval.ToDayOfWeekTimeInterval(),
                                 violationTimestamp: new DateWithTimeInterval { Date = lesson.DateWithTimeInterval.Date, TimeInterval = conflictingTimeAssignment.DayOfWeekTimeInterval.TimeInterval });
                         violations
                             .AddWarningIf(lesson.FlexibilityType == LessonFlexibilityType.Flexible,
                                 existedLessonTargetIdentities,
                                 LessonPolicyViolationCode.FlexibleLessonTypeConflictByGroup,
                                 lessonBatchId: conflictingByGroupBatch.Id!.Value,
+                                conflictingDayOfWeekTimeInterval: lesson.DateWithTimeInterval.ToDayOfWeekTimeInterval(),
                                 violationTimestamp: new DateWithTimeInterval { Date = lesson.DateWithTimeInterval.Date, TimeInterval = conflictingTimeAssignment.DayOfWeekTimeInterval.TimeInterval });
                     }
                 }
@@ -695,7 +722,7 @@ public class LessonValidationService(
                 var existedLessonTargetIdentities = new[]
                 {
                     new LessonPolicyViolationTargetIdentity(lesson.Id!.Value, LessonPolicyViolationTargetType.Lesson),
-                    new LessonPolicyViolationTargetIdentity(teacher.Id!.Value, LessonPolicyViolationTargetType.Lesson),
+                    new LessonPolicyViolationTargetIdentity(teacher.Id!.Value, LessonPolicyViolationTargetType.Teacher),
                 };
                 violations
                     .AddErrorIf(lesson.FlexibilityType == LessonFlexibilityType.Fixed,
@@ -762,12 +789,14 @@ public class LessonValidationService(
                                 existedLessonTargetIdentities,
                                 LessonPolicyViolationCode.FixedLessonTypeConflictByTeacher,
                                 lessonBatchId: conflictingByTeacherBatch.Id!.Value,
+                                conflictingDayOfWeekTimeInterval: lesson.DateWithTimeInterval.ToDayOfWeekTimeInterval(),
                                 violationTimestamp: new DateWithTimeInterval { Date = lesson.DateWithTimeInterval.Date, TimeInterval = conflictingTimeAssignment.DayOfWeekTimeInterval.TimeInterval });
                         violations
                             .AddWarningIf(lesson.FlexibilityType == LessonFlexibilityType.Flexible,
                                 existedLessonTargetIdentities,
                                 LessonPolicyViolationCode.FlexibleLessonTypeConflictByTeacher,
                                 lessonBatchId: conflictingByTeacherBatch.Id!.Value,
+                                conflictingDayOfWeekTimeInterval: lesson.DateWithTimeInterval.ToDayOfWeekTimeInterval(),
                                 violationTimestamp: new DateWithTimeInterval { Date = lesson.DateWithTimeInterval.Date, TimeInterval = conflictingTimeAssignment.DayOfWeekTimeInterval.TimeInterval });
                     }
                 }
@@ -862,7 +891,7 @@ public class LessonValidationService(
 
                     var existedLessonTargetIdentities = new[]
                     {
-                        new LessonPolicyViolationTargetIdentity(lesson.Id!.Value, LessonPolicyViolationTargetType.LessonBatch),
+                        new LessonPolicyViolationTargetIdentity(lesson.Id!.Value, LessonPolicyViolationTargetType.Lesson),
                         new LessonPolicyViolationTargetIdentity(room.Id!.Value, LessonPolicyViolationTargetType.Room),
                     };
                     violations
@@ -870,12 +899,14 @@ public class LessonValidationService(
                             existedLessonTargetIdentities,
                             LessonPolicyViolationCode.FixedLessonTypeConflictByRoom,
                             lessonBatchId: conflictingByRoomBatch.Id!.Value,
+                            conflictingDayOfWeekTimeInterval: lesson.DateWithTimeInterval.ToDayOfWeekTimeInterval(),
                             violationTimestamp: new DateWithTimeInterval { Date = lesson.DateWithTimeInterval.Date, TimeInterval = conflictingTimeAssignment.DayOfWeekTimeInterval.TimeInterval });
                     violations
                         .AddWarningIf(lesson.FlexibilityType == LessonFlexibilityType.Flexible,
                             existedLessonTargetIdentities,
                             LessonPolicyViolationCode.FlexibleLessonTypeConflictByRoom,
                             lessonBatchId: conflictingByRoomBatch.Id!.Value,
+                            conflictingDayOfWeekTimeInterval: lesson.DateWithTimeInterval.ToDayOfWeekTimeInterval(),
                             violationTimestamp: new DateWithTimeInterval { Date = lesson.DateWithTimeInterval.Date, TimeInterval = conflictingTimeAssignment.DayOfWeekTimeInterval.TimeInterval });
                 }
             }

@@ -38,6 +38,8 @@ public class LessonBatchInfoRepository(
             return id.Value;
         }
 
+        await Context.Set<DbPolicyViolation>().Where(x => x.LessonBatchInfoId == previousLessonBatchInfo.Id).ExecuteDeleteAsync(cancellationToken);
+
         var removedStudentGroups = previousLessonBatchInfo.StudentGroups
             .Where(x => model.StudentGroups.All(y => y.Id != x.Id))
             .ToArray();
@@ -64,6 +66,10 @@ public class LessonBatchInfoRepository(
         var previousLessonBatchInfosById = (await SelectAsync(models
                 .Where(x => x.Id.HasValue).Select(x => x.Id!.Value).ToArray(), cancellationToken))
             .ToDictionary(x => x.Id!.Value);
+
+        await Context.Set<DbPolicyViolation>()
+            .Where(x => x.LessonBatchInfoId.HasValue && previousLessonBatchInfosById.Keys.Contains(x.LessonBatchInfoId!.Value))
+            .ExecuteDeleteAsync(cancellationToken);
 
         var saveExpressions = new List<string>();
         var deleteExpressions = new List<string>();
@@ -114,11 +120,14 @@ public class LessonBatchInfoRepository(
     }
 
     protected override IQueryable<DbLessonBatchInfo> Query() => Context.Set<DbLessonBatchInfo>()
+        .Include(x => x.AcademicDiscipline)
+        .ThenInclude(x => x.Schedule)
         .Include(x => x.StudentGroups)
         .Include(x => x.Teachers)
         .Include(x => x.Rooms)
         .ThenInclude(x => x.Campus)
-        .Include(x => x.DayOfWeekTimeIntervals);
+        .Include(x => x.DayOfWeekTimeIntervals)
+        .Include(x => x.Violations);
 
     private string? BuildSaveReferencesExpression(Domain.Models.LessonBatchInfo model)
     {

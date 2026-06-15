@@ -93,13 +93,19 @@ public class LessonService(
                 .Select(x =>
                 {
                     var shortDto = LessonBatchInfoDtoMappingRegister.MapModelToShortDto(x);
-                    shortDto!.LessonPolicyViolationDescription = x.Violations.Length switch
+                    var currentDateRangeViolations = x.Violations
+                        .Where(v => v.Timestamp == null || v.Timestamp.Date >= dateFrom && v.Timestamp.Date <= dateTo)
+                        .ToArray();
+                    shortDto!.LessonPolicyViolationDescription = currentDateRangeViolations.Length switch
                     {
                         0 => null,
                         1 => messagesByBatchId[x.Id!.Value].Messages.Single().Message,
                         _ => string.Format(LessonPolicyViolationTemplates.LessonPolicyViolationDefaultTemplate,
-                            x.Violations.Length)
+                            currentDateRangeViolations.Length)
                     };
+                    shortDto.CurrentErrorsMaxLevel = currentDateRangeViolations.Length == 0
+                        ? null
+                        : currentDateRangeViolations.Max(v => v.ErrorType);
                     return shortDto;
                 }).ToArray(),
         };
@@ -213,7 +219,10 @@ public class LessonService(
 
         if (updatedLessonBatchInfoToSave != null)
         {
-            await lessonBatchInfoRepository.SaveAsync(updatedLessonBatchInfoToSave);
+            var id = await lessonBatchInfoRepository.SaveAsync(updatedLessonBatchInfoToSave);
+            var savedBatch = await lessonBatchInfoRepository.GetAsync(id);
+            var lessonBatchPolicyViolations = await lessonBatchValidationService.ValidateAsync(savedBatch);
+            await lessonValidationService.SaveAllAsync(lessonBatchPolicyViolations);
         }
     }
 
@@ -293,6 +302,12 @@ public class LessonService(
         {
             var lessonPolicyViolations = await lessonValidationService.ValidateAsync(savedLessons);
             await lessonValidationService.SaveAllAsync(lessonPolicyViolations);
+        }
+
+        foreach (var lessonBatchInfo in lessonBatchInfos)
+        {
+            var lessonBatchPolicyViolations = await lessonBatchValidationService.ValidateAsync(lessonBatchInfo);
+            await lessonValidationService.SaveAllAsync(lessonBatchPolicyViolations);
         }
     }
 
@@ -412,11 +427,6 @@ public class LessonService(
 
         var schedule = await scheduleRepository.GetAsync(batch.AcademicDiscipline.ScheduleId);
 
-        var batchLessons = await lessonRepository.SearchAsync(new LessonSearchModel
-        {
-            LessonBatchInfoIds = [batch.Id!.Value],
-        });
-
         var conflictingTeacherPreferences = await teacherPreferenceRepository.SearchAsync(new TeacherPreferenceSearchModel
         {
             ScheduleId = batch.AcademicDiscipline.ScheduleId,
@@ -454,26 +464,26 @@ public class LessonService(
                 includeTiming: true);
         }
 
-        // lessonPolicyViolations = lessonPolicyViolations.Where(violation => violation.LessonId == lesson.Id).ToList();
-
         foreach (var violation in lessonPolicyViolations)
         {
             violation.Id ??= Guid.NewGuid();
         }
         var messagesByLessonId =
             (await lessonValidationService.GetValidationResultMessageAsync(lessonPolicyViolations.ToArray()))
-            .ToDictionary(x => x.LessonId, x => x.MessagesByViolationId);
+            .Where(x => x.LessonId.HasValue)
+            .ToDictionary(x => x.LessonId!.Value, x => x.MessagesByViolationId);
 
         var includedKeys = new List<(DayOfWeekTimeInterval, string)>();
 
         var lessonSeriesConflicts = lessonPolicyViolations
+            .Where(x => x.LessonId.HasValue)
             .GroupBy(x => x.LessonId)
             .SelectMany(group => group
                 .Where(violation => violation.DayOfWeekTimeInterval != null)
                 .Select(violation =>
                 {
                     var key = (violation.DayOfWeekTimeInterval!,
-                        messagesByLessonId[violation.LessonId][violation.Id!.Value]);
+                        messagesByLessonId[violation.LessonId!.Value][violation.Id!.Value]);
                     if (includedKeys.Contains(key))
                     {
                         return null;
@@ -487,7 +497,7 @@ public class LessonService(
                             new LessonSeriesConflictMessageDto
                             {
                                 TimeInterval = violation.DayOfWeekTimeInterval!.TimeInterval,
-                                Message = messagesByLessonId[violation.LessonId][violation.Id!.Value],
+                                Message = messagesByLessonId[violation.LessonId!.Value][violation.Id!.Value],
                                 ErrorType = violation.ErrorType,
                             }
                         ],

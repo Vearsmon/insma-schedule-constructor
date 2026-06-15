@@ -6,7 +6,7 @@ namespace Domain.Services;
 
 public interface ILessonBatchValidationService
 {
-    Task<LessonPolicyViolation[]> ValidateBatchAsync(LessonBatchInfo lessonBatchInfo);
+    Task<LessonPolicyViolation[]> ValidateAsync(LessonBatchInfo lessonBatchInfo);
 
     void BuildPolicyViolations(List<LessonPolicyViolation> lessonPolicyViolations,
         DayOfWeekTimeIntervalAssignment dayOfWeekTimeIntervalAssignment,

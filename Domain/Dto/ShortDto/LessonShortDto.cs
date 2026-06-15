@@ -15,6 +15,7 @@ public class LessonShortDto
     public Guid? DayOfWeekTimeIntervalAssignmentId { get; set; }
     public DateWithTimeInterval? DateWithTimeInterval { get; set; }
     public LessonFlexibilityType FlexibilityType { get; set; }
+    public Guid LessonBatchInfoId { get; set; }
     public bool AllowCombining { get; set; }
     public string? LessonPolicyViolationDescription { get; set; }
     public LessonValidationErrorType? CurrentErrorsMaxLevel { get; set; }

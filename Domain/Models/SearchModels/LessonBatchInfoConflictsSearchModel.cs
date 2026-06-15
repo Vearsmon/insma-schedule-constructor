@@ -9,4 +9,5 @@ public class LessonBatchInfoConflictsSearchModel
     public Guid[] TeacherIds { get; set; } = [];
     public Guid[] RoomIds { get; set; } = [];
     public DateWithTimeInterval[] DateWithTimeIntervals { get; set; } = [];
+    public Guid[] ExcludeBatchIds { get; set; } = [];
 }

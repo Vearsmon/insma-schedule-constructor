@@ -28,28 +28,6 @@ namespace Services.Mapping
         }
 
         [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
-        [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(model))]
-        public static partial global::Domain.Dto.ShortDto.LessonBatchInfoShortDto? MapModelToShortDto(global::Domain.Models.LessonBatchInfo? model)
-        {
-            if (model == null)
-                return default;
-            var target = new global::Domain.Dto.ShortDto.LessonBatchInfoShortDto();
-            target.Id = model.Id;
-            target.AcademicDisciplineId = model.AcademicDisciplineId;
-            target.AcademicDisciplineName = model.AcademicDiscipline.Name;
-            target.Type = model.Type;
-            target.LessonsPerWeekCount = model.LessonsPerWeekCount;
-            target.DayOfWeekTimeIntervals = MapToDayOfWeekTimeIntervalAssignmentShortDtoArray(model.DayOfWeekTimeIntervals);
-            target.AllowCombining = model.AllowCombining;
-            target.FlexibilityType = model.FlexibilityType;
-            target.HoursCost = model.HoursCost;
-            target.TotalHoursCount = model.TotalHoursCount;
-            target.CurrentErrorsMaxLevel = GetViolationsMaxLevel(model.Violations);
-            target.Comment = model.Comment;
-            return target;
-        }
-
-        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
         [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(dto))]
         public static partial global::Domain.Models.LessonBatchInfo? MapDtoToModel(global::Domain.Dto.LessonBatchInfoDto? dto)
         {
@@ -91,6 +69,27 @@ namespace Services.Mapping
             target.HoursCost = dto.HoursCost;
             target.TotalHoursCount = dto.TotalHoursCount;
             target.Comment = dto.Comment;
+            return target;
+        }
+
+        [global::System.CodeDom.Compiler.GeneratedCode("Riok.Mapperly", "5.0.0.0")]
+        [return: global::System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(model))]
+        private static partial global::Domain.Dto.ShortDto.LessonBatchInfoShortDto? AutoMapModelToShortDto(global::Domain.Models.LessonBatchInfo? model)
+        {
+            if (model == null)
+                return default;
+            var target = new global::Domain.Dto.ShortDto.LessonBatchInfoShortDto();
+            target.Id = model.Id;
+            target.AcademicDisciplineId = model.AcademicDisciplineId;
+            target.AcademicDisciplineName = model.AcademicDiscipline.Name;
+            target.Type = model.Type;
+            target.LessonsPerWeekCount = model.LessonsPerWeekCount;
+            target.DayOfWeekTimeIntervals = MapToDayOfWeekTimeIntervalAssignmentShortDtoArray(model.DayOfWeekTimeIntervals);
+            target.AllowCombining = model.AllowCombining;
+            target.FlexibilityType = model.FlexibilityType;
+            target.HoursCost = model.HoursCost;
+            target.TotalHoursCount = model.TotalHoursCount;
+            target.Comment = model.Comment;
             return target;
         }
 

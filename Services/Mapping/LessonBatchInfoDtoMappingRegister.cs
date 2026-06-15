@@ -2,7 +2,6 @@
 using Domain.Dto.SaveDto;
 using Domain.Dto.ShortDto;
 using Domain.Models;
-using Domain.Models.Enums;
 using Riok.Mapperly.Abstractions;
 
 namespace Services.Mapping;
@@ -23,6 +22,17 @@ public static partial class LessonBatchInfoDtoMappingRegister
         return model;
     }
 
+    [UserMapping(Default = true)]
+    public static LessonBatchInfoShortDto? MapModelToShortDto(LessonBatchInfo? model)
+    {
+        var dto = AutoMapModelToShortDto(model);
+        if (model == null) return dto;
+        dto!.StudentGroups = model.StudentGroups.Select(StudentGroupDtoMappingRegister.MapModelToShortDto).ToArray()!;
+        dto.Teachers = model.Teachers.Select(TeacherDtoMappingRegister.MapModelToShortDto).ToArray()!;
+        dto.Rooms = model.Rooms.Select(RoomDtoMappingRegister.MapModelToShortDto).ToArray()!;
+        return dto;
+    }
+
     [MapperIgnoreSource(nameof(LessonBatchInfo.AcademicDisciplineId))]
     [MapperIgnoreSource(nameof(LessonBatchInfo.AcademicDiscipline))]
     [MapperIgnoreSource(nameof(LessonBatchInfo.Type))]
@@ -31,18 +41,6 @@ public static partial class LessonBatchInfoDtoMappingRegister
     [MapProperty(nameof(LessonBatchInfo.Teachers), nameof(LessonBatchInfoDto.TeacherIds), Use = nameof(MapTeachersCollection))]
     [MapProperty(nameof(LessonBatchInfo.Rooms), nameof(LessonBatchInfoDto.RoomIds), Use = nameof(MapRoomsCollection))]
     public static partial LessonBatchInfoDto? MapModelToDto(LessonBatchInfo? model);
-
-    [MapperIgnoreSource(nameof(LessonBatchInfo.StudentGroups))]
-    [MapperIgnoreSource(nameof(LessonBatchInfo.Teachers))]
-    [MapperIgnoreSource(nameof(LessonBatchInfo.Rooms))]
-    [MapperIgnoreSource(nameof(LessonBatchInfo.RepeatType))]
-    [MapperIgnoreSource(nameof(LessonBatchInfo.DateInterval))]
-    [MapperIgnoreTarget(nameof(LessonBatchInfoShortDto.StudentGroups))]
-    [MapperIgnoreTarget(nameof(LessonBatchInfoShortDto.Teachers))]
-    [MapperIgnoreTarget(nameof(LessonBatchInfoShortDto.Rooms))]
-    [MapperIgnoreTarget(nameof(LessonBatchInfoShortDto.LessonPolicyViolationDescription))]
-    [MapProperty(nameof(LessonBatchInfo.Violations), nameof(LessonBatchInfoShortDto.CurrentErrorsMaxLevel), Use = nameof(GetViolationsMaxLevel))]
-    public static partial LessonBatchInfoShortDto? MapModelToShortDto(LessonBatchInfo? model);
 
     [MapperIgnoreTarget(nameof(LessonBatchInfo.AcademicDisciplineId))]
     [MapperIgnoreTarget(nameof(LessonBatchInfo.AcademicDiscipline))]
@@ -64,6 +62,19 @@ public static partial class LessonBatchInfoDtoMappingRegister
     [MapProperty(nameof(LessonBatchInfoSaveDto.RoomIds), nameof(LessonBatchInfo.Rooms), Use = nameof(MapRoomIds))]
     private static partial LessonBatchInfo? AutoMapSaveDtoToModel(LessonBatchInfoSaveDto? dto);
 
+    [MapperIgnoreSource(nameof(LessonBatchInfo.StudentGroups))]
+    [MapperIgnoreSource(nameof(LessonBatchInfo.Teachers))]
+    [MapperIgnoreSource(nameof(LessonBatchInfo.Rooms))]
+    [MapperIgnoreSource(nameof(LessonBatchInfo.RepeatType))]
+    [MapperIgnoreSource(nameof(LessonBatchInfo.DateInterval))]
+    [MapperIgnoreSource(nameof(LessonBatchInfo.Violations))]
+    [MapperIgnoreTarget(nameof(LessonBatchInfoShortDto.StudentGroups))]
+    [MapperIgnoreTarget(nameof(LessonBatchInfoShortDto.Teachers))]
+    [MapperIgnoreTarget(nameof(LessonBatchInfoShortDto.Rooms))]
+    [MapperIgnoreTarget(nameof(LessonBatchInfoShortDto.LessonPolicyViolationDescription))]
+    [MapperIgnoreTarget(nameof(LessonBatchInfoShortDto.CurrentErrorsMaxLevel))]
+    private static partial LessonBatchInfoShortDto? AutoMapModelToShortDto(LessonBatchInfo? model);
+
     private static StudentGroupShortDto[] MapStudentGroupsCollection(StudentGroup[] collection) => collection.Select(x => new StudentGroupShortDto { Id = x.Id!.Value, Name = x.Name }).ToArray();
     private static Guid[] MapTeachersCollection(Teacher[] collection) => collection.Select(x => x.Id!.Value).ToArray();
     private static Guid[] MapRoomsCollection(Room[] collection) => collection.Select(x => x.Id!.Value).ToArray();
@@ -71,7 +82,4 @@ public static partial class LessonBatchInfoDtoMappingRegister
     private static StudentGroup[] MapStudentGroupIds(Guid[] ids) => ids.Select(x => new StudentGroup { Id = x }).ToArray();
     private static Teacher[] MapTeacherIds(Guid[] ids) => ids.Select(x => new Teacher { Id = x }).ToArray();
     private static Room[] MapRoomIds(Guid[] ids) => ids.Select(x => new Room { Id = x }).ToArray();
-
-    private static LessonValidationErrorType? GetViolationsMaxLevel(LessonPolicyViolation[] violations) =>
-        violations.Length == 0 ? null : violations.Max(x => x.ErrorType);
 }

@@ -22,6 +22,7 @@ public class LessonBatchInfoConflictsPredicateBuilder : IPredicateBuilder<DbLess
                     .OrIf(searchModel.TeacherIds.Length > 0, f => f.Teachers.Any(x => searchModel.TeacherIds.Contains(x.Id)))
                     .OrIf(searchModel.RoomIds.Length > 0, f => f.Rooms.Any(x => searchModel.RoomIds.Contains(x.Id))))
                 .AndIf(searchModel.DateWithTimeIntervals.Length > 0, BuildDateWithTimeIntervalExpression(searchModel))
+                .AndIf(searchModel.ExcludeBatchIds.Length > 0, f => !searchModel.ExcludeBatchIds.Contains(f.Id))
             ;
     }
 

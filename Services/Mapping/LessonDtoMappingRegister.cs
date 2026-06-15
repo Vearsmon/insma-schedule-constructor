@@ -95,7 +95,6 @@ public static partial class LessonDtoMappingRegister
     [MapperIgnoreSource(nameof(Lesson.Rooms))]
     [MapperIgnoreSource(nameof(Lesson.DayOfWeekTimeIntervalAssignment))]
     [MapperIgnoreSource(nameof(Lesson.HoursCost))]
-    [MapperIgnoreSource(nameof(Lesson.LessonBatchInfoId))]
     [MapperIgnoreSource(nameof(Lesson.LessonBatchInfo))]
     [MapperIgnoreSource(nameof(Lesson.DetachedFromBatch))]
     [MapperIgnoreTarget(nameof(LessonShortDto.AcademicDisciplineId))]

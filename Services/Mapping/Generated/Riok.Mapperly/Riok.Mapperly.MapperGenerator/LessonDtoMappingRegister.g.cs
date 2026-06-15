@@ -73,6 +73,7 @@ namespace Services.Mapping
             target.DayOfWeekTimeIntervalAssignmentId = model.DayOfWeekTimeIntervalAssignmentId;
             target.DateWithTimeInterval = model.DateWithTimeInterval;
             target.FlexibilityType = model.FlexibilityType;
+            target.LessonBatchInfoId = model.LessonBatchInfoId;
             target.AllowCombining = model.AllowCombining;
             target.CurrentErrorsMaxLevel = GetViolationsMaxLevel(model.Violations);
             return target;
