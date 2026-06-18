@@ -11,6 +11,11 @@ public class TeacherRegistryPredicateBuilder : IPredicateBuilder<DbTeacher, Teac
 
     public Expression<Func<DbTeacher, bool>> Build(TeacherRegistryInternalSearchModel searchModel)
     {
-        return Predicate;
+        var nameLowerCaseTrimmed = string.IsNullOrEmpty(searchModel.Name) ? null : searchModel.Name!.ToLower().Trim().Replace("  ", " ");
+
+        return Predicate
+                .AndIf(!string.IsNullOrEmpty(nameLowerCaseTrimmed),
+                    f => f.Fullname.ToLower().Contains(nameLowerCaseTrimmed!))
+            ;
     }
 }

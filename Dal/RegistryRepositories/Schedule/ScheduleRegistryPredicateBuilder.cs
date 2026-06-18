@@ -11,6 +11,11 @@ public class ScheduleRegistryPredicateBuilder : IPredicateBuilder<DbSchedule, Sc
 
     public Expression<Func<DbSchedule, bool>> Build(ScheduleRegistryInternalSearchModel searchModel)
     {
-        return Predicate;
+        var nameLowerCaseTrimmed = string.IsNullOrEmpty(searchModel.Name) ? null : searchModel.Name!.ToLower().Trim().Replace("  ", " ");
+
+        return Predicate
+                .AndIf(!string.IsNullOrEmpty(nameLowerCaseTrimmed),
+                    f => f.Name.ToLower().Contains(nameLowerCaseTrimmed!))
+            ;
     }
 }

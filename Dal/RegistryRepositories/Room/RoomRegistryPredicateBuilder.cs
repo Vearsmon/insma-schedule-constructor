@@ -11,8 +11,12 @@ public class RoomRegistryPredicateBuilder : IPredicateBuilder<DbRoom, RoomRegist
 
     public Expression<Func<DbRoom, bool>> Build(RoomRegistryInternalSearchModel searchModel)
     {
+        var nameLowerCaseTrimmed = string.IsNullOrEmpty(searchModel.Name) ? null : searchModel.Name!.ToLower().Trim().Replace("  ", " ");
+
         return Predicate
                 .AndIf(searchModel.CampusId.HasValue, f => f.CampusId == searchModel.CampusId)
+                .AndIf(!string.IsNullOrEmpty(nameLowerCaseTrimmed),
+                    f => f.Name.ToLower().Contains(nameLowerCaseTrimmed!))
             ;
     }
 }

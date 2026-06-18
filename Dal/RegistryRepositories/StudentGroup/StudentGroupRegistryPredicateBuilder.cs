@@ -13,8 +13,12 @@ public class StudentGroupRegistryPredicateBuilder
 
     public Expression<Func<DbStudentGroup, bool>> Build(StudentGroupRegistryInternalSearchModel searchModel)
     {
+        var nameLowerCaseTrimmed = string.IsNullOrEmpty(searchModel.Name) ? null : searchModel.Name!.ToLower().Trim().Replace("  ", " ");
+
         return Predicate
                 .AndIf(searchModel.StudentGroupType.HasValue, f => f.StudentGroupType == searchModel.StudentGroupType)
+                .AndIf(!string.IsNullOrEmpty(nameLowerCaseTrimmed),
+                    f => f.Name.ToLower().Contains(nameLowerCaseTrimmed!))
             ;
     }
 }
